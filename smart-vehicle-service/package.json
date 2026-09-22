@@ -1,0 +1,14 @@
+{
+  "name": "smart-vehicle-service",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "backend:dev": "npm --prefix app/backend run start:dev",
+    "backend:start": "npm --prefix app/backend run start",
+    "frontend:dev": "npm --prefix app/frontend run dev",
+    "backend:build": "npm --prefix app/backend run build",
+    "frontend:build": "npm --prefix app/frontend run build"
+  }
+}

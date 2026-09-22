@@ -1,0 +1,2 @@
+-- Placeholder schema file for Phase 1.
+-- Database entities and migrations will be added in the database phase.
