@@ -23,6 +23,12 @@ import { ServicesModule } from './services.module.js';
 import { ServiceCentersModule } from './service-centers.module.js';
 import { BookingsModule } from './bookings.module.js';
 import { SparePartsModule } from './spare-parts.module.js';
+import { InvoicesModule } from './invoices.module.js';
+import { ReviewsModule } from './reviews.module.js';
+import { MaintenanceRemindersModule } from './maintenance-reminders.module.js';
+import { AdminDashboardModule } from './admin-dashboard.module.js';
+import { ServiceHistoryModule } from './service-history.module.js';
+import { ServiceStatusModule } from './service-status.module.js'; // <-- ServiceStatusModule import kiya gaya hai
 
 @Module({
   imports: [
@@ -67,6 +73,12 @@ import { SparePartsModule } from './spare-parts.module.js';
     ServiceCentersModule,
     BookingsModule,
     SparePartsModule,
+    InvoicesModule,
+    ReviewsModule,
+    MaintenanceRemindersModule,
+    AdminDashboardModule,
+    ServiceHistoryModule,
+    ServiceStatusModule, // <-- Yahan imports array mein register kar diya gaya hai
   ],
   controllers: [AppController],
   providers: [AppService],
