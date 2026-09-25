@@ -1,28 +1,20 @@
 @import "tailwindcss";
 
-:root { --background: #f4f1ea; --foreground: #17211d; --ink: #17211d; --accent: #e3ff62; --muted: #737c73; --line: #d8d8cd; }
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@keyframes smoothCarSlide {
+  0% {
+    transform: translateX(-150vw) scale(0.8);
+    opacity: 0;
+  }
+  60% {
+    transform: translateX(20px) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), sans-serif;
+.animate-smooth-car {
+  animation: smoothCarSlide 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-
-* { box-sizing: border-box; } a { color: inherit; text-decoration: none; }
-.container { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
-.site-shell { overflow: hidden; } .nav { display:flex; align-items:center; justify-content:space-between; padding:28px 0; }
-.brand { font-size:19px; font-weight:800; letter-spacing:-.06em; } .brand span { color:#91a52c; } .nav-links { display:flex; gap:32px; font-size:13px; color:var(--muted); }
-.button { display:inline-flex; align-items:center; gap:16px; padding:13px 18px; border-radius:2px; font-size:12px; font-weight:700; } .button span { font-size:17px; } .button-dark { background:var(--ink); color:#fff; } .button-accent { background:var(--accent); color:var(--ink); }
-.hero { display:grid; grid-template-columns:1fr 1fr; min-height:560px; align-items:center; gap:48px; } .eyebrow { color:#82912c; font-size:10px; font-weight:800; letter-spacing:.16em; } h1,h2 { font-size:clamp(44px,6vw,78px); line-height:.98; letter-spacing:-.07em; margin:20px 0; } h1 em,h2 em { color:#9aa93f; font-style:normal; } .hero-text { max-width:430px; color:var(--muted); line-height:1.7; } .hero-actions { display:flex; gap:26px; align-items:center; margin-top:30px; } .text-link { font-size:12px; font-weight:700; } .trust-row { display:flex; align-items:center; gap:10px; margin-top:52px; color:var(--muted); font-size:10px; } .trust-row strong { color:var(--ink); font-size:15px; } .trust-row i { height:24px; width:1px; background:var(--line); margin:0 12px; }
-.hero-art { position:relative; height:410px; background:#dce4d1; overflow:hidden; } .sun { position:absolute; width:250px; height:250px; border-radius:50%; background:#f0c9a6; right:14%; top:12%; } .road { position:absolute; width:150%; height:190px; background:#a9b49d; transform:rotate(-11deg); bottom:-90px; left:-20%; } .car { position:absolute; width:330px; height:100px; background:#344c45; border-radius:45px 70px 18px 18px; left:18%; bottom:98px; transform:rotate(-4deg); box-shadow:0 18px 0 #243732; } .window { position:absolute; width:130px; height:47px; background:#a9c1bb; top:10px; left:92px; border-radius:8px 37px 3px 3px; transform:skew(-20deg); } .hood { position:absolute; width:105px; height:23px; right:-74px; top:52px; background:#344c45; border-radius:0 16px 9px 0; } .wheel { position:absolute; width:47px; height:47px; background:#192522; border:9px solid #d3d0bf; border-radius:50%; bottom:-20px; } .wheel-one { left:54px; }.wheel-two { right:38px; }.service-tag { position:absolute; right:8%; top:18%; padding:15px 18px; background:#fffef7; font-size:9px; line-height:1.6; box-shadow:5px 5px 0 #91a52c; } .service-tag b { font-size:13px; }
-.marquee { background:#263a34; color:#e7f0dc; padding:16px 0; font-size:10px; letter-spacing:.15em; } .marquee-inner { display:flex; justify-content:space-between; align-items:center; gap:18px; }
-.section { padding:120px 0; } .section-heading { display:flex; justify-content:space-between; align-items:end; margin-bottom:52px; } h2 { font-size:clamp(38px,5vw,62px); } .section-heading>p { max-width:310px; color:var(--muted); line-height:1.7; font-size:13px; }.service-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }.service-card { min-height:250px; padding:25px; border:1px solid var(--line); display:flex; flex-direction:column; background:#f8f6ef; }.card-number { color:#9aa93f; font-size:12px; }.service-card h3 { font-size:22px; letter-spacing:-.05em; margin-top:auto; }.service-card p { color:var(--muted); font-size:12px; line-height:1.6; }.service-card footer { display:flex; justify-content:space-between; align-items:center; margin-top:25px; padding-top:15px; border-top:1px solid var(--line); color:var(--muted); font-size:11px; }.service-card footer a { font-size:21px; color:var(--ink); }
-.dark-band { background:#263a34; color:#f5f3e9; padding:100px 0; }.process { display:grid; grid-template-columns:1fr 1fr; gap:80px; }.light { color:var(--accent); }.step-list { border-top:1px solid #607069; }.step { display:flex; gap:35px; align-items:center; border-bottom:1px solid #607069; padding:24px 0; }.step span { color:var(--accent); font-size:11px; }.step p { font-size:18px; margin:0; }.location { padding:120px 0; display:grid; grid-template-columns:1fr 1fr; align-items:center; gap:60px; }.location-panel { border:1px solid var(--line); padding:25px; display:flex; align-items:center; justify-content:space-between; gap:20px; }.location-panel>div { display:flex; gap:14px; align-items:center; }.location-panel p { font-size:12px; line-height:1.7; color:var(--muted); }.location-panel strong { color:var(--ink); font-size:15px; }.pin { font-size:28px; color:#9aa93f; }.footer { border-top:1px solid var(--line); padding:28px 0; }.footer-inner { display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--muted); }.footer .brand { color:var(--ink); }
-@media (max-width:700px) { .container { width:calc(100% - 32px); }.nav-links { display:none; }.hero { grid-template-columns:1fr; padding:55px 0 70px; min-height:auto; }.hero-art { height:300px; }.car { transform:scale(.75) rotate(-4deg); transform-origin:left bottom; left:12%; }.service-tag { right:4%; top:9%; }.marquee-inner { overflow:hidden; white-space:nowrap; justify-content:flex-start; }.marquee-inner span:nth-child(n+5) { display:none; }.section,.location { padding:75px 0; }.section-heading,.location { display:block; }.section-heading>p { margin-top:25px; }.service-grid,.process { grid-template-columns:1fr; }.service-card { min-height:210px; }.process { gap:45px; }.location-panel { margin-top:30px; display:block; }.location-panel .button { margin-top:15px; }.footer-inner { flex-wrap:wrap; gap:15px; } h1 { font-size:54px; } }
