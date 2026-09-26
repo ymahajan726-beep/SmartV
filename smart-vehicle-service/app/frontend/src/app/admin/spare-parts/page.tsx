@@ -1,107 +1,238 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { apiRequest } from "@/services/api";
+import { apiRequest } from "@/src/services/api";
 
 export default function AdminSparePartsPage() {
-  const [parts, setParts] = useState([]);
-  const [formData, setFormData] = useState({ name: "", stock: "", price: "" });
-  const [toast, setToast] = useState<string | null>(null);
+  const [isLightMode, setIsLightMode] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [spareParts, setSpareParts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // Create Spare Part Modal States
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [name, setName] = useState("");
+  const [partNumber, setPartNumber] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
 
   useEffect(() => {
-    loadParts();
+    fetchSpareParts();
   }, []);
 
-  const loadParts = async () => {
+  const fetchSpareParts = async () => {
     try {
-      const data = await apiRequest("/spare-parts");
-      setParts(data);
-    } catch {
-      setParts([
-        { id: 1, name: "Synthetic Engine Oil 5W40", stock: 45, price: 1200 },
-        { id: 2, name: "Ceramic Brake Pads", stock: 12, price: 4500 }
-      ]);
+      setLoading(true);
+      const data = await apiRequest("/spare-parts", "GET");
+      setSpareParts(Array.isArray(data) ? data : []);
+      setErrorMsg("");
+    } catch (err: any) {
+      console.error("Failed to fetch spare parts from backend:", err);
+      setErrorMsg(err.message || "Backend database connection error.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreatePart = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest("/spare-parts", "POST", formData);
-      setToast("Spare part registered to database!");
-      setFormData({ name: "", stock: "", price: "" });
-      loadParts();
-    } catch {
-      setToast("Failed to save part");
+      await apiRequest("/spare-parts", "POST", { 
+        name, 
+        partNumber, 
+        price: Number(price), 
+        stock: Number(stock) 
+      });
+      setShowCreateModal(false);
+      setName("");
+      setPartNumber("");
+      setPrice("");
+      setStock("");
+      fetchSpareParts();
+    } catch (err: any) {
+      alert("Failed to create spare part: " + (err.message || "Unknown error"));
     }
-    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleDeletePart = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this spare part from database?")) return;
+    try {
+      await apiRequest(`/spare-parts/${id}`, "DELETE");
+      fetchSpareParts();
+    } catch (err: any) {
+      alert("Failed to delete spare part: " + (err.message || "Unknown error"));
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0b0e] text-[#f3f3f6] p-8 md:p-12 font-sans">
-      <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+    <div className={`min-h-screen font-sans transition-colors duration-500 flex flex-col lg:flex-row ${isLightMode ? "bg-[#f4f4f0] text-[#111111]" : "bg-[#0b0b0e] text-[#f3f3f6]"}`}>
+      
+      {/* Dark Backdrop Overlay */}
+      {sidebarOpen && <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-xs z-30 lg:hidden" />}
+
+      {/* Sidebar Navigation */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-72 sm:w-80 border-r p-6 flex flex-col justify-between transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${isLightMode ? "border-black/10 bg-white" : "border-white/10 bg-[#121216]"}`}>
         <div>
-          <span className="text-xs font-mono text-[#cbf000] uppercase">[ Backend Module: Spare Parts ]</span>
-          <h1 className="text-3xl font-light mt-1">Inventory & Ledger</h1>
+          <div className="flex items-center justify-between mb-8">
+            <span className="text-xl font-black tracking-tighter uppercase">
+              Auto<span className="text-[#cbf000] bg-black text-white px-2 py-0.5 rounded-md">Care</span>
+            </span>
+            <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-2 rounded-xl border text-xs cursor-pointer">✕</button>
+          </div>
+          <nav className="flex flex-col gap-2 text-xs uppercase tracking-widest font-bold w-full overflow-y-auto max-h-[calc(100vh-200px)] pr-1">
+            <Link href="/admin/dashboard" className="px-4 py-2.5 rounded-2xl hover:bg-white/5 flex items-center gap-3 transition-all">📊 Dashboard</Link>
+            <Link href="/admin/users" className="px-4 py-2.5 rounded-2xl hover:bg-white/5 flex items-center gap-3 transition-all">👥 1. Users Module</Link>
+            <Link href="/admin/vehicles" className="px-4 py-2.5 rounded-2xl hover:bg-white/5 flex items-center gap-3 transition-all">🚗 2. Vehicles Module</Link>
+            <Link href="/admin/spare-parts" className="px-4 py-2.5 rounded-2xl bg-[#cbf000] text-black shadow-lg flex items-center gap-3">📦 6. Spare Parts Module</Link>
+          </nav>
         </div>
-        <Link href="/admin/dashboard" className="text-xs font-mono uppercase text-[#cbf000] hover:underline">← Back to Dashboard</Link>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <form onSubmit={handleCreate} className="bg-[#141418] border border-white/10 p-6 rounded-[32px] space-y-4 h-fit">
-          <h3 className="text-lg font-light">Add New Spare Part</h3>
-          <input 
-            type="text" 
-            placeholder="Part Name" 
-            value={formData.name} 
-            onChange={(e) => setFormData({...formData, name: e.target.value})} 
-            className="w-full bg-black text-white border border-white/20 rounded-2xl px-4 py-3 text-sm focus:border-[#cbf000] outline-none"
-            required 
-          />
-          <input 
-            type="number" 
-            placeholder="Stock Units" 
-            value={formData.stock} 
-            onChange={(e) => setFormData({...formData, stock: e.target.value})} 
-            className="w-full bg-black text-white border border-white/20 rounded-2xl px-4 py-3 text-sm focus:border-[#cbf000] outline-none"
-            required 
-          />
-          <input 
-            type="number" 
-            placeholder="Price (₹)" 
-            value={formData.price} 
-            onChange={(e) => setFormData({...formData, price: e.target.value})} 
-            className="w-full bg-black text-white border border-white/20 rounded-2xl px-4 py-3 text-sm focus:border-[#cbf000] outline-none"
-            required 
-          />
-          <button type="submit" className="w-full bg-[#cbf000] text-black font-bold uppercase text-xs py-3.5 rounded-2xl cursor-pointer hover:bg-white transition-all">
-            Save to DB →
+        <div className="pt-6 border-t border-white/10 flex items-center justify-between">
+          <Link href="/admin/dashboard" className="text-xs uppercase font-mono tracking-widest hover:text-[#cbf000]">← Dashboard</Link>
+          <button onClick={() => setIsLightMode(!isLightMode)} className="p-2.5 rounded-full border text-xs cursor-pointer">
+            {isLightMode ? "🌙" : "☀️"}
           </button>
-        </form>
-
-        <div className="md:col-span-2 bg-[#141418] border border-white/10 rounded-[32px] overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/10 bg-black/50 text-xs font-mono uppercase text-neutral-400">
-                <th className="p-5 pl-8">Part Name</th>
-                <th className="p-5">Stock</th>
-                <th className="p-5 pr-8 text-right">Price</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 text-sm">
-              {parts.map((p: any) => (
-                <tr key={p.id} className="hover:bg-white/5">
-                  <td className="p-5 pl-8 font-medium">{p.name}</td>
-                  <td className="p-5 font-mono text-[#cbf000]">{p.stock} Units</td>
-                  <td className="p-5 pr-8 text-right font-mono">₹{p.price}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
-      </div>
+      </aside>
 
-      {toast && <div className="fixed bottom-6 right-6 bg-[#cbf000] text-black px-6 py-4 rounded-2xl font-semibold text-sm shadow-2xl">{toast}</div>}
+      {/* Main Content Area */}
+      <main className="flex-1 p-6 md:p-12 overflow-y-auto">
+        <header className="mb-10 pb-6 border-b border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <span className="text-xs font-mono text-[#cbf000] uppercase tracking-widest">[ Module 6: Spare Parts Inventory ]</span>
+            <h1 className="text-2xl md:text-3xl font-light tracking-tight mt-1">Spare Parts & Inventory Management</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowCreateModal(true)} className="px-4 py-2.5 rounded-xl bg-[#cbf000] text-black text-xs uppercase font-mono font-bold tracking-wider hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-[#cbf000]/20">
+              + Add Part
+            </button>
+            <button onClick={fetchSpareParts} className="px-4 py-2.5 rounded-xl border border-white/20 text-xs uppercase font-mono tracking-wider hover:border-[#cbf000] transition-all cursor-pointer">
+              🔄 Refresh
+            </button>
+          </div>
+        </header>
+
+        {errorMsg && (
+          <div className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
+            ⚠️ Error: {errorMsg}
+          </div>
+        )}
+
+        {/* Spare Parts Table */}
+        <div className={`rounded-[32px] border overflow-hidden shadow-2xl ${isLightMode ? "bg-white border-black/10" : "bg-[#141418] border-white/10"}`}>
+          <div className="p-6 border-b border-white/10 flex justify-between items-center">
+            <h4 className="text-sm font-mono uppercase tracking-widest">Active Inventory Records</h4>
+            <span className="text-xs font-mono bg-[#cbf000]/10 text-[#cbf000] px-3 py-1 rounded-full">{spareParts.length} Parts Found</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
+              <thead className={`border-b ${isLightMode ? "bg-neutral-100 border-black/10 text-neutral-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
+                <tr>
+                  <th className="p-4">ID</th>
+                  <th className="p-4">Part Name</th>
+                  <th className="p-4">Part Number</th>
+                  <th className="p-4">Price</th>
+                  <th className="p-4">Stock</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-neutral-400">Loading inventory from database...</td>
+                  </tr>
+                ) : spareParts.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-neutral-400">No spare parts found in database.</td>
+                  </tr>
+                ) : (
+                  spareParts.map((part) => (
+                    <tr key={part.id} className="hover:bg-white/5 transition-colors">
+                      <td className="p-4 text-neutral-400">#{part.id.slice(-6)}</td>
+                      <td className="p-4 font-bold text-white">{part.name}</td>
+                      <td className="p-4 text-neutral-400">{part.partNumber || "N/A"}</td>
+                      <td className="p-4 text-[#cbf000] font-bold">₹{part.price}</td>
+                      <td className="p-4 text-white">{part.stock} units</td>
+                      <td className="p-4 text-right space-x-3">
+                        <button onClick={() => handleDeletePart(part.id)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Create Spare Part Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className={`w-full max-w-lg p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-black/10 text-black" : "bg-[#141418] border-white/10 text-white"}`}>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-sm font-mono uppercase tracking-widest text-[#cbf000]">📦 Add New Spare Part</h3>
+                <button onClick={() => setShowCreateModal(false)} className="text-xs uppercase font-mono px-3 py-1 rounded-lg border border-white/20 cursor-pointer">Close</button>
+              </div>
+
+              <form onSubmit={handleCreatePart} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-mono uppercase text-neutral-400 mb-1">Part Name</label>
+                  <input 
+                    type="text" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    placeholder="e.g. Brake Pad Set" 
+                    required 
+                    className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none focus:border-[#cbf000] ${isLightMode ? "bg-neutral-100 border-black/10" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-neutral-400 mb-1">Part Number / SKU</label>
+                  <input 
+                    type="text" 
+                    value={partNumber} 
+                    onChange={(e) => setPartNumber(e.target.value)} 
+                    placeholder="e.g. BP-8920-X" 
+                    required 
+                    className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none focus:border-[#cbf000] ${isLightMode ? "bg-neutral-100 border-black/10" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-neutral-400 mb-1">Price (₹)</label>
+                  <input 
+                    type="number" 
+                    value={price} 
+                    onChange={(e) => setPrice(e.target.value)} 
+                    placeholder="e.g. 1200" 
+                    required 
+                    className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none focus:border-[#cbf000] ${isLightMode ? "bg-neutral-100 border-black/10" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-mono uppercase text-neutral-400 mb-1">Stock Quantity</label>
+                  <input 
+                    type="number" 
+                    value={stock} 
+                    onChange={(e) => setStock(e.target.value)} 
+                    placeholder="e.g. 45" 
+                    required 
+                    className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none focus:border-[#cbf000] ${isLightMode ? "bg-neutral-100 border-black/10" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  />
+                </div>
+
+                <div className="pt-4 flex gap-4">
+                  <button type="submit" className="flex-1 py-3.5 rounded-2xl bg-[#cbf000] text-black font-bold uppercase text-xs tracking-widest hover:opacity-90 transition-all cursor-pointer">
+                    Save Part to Inventory →
+                  </button>
+                  <button type="button" onClick={() => setShowCreateModal(false)} className="px-6 py-3.5 rounded-2xl border border-white/20 text-xs font-mono uppercase cursor-pointer">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
   );
 }

@@ -1,0 +1,33 @@
+"use client";
+import React, { createContext, useContext, useState, useEffect } from "react";
+
+const ThemeContext = createContext<{
+  isLightMode: boolean;
+  toggleTheme: () => void;
+}>({
+  isLightMode: false,
+  toggleTheme: () => {},
+});
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [isLightMode, setIsLightMode] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("autocare_theme");
+    if (saved) setIsLightMode(saved === "light");
+  }, []);
+
+  const toggleTheme = () => {
+    const nextMode = !isLightMode;
+    setIsLightMode(nextMode);
+    localStorage.setItem("autocare_theme", nextMode ? "light" : "dark");
+  };
+
+  return (
+    <ThemeContext.Provider value={{ isLightMode, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export const useTheme = () => useContext(ThemeContext);

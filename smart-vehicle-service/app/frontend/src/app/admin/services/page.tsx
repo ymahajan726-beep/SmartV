@@ -1,79 +1,272 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { apiRequest } from "@/services/api";
+import { apiRequest } from "@/src/services/api";
 
 export default function AdminServicesPage() {
-  const [services, setServices] = useState([]);
-  const [formData, setFormData] = useState({ name: "", description: "", price: "" });
-  const [toast, setToast] = useState<string | null>(null);
+  const [services, setServices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => { loadData(); }, []);
+  // Create Service Modal States
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
 
-  const loadData = async () => {
+  // Edit Service Modal States
+  const [editingService, setEditingService] = useState<any>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
     try {
-      const data = await apiRequest("/services");
-      setServices(data);
-    } catch {
-      setServices([
-        { id: 1, name: "Full Ceramic Coating", description: "Complete body protection", price: 15000 },
-        { id: 2, name: "Engine Diagnostic & Tuning", description: "ECU scan and repair", price: 3500 }
-      ]);
+      setLoading(true);
+      const data = await apiRequest("/services", "GET").catch(() => []);
+      setServices(Array.isArray(data) ? data : []);
+      setErrorMsg("");
+    } catch (err: any) {
+      console.error("Failed to fetch services from backend:", err);
+      setErrorMsg(err.message || "Backend database connection error.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreateService = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest("/services", "POST", formData);
-      setToast("Service added successfully!");
-      setFormData({ name: "", description: "", price: "" });
-      loadData();
-    } catch {
-      setToast("Failed to save service");
+      await apiRequest("/services", "POST", { 
+        name, 
+        description, 
+        price: Number(price) 
+      });
+      setShowCreateModal(false);
+      setName("");
+      setDescription("");
+      setPrice("");
+      fetchServices();
+    } catch (err: any) {
+      alert("Failed to create service: " + (err.message || "Unknown error"));
     }
-    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleUpdateService = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingService) return;
+    try {
+      await apiRequest(`/services/${editingService.id}`, "PATCH", {
+        name: editName,
+        description: editDescription,
+        price: Number(editPrice),
+      });
+      setEditingService(null);
+      fetchServices();
+    } catch (err: any) {
+      alert("Failed to update service: " + (err.message || "Unknown error"));
+    }
+  };
+
+  const handleDeleteService = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this service from database?")) return;
+    try {
+      await apiRequest(`/services/${id}`, "DELETE");
+      fetchServices();
+    } catch (err: any) {
+      alert("Failed to delete service: " + (err.message || "Unknown error"));
+    }
+  };
+
+  const openEditModal = (service: any) => {
+    setEditingService(service);
+    setEditName(service.name || "");
+    setEditDescription(service.description || "");
+    setEditPrice(service.price || "");
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0b0e] text-[#f3f3f6] p-8 md:p-12 font-sans">
-      <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+    <div className="space-y-8 font-sans text-gray-900">
+      <header className="pb-6 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <span className="text-xs font-mono text-[#cbf000] uppercase">[ Backend Module: Services ]</span>
-          <h1 className="text-3xl font-light mt-1">Master Services Management</h1>
+          <span className="text-xs font-mono text-emerald-600 uppercase tracking-widest">[ Module 4: Services Management ]</span>
+          <h1 className="text-2xl md:text-3xl font-light tracking-tight mt-1">Vehicle Services Database</h1>
         </div>
-        <Link href="/admin/dashboard" className="text-xs font-mono uppercase text-[#cbf000] hover:underline">← Back to Dashboard</Link>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <form onSubmit={handleCreate} className="bg-[#141418] border border-white/10 p-6 rounded-[32px] space-y-4 h-fit">
-          <h3 className="text-lg font-light">Add Service Offering</h3>
-          <input type="text" placeholder="Service Name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-black text-white border border-white/20 rounded-2xl px-4 py-3 text-sm outline-none focus:border-[#cbf000]" required />
-          <input type="text" placeholder="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="w-full bg-black text-white border border-white/20 rounded-2xl px-4 py-3 text-sm outline-none focus:border-[#cbf000]" required />
-          <input type="number" placeholder="Price (₹)" value={formData.price} onChange={(e) => setFormData({...formData, price: e.target.value})} className="w-full bg-black text-white border border-white/20 rounded-2xl px-4 py-3 text-sm outline-none focus:border-[#cbf000]" required />
-          <button type="submit" className="w-full bg-[#cbf000] text-black font-bold uppercase text-xs py-3.5 rounded-2xl cursor-pointer hover:bg-white transition-all">Save to DB →</button>
-        </form>
-        <div className="md:col-span-2 bg-[#141418] border border-white/10 rounded-[32px] overflow-hidden">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/10 bg-black/50 text-xs font-mono uppercase text-neutral-400">
-                <th className="p-5 pl-8">Service Name</th>
-                <th className="p-5">Description</th>
-                <th className="p-5 pr-8 text-right">Price</th>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setShowCreateModal(true)} className="px-4 py-2.5 rounded-xl bg-gray-900 text-white text-xs uppercase font-mono font-bold tracking-wider hover:bg-gray-800 transition-all cursor-pointer shadow-sm">
+            + New Service
+          </button>
+          <button onClick={fetchServices} className="px-4 py-2.5 rounded-xl border border-gray-200 text-xs uppercase font-mono tracking-wider hover:border-emerald-600 transition-all cursor-pointer bg-gray-50">
+            🔄 Refresh
+          </button>
+        </div>
+      </header>
+
+      {errorMsg && (
+        <div className="mb-8 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs font-mono">
+          ⚠️ Error: {errorMsg}
+        </div>
+      )}
+
+      {/* Services Table */}
+      <div className="rounded-[32px] border border-gray-200 bg-white overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+          <h4 className="text-sm font-mono uppercase tracking-widest text-gray-600">Active Services Records</h4>
+          <span className="text-xs font-mono bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">{services.length} Services Found</span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
+            <thead className="border-b bg-gray-50 border-gray-100 text-gray-500">
+              <tr>
+                <th className="p-4">ID</th>
+                <th className="p-4">Service Name</th>
+                <th className="p-4">Description</th>
+                <th className="p-4">Price</th>
+                <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 text-sm">
-              {services.map((s: any) => (
-                <tr key={s.id} className="hover:bg-white/5">
-                  <td className="p-5 pl-8 font-medium">{s.name}</td>
-                  <td className="p-5 text-neutral-400">{s.description}</td>
-                  <td className="p-5 pr-8 text-right font-mono text-[#cbf000]">₹{s.price}</td>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-400">Loading services from database...</td>
                 </tr>
-              ))}
+              ) : services.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-gray-400">No service records found.</td>
+                </tr>
+              ) : (
+                services.map((srv) => (
+                  <tr key={srv.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="p-4 text-gray-400">#{srv.id.slice(-6)}</td>
+                    <td className="p-4 font-bold text-gray-900">{srv.name}</td>
+                    <td className="p-4 text-gray-500">{srv.description || "N/A"}</td>
+                    <td className="p-4 text-emerald-600 font-bold">₹{srv.price}</td>
+                    <td className="p-4 text-right space-x-3">
+                      <button onClick={() => openEditModal(srv)} className="text-blue-600 hover:underline cursor-pointer">Edit</button>
+                      <button onClick={() => handleDeleteService(srv.id)} className="text-red-500 hover:text-red-700 cursor-pointer">Delete</button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
-      {toast && <div className="fixed bottom-6 right-6 bg-[#cbf000] text-black px-6 py-4 rounded-2xl font-semibold text-sm shadow-2xl">{toast}</div>}
+
+      {/* Create Service Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg p-8 rounded-[32px] border border-gray-200 bg-white shadow-2xl text-gray-900">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-sm font-mono uppercase tracking-widest text-emerald-600">⚙️ Create New Service</h3>
+              <button onClick={() => setShowCreateModal(false)} className="text-xs uppercase font-mono px-3 py-1 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">Close</button>
+            </div>
+
+            <form onSubmit={handleCreateService} className="space-y-4">
+              <div>
+                <label className="block text-xs font-mono uppercase text-gray-500 mb-1">Service Name</label>
+                <input 
+                  type="text" 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)} 
+                  placeholder="e.g. Engine Tuning" 
+                  required 
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm outline-none focus:border-emerald-500 bg-gray-50"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase text-gray-500 mb-1">Description</label>
+                <textarea 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  placeholder="Describe service details..." 
+                  rows={3}
+                  required 
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm outline-none focus:border-emerald-500 bg-gray-50"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase text-gray-500 mb-1">Price (₹)</label>
+                <input 
+                  type="number" 
+                  value={price} 
+                  onChange={(e) => setPrice(e.target.value)} 
+                  placeholder="e.g. 1500" 
+                  required 
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm outline-none focus:border-emerald-500 bg-gray-50"
+                />
+              </div>
+
+              <div className="pt-4 flex gap-4">
+                <button type="submit" className="flex-1 py-3.5 rounded-2xl bg-gray-900 text-white font-bold uppercase text-xs tracking-widest hover:bg-gray-800 transition-all cursor-pointer">
+                  Save Service Record →
+                </button>
+                <button type="button" onClick={() => setShowCreateModal(false)} className="px-6 py-3.5 rounded-2xl border border-gray-200 text-xs font-mono uppercase cursor-pointer hover:bg-gray-50">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Service Modal */}
+      {editingService && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg p-8 rounded-[32px] border border-gray-200 bg-white shadow-2xl text-gray-900">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-sm font-mono uppercase tracking-widest text-emerald-600">✏️ Edit Service Record</h3>
+              <button onClick={() => setEditingService(null)} className="text-xs uppercase font-mono px-3 py-1 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50">Close</button>
+            </div>
+
+            <form onSubmit={handleUpdateService} className="space-y-4">
+              <div>
+                <label className="block text-xs font-mono uppercase text-gray-500 mb-1">Service Name</label>
+                <input 
+                  type="text" 
+                  value={editName} 
+                  onChange={(e) => setEditName(e.target.value)} 
+                  required 
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm outline-none focus:border-emerald-500 bg-gray-50"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase text-gray-500 mb-1">Description</label>
+                <textarea 
+                  value={editDescription} 
+                  onChange={(e) => setEditDescription(e.target.value)} 
+                  rows={3}
+                  required 
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm outline-none focus:border-emerald-500 bg-gray-50"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-mono uppercase text-gray-500 mb-1">Price (₹)</label>
+                <input 
+                  type="number" 
+                  value={editPrice} 
+                  onChange={(e) => setEditPrice(e.target.value)} 
+                  required 
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 text-sm outline-none focus:border-emerald-500 bg-gray-50"
+                />
+              </div>
+
+              <div className="pt-4 flex gap-4">
+                <button type="submit" className="flex-1 py-3.5 rounded-2xl bg-gray-900 text-white font-bold uppercase text-xs tracking-widest hover:bg-gray-800 transition-all cursor-pointer">
+                  Save Changes →
+                </button>
+                <button type="button" onClick={() => setEditingService(null)} className="px-6 py-3.5 rounded-2xl border border-gray-200 text-xs font-mono uppercase cursor-pointer hover:bg-gray-50">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

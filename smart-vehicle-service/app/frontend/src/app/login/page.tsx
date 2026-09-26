@@ -1,128 +1,87 @@
 "use client";
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { apiRequest } from "@/src/services/api";
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
-  const [role, setRole] = useState("admin"); // 'admin' | 'workshop'
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
-  const showToast = (message: string, type: "success" | "error" = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
     try {
-      setTimeout(() => {
-        setLoading(false);
-        localStorage.setItem("auth_token", "jwt_mock_token_12345");
-        localStorage.setItem("user_role", role);
+      setLoading(true);
+      setErrorMsg("");
+      
+      // API call to backend login route
+      const data = await apiRequest("/api/auth/login", "POST", { email, password });
+      
+      // Extract and store token in localStorage for authenticated requests
+      const token = data?.token || data?.accessToken || data?.access_token;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
 
-        showToast("Login successful! Redirecting to dashboard...", "success");
-
-        setTimeout(() => {
-          if (role === "admin") {
-            router.push("/admin/dashboard");
-          } else {
-            router.push("/workshop/dashboard");
-          }
-        }, 1000);
-      }, 800);
-    } catch (error) {
+      router.push("/admin/dashboard");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Invalid credentials or backend error.");
+    } finally {
       setLoading(false);
-      showToast("Invalid credentials or database error", "error");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#08080a] text-[#f3f3f6] flex items-center justify-center p-6 font-sans">
-      <div className="absolute w-[500px] h-[500px] bg-[#cbf000]/10 rounded-full blur-[140px] pointer-events-none"></div>
-
-      <div className="w-full max-w-md bg-[#121216] border border-white/15 rounded-[40px] p-8 md:p-10 shadow-2xl relative z-10">
-        
-        <div className="text-center mb-8">
-          <span className="text-xl font-black tracking-tighter uppercase inline-block mb-3">
+    <div className="min-h-screen bg-[#0b0b0e] text-[#f3f3f6] flex items-center justify-center p-6 font-sans">
+      <div className="w-full max-w-md p-8 rounded-[32px] border border-white/10 bg-[#141418] shadow-2xl">
+        <div className="mb-8 text-center">
+          <span className="text-2xl font-black tracking-tighter uppercase">
             Auto<span className="text-[#cbf000] bg-black text-white px-2 py-0.5 rounded-md">Care</span>
           </span>
-          <h2 className="text-2xl font-light tracking-tight">Portal Gateway</h2>
-          <p className="text-xs font-mono text-neutral-400 mt-1">Select your staff role to access secured dashboard</p>
+          <p className="text-xs font-mono text-neutral-400 mt-2 uppercase tracking-widest">[ Admin Portal Authentication ]</p>
         </div>
 
-        {/* Role Selector Tabs (Only Admin & Workshop) */}
-        <div className="grid grid-cols-2 gap-3 bg-black/40 p-1.5 rounded-2xl border border-white/10 mb-6 text-xs uppercase font-mono">
-          <button 
-            type="button"
-            onClick={() => setRole("admin")}
-            className={`py-3 rounded-xl transition-all cursor-pointer ${role === "admin" ? "bg-[#cbf000] text-black font-bold shadow-lg" : "text-neutral-400 hover:text-white"}`}
-          >
-            🛡️ Admin Control
-          </button>
-          <button 
-            type="button"
-            onClick={() => setRole("workshop")}
-            className={`py-3 rounded-xl transition-all cursor-pointer ${role === "workshop" ? "bg-[#cbf000] text-black font-bold shadow-lg" : "text-neutral-400 hover:text-white"}`}
-          >
-            🛠️ Workshop Panel
-          </button>
-        </div>
+        {errorMsg && (
+          <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
+            ⚠️ {errorMsg}
+          </div>
+        )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-xs uppercase font-mono text-neutral-400 mb-2">Registered Email</label>
+            <label className="block text-xs font-mono uppercase text-neutral-400 mb-1">Email Address</label>
             <input 
               type="email" 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@domain.com" 
-              className="w-full bg-black text-white border border-white/20 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-[#cbf000]"
-              required
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)} 
+              placeholder="admin@autocare.com" 
+              required 
+              className="w-full px-4 py-3 rounded-2xl border border-white/10 bg-[#0b0b0e] text-sm text-white outline-none focus:border-[#cbf000]"
             />
           </div>
           <div>
-            <label className="block text-xs uppercase font-mono text-neutral-400 mb-2">Access Password</label>
+            <label className="block text-xs font-mono uppercase text-neutral-400 mb-1">Password</label>
             <input 
               type="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
               placeholder="••••••••" 
-              className="w-full bg-black text-white border border-white/20 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-[#cbf000]"
-              required
+              required 
+              className="w-full px-4 py-3 rounded-2xl border border-white/10 bg-[#0b0b0e] text-sm text-white outline-none focus:border-[#cbf000]"
             />
           </div>
 
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-[#cbf000] text-black font-bold uppercase tracking-wider py-4 rounded-2xl hover:bg-white transition-all text-xs shadow-2xl cursor-pointer flex items-center justify-center gap-2 mt-2"
+            className="w-full py-3.5 rounded-2xl bg-[#cbf000] text-black font-bold uppercase text-xs tracking-widest hover:opacity-90 transition-all cursor-pointer shadow-lg shadow-[#cbf000]/20 mt-4 disabled:opacity-50"
           >
-            <span>{loading ? "Authenticating..." : `Login to ${role.toUpperCase()} Portal`}</span>
-            <span>→</span>
+            {loading ? "Authenticating..." : "Login to Dashboard →"}
           </button>
         </form>
-
-        <div className="mt-8 pt-6 border-t border-white/10 text-center">
-          <Link href="/" className="text-xs uppercase font-mono text-neutral-400 hover:text-[#cbf000] transition-colors">
-            ← Back to Home Landing Page
-          </Link>
-        </div>
       </div>
-
-      {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 animate-in fade-in slide-in-from-right duration-300 font-semibold text-sm ${
-          toast.type === "success" ? "bg-[#cbf000] text-black border-black/20" : "bg-red-600 text-white border-red-800"
-        }`}>
-          <span>{toast.type === "success" ? "🏎️" : "⚠️"}</span>
-          <span>{toast.message}</span>
-        </div>
-      )}
     </div>
   );
 }

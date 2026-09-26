@@ -1,87 +1,85 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { apiRequest } from "../../../api/api";
+import { apiRequest } from "@/src/services/api";
 
 export default function AdminBookingsPage() {
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
-  const showToast = (message: string, type: "success" | "error" = "success") => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
-  };
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    loadBookings();  
+    fetchBookings();
   }, []);
 
-  const loadBookings = async () => {
-    setLoading(true);
+  const fetchBookings = async () => {
     try {
-      const data = await apiRequest("/bookings");
-      setBookings(data);
-    } catch (error) {
-      // Fallback for live preview if backend is booting up
-      setBookings([
-        { id: 1, serviceType: "Full Engine Diagnostic", status: "Pending", client: { name: "Rajesh Sharma" } }
-      ]);
+      setLoading(true);
+      const data = await apiRequest("/bookings", "GET").catch(() => []);
+      setBookings(Array.isArray(data) ? data : []);
+      setErrorMsg("");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to fetch bookings.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleCancel = async (id: string) => {
+    if (!confirm("Cancel booking?")) return;
     try {
-      await apiRequest(`/bookings/${id}`, "DELETE");
-      setBookings(bookings.filter((b: any) => b.id !== id));
-      showToast("Booking record deleted from database successfully!");
-    } catch (error) {
-      showToast("Failed to delete booking", "error");
+      await apiRequest(`/bookings/${id}/cancel`, "PATCH");
+      fetchBookings();
+    } catch (err: any) {
+      alert("Failed: " + err.message);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0b0e] text-[#f3f3f6] p-8 md:p-12 font-sans">
-      <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+    <div className="space-y-8 font-sans">
+      <header className="pb-6 border-b border-current/10 flex justify-between items-center">
         <div>
-          <span className="text-xs font-mono text-[#cbf000] uppercase">[ Backend Module: Bookings ]</span>
-          <h1 className="text-3xl font-light mt-1">Service Bookings Management</h1>
+          <span className="text-xs font-mono text-[#cbf000] uppercase tracking-widest">[ MODULE 3: BOOKINGS ]</span>
+          <h1 className="text-3xl font-light tracking-tight mt-1">Service Bookings</h1>
         </div>
-        <Link href="/admin/dashboard" className="text-xs font-mono uppercase text-[#cbf000] hover:underline">← Back to Dashboard</Link>
-      </div>
+        <button onClick={fetchBookings} className="px-4 py-2.5 rounded-xl border border-current/20 text-xs uppercase font-mono cursor-pointer transition-all hover:border-[#cbf000]">🔄 Refresh</button>
+      </header>
 
-      <div className="bg-[#141418] border border-white/10 rounded-[32px] overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-white/10 bg-black/50 text-xs font-mono uppercase text-neutral-400">
-              <th className="p-5 pl-8">ID</th>
-              <th className="p-5">Service Type</th>
-              <th className="p-5">Status</th>
-              <th className="p-5 pr-8 text-right">Actions</th>
+      {errorMsg && <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-xs font-mono border border-red-500/20">⚠️ Note: {errorMsg}</div>}
+
+      <div className="rounded-[32px] border border-current/10 overflow-hidden shadow-xl bg-inherit">
+        <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
+          <thead className="border-b border-current/10 bg-black/10 text-neutral-400">
+            <tr>
+              <th className="p-4">ID</th>
+              <th className="p-4">Service Type</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Date</th>
+              <th className="p-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5 text-sm">
-            {bookings.map((b: any) => (
-              <tr key={b.id} className="hover:bg-white/5">
-                <td className="p-5 pl-8 font-mono text-xs text-neutral-400">#BK-{b.id}</td>
-                <td className="p-5 font-medium">{b.serviceType}</td>
-                <td className="p-5 font-mono text-[#cbf000]">{b.status}</td>
-                <td className="p-5 pr-8 text-right">
-                  <button onClick={() => handleDelete(b.id)} className="text-xs font-mono text-red-400 hover:underline cursor-pointer">Delete</button>
-                </td>
-              </tr>
-            ))}
+          <tbody className="divide-y divide-current/5">
+            {loading ? (
+              <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading...</td></tr>
+            ) : bookings.length === 0 ? (
+              <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No bookings found.</td></tr>
+            ) : (
+              bookings.map((b) => (
+                <tr key={b.id} className="hover:bg-current/5 transition-colors">
+                  <td className="p-4 text-neutral-400">#{b.id.slice(-6)}</td>
+                  <td className="p-4 font-bold">{b.serviceType || "Standard"}</td>
+                  <td className="p-4 text-[#cbf000]">{b.status || "PENDING"}</td>
+                  <td className="p-4 text-neutral-400">{b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : "N/A"}</td>
+                  <td className="p-4 text-right">
+                    {b.status !== 'CANCELLED' && (
+                      <button onClick={() => handleCancel(b.id)} className="text-red-400 hover:text-red-300 cursor-pointer">Cancel</button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
-
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#cbf000] text-black px-6 py-4 rounded-2xl font-semibold text-sm shadow-2xl">
-          {toast.message}
-        </div>
-      )}
     </div>
   );
 }

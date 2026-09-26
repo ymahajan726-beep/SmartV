@@ -1,44 +1,67 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import { apiRequest } from "@/services/api";
+import { apiRequest } from "@/src/services/api";
 
 export default function AdminReviewsPage() {
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
-    apiRequest("/reviews").then(setReviews).catch(() => {
-      setReviews([{ id: 1, client: "Amit Deshmukh", rating: 5, comment: "Excellent service turnaround time!" }]);
-    });
+    fetchReviews();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-[#0b0b0e] text-[#f3f3f6] p-8 md:p-12 font-sans">
-      <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
-        <div>
-          <span className="text-xs font-mono text-[#cbf000] uppercase">[ Backend Module: Reviews ]</span>
-          <h1 className="text-3xl font-light mt-1">Client Reviews & Ratings</h1>
-        </div>
-        <Link href="/admin/dashboard" className="text-xs font-mono uppercase text-[#cbf000] hover:underline">← Back to Dashboard</Link>
-      </div>
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      // Fallback safe handling agar backend endpoint abhi ready nahi hai
+      const data = await apiRequest("/reviews", "GET").catch(() => []);
+      setReviews(Array.isArray(data) ? data : []);
+      setErrorMsg("");
+    } catch (err: any) {
+      setErrorMsg(err.message || "Failed to fetch reviews.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <div className="bg-[#141418] border border-white/10 rounded-[32px] overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-white/10 bg-black/50 text-xs font-mono uppercase text-neutral-400">
-              <th className="p-5 pl-8">Client</th>
-              <th className="p-5">Rating</th>
-              <th className="p-5 pr-8 text-right">Comment</th>
+  return (
+    <div className="space-y-8">
+      <header className="pb-6 border-b border-white/10 flex justify-between items-center">
+        <div>
+          <span className="text-xs font-mono text-[#cbf000] uppercase tracking-widest">[ MODULE 9: REVIEWS & RATINGS ]</span>
+          <h1 className="text-3xl font-light tracking-tight mt-1">Customer Feedback Database</h1>
+        </div>
+        <button onClick={fetchReviews} className="px-4 py-2.5 rounded-xl border border-current/20 text-xs uppercase font-mono">🔄 Refresh</button>
+      </header>
+
+      {errorMsg && <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-xs font-mono">⚠️ Note: {errorMsg}</div>}
+
+      <div className="rounded-[32px] border border-current/10 overflow-hidden shadow-xl">
+        <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
+          <thead className="border-b border-current/10 bg-black/20 text-neutral-400">
+            <tr>
+              <th className="p-4">ID</th>
+              <th className="p-4">Rating</th>
+              <th className="p-4">Comment</th>
+              <th className="p-4 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5 text-sm">
-            {reviews.map((rev: any) => (
-              <tr key={rev.id} className="hover:bg-white/5">
-                <td className="p-5 pl-8 font-medium">{rev.client}</td>
-                <td className="p-5 font-mono text-[#cbf000]">★ {rev.rating} / 5</td>
-                <td className="p-5 pr-8 text-right text-neutral-400 italic">"{rev.comment}"</td>
-              </tr>
-            ))}
+          <tbody className="divide-y divide-current/5">
+            {loading ? (
+              <tr><td colSpan={4} className="p-8 text-center text-neutral-400">Loading reviews...</td></tr>
+            ) : reviews.length === 0 ? (
+              <tr><td colSpan={4} className="p-8 text-center text-neutral-400">No reviews found in database.</td></tr>
+            ) : (
+              reviews.map((r) => (
+                <tr key={r.id} className="hover:bg-white/5">
+                  <td className="p-4 text-neutral-400">#{r.id.slice(-6)}</td>
+                  <td className="p-4 text-[#cbf000]">⭐ {r.rating} / 5</td>
+                  <td className="p-4 lowercase text-neutral-300">{r.comment || "No comment provided"}</td>
+                  <td className="p-4 text-right text-red-400 cursor-pointer">Delete</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
