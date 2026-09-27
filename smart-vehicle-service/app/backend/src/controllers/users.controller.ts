@@ -5,51 +5,51 @@ import {
   Get,
   Param,
   Patch,
-  Req,
+  Post,
+  ForbiddenException,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
-import { User, UserRole } from '../entities/index.js';
-import { Roles } from '../common/decorators/roles.decorator.js';
-import { RolesGuard } from '../auth/guards/roles.guard.js';
 import { UsersService } from '../service/users.service.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('me')
-  async getCurrentUser(@Req() req: { user: { id: string } }) {
-    return this.usersService.findById(req.user.id);
-  }
-
   @Get()
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
   async findAll() {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
+  @Post('staff')
+  async createStaff(@Body(new ValidationPipe()) dto: any) {
+    return this.usersService.create(dto);
   }
 
   @Patch(':id')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
-  async update(@Param('id') id: string, @Body(new ValidationPipe()) dto: Partial<User>) {
+  async update(@Param('id') id: string, @Body(new ValidationPipe()) dto: any) {
+    const user = await this.usersService.findById(id);
+    
+    // Security check: Super Admin role ya email ko modify hone se bachane ke liye
+    if (user && (String(user.role) === 'SUPER_ADMIN' || user.email === 'admin@autocare.com')) {
+      if (dto.role && dto.role !== 'ADMIN' && dto.role !== 'SUPER_ADMIN') {
+        throw new ForbiddenException('Critical Security Error: Super Admin role cannot be downgraded!');
+      }
+    }
+
     return this.usersService.update(id, dto);
   }
 
   @Delete(':id')
-  @UseGuards(RolesGuard)
-  @Roles(UserRole.ADMIN)
   async remove(@Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    
+    if (user && (String(user.role) === 'SUPER_ADMIN' || user.email === 'admin@autocare.com')) {
+      throw new ForbiddenException('Critical Security Error: Super Admin account cannot be deleted!');
+    }
+
     await this.usersService.remove(id);
     return { success: true };
   }

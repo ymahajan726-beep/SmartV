@@ -1,64 +1,63 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTheme } from "@/src/hooks/useTheme";
+import { useTheme } from "@/src/context/ThemeContext";
 
 export default function AdminSidebar() {
-  const pathname = usePathname();
-  const { isLightMode, toggleTheme } = useTheme();
-
-  const menuItems = [
-    { name: "📊 Dashboard", href: "/admin/dashboard" },
-    { name: "👥 1. Users Module", href: "/admin/users" },
-    { name: "🚗 2. Vehicles Module", href: "/admin/vehicles" },
-    { name: "📅 3. Bookings Module", href: "/admin/bookings" },
-    { name: "⚙️ 4. Services Module", href: "/admin/services" },
-    { name: "🛠️ 5. Service Centers", href: "/admin/service-centers" },
-    { name: "📦 6. Spare Parts", href: "/admin/spare-parts" },
-    { name: "💰 7. Invoices & Billing", href: "/admin/invoices" },
-    { name: "⏰ 8. Reminders Module", href: "/admin/maintenance-reminders" },
-    { name: "⭐ 9. Reviews & Ratings", href: "/admin/reviews" },
-    { name: "📜 10. Service History", href: "/admin/service-history" },
-    { name: "🔄 11. Service Status", href: "/admin/service-status" },
-  ];
+  const { isLightMode } = useTheme();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <aside className={`w-64 fixed top-0 left-0 h-screen border-r z-50 flex flex-col justify-between p-6 transition-colors duration-300 ${isLightMode ? "bg-white border-black/10 text-neutral-900" : "bg-[#141418] border-white/10 text-white"}`}>
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <span className="text-xl font-black tracking-tighter uppercase">
-            Auto<span className="text-[#cbf000] bg-black text-white px-2 py-0.5 rounded-md">Care</span>
-          </span>
-        </div>
-        <nav className="flex flex-col gap-1 text-xs uppercase tracking-widest font-bold overflow-y-auto max-h-[calc(100vh-180px)] pr-1">
-          {menuItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-3 py-2.5 rounded-xl flex items-center gap-2 transition-all ${
-                  isActive ? "bg-[#cbf000] text-black shadow-md font-extrabold" : isLightMode ? "hover:bg-neutral-100 text-neutral-600" : "hover:bg-white/5 text-neutral-300"
-                }`}
-              >
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div className={`pt-4 border-t flex items-center justify-between ${isLightMode ? "border-black/10" : "border-white/10"}`}>
-        <span className="text-[10px] font-mono uppercase tracking-widest text-green-400">● Live DB</span>
+    <>
+      {/* Mobile & Tablet Top Bar for Responsive Screens */}
+      <div className={`lg:hidden flex items-center justify-between px-4 sm:px-6 py-4 border-b ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#121216] border-white/10 text-white"} fixed top-0 left-0 right-0 z-50`}>
+        <span className="text-lg font-black tracking-tighter uppercase">
+          Auto<span className="text-[#cbf000] bg-black text-white px-2 py-0.5 rounded-md">Care</span>
+        </span>
         <button 
-          onClick={toggleTheme} 
-          className={`p-2 rounded-xl text-xs cursor-pointer transition-all ${isLightMode ? "bg-neutral-100 hover:bg-neutral-200 text-black" : "bg-white/10 hover:bg-white/20 text-white"}`}
-          title="Toggle Theme"
+          onClick={() => setSidebarOpen(!sidebarOpen)} 
+          className="px-3.5 py-2 rounded-xl border text-xs font-bold tracking-wider uppercase cursor-pointer"
         >
-          {isLightMode ? "🌙 Dark" : "☀️ Light"}
+          {sidebarOpen ? "✕ Close" : "☰ Menu"}
         </button>
       </div>
-    </aside>
+
+      {/* Backdrop Overlay for smaller viewports */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          className="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 lg:hidden" 
+        />
+      )}
+
+      {/* Adaptive Sidebar Navigation */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 shrink-0 border-r p-6 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} ${isLightMode ? "border-gray-200 bg-white text-gray-900" : "border-white/10 bg-[#121216] text-[#f3f3f6]"}`}>
+        <div>
+          <div className="hidden lg:flex items-center justify-between mb-8">
+            <span className="text-xl font-black tracking-tighter uppercase">
+              Auto<span className="text-[#cbf000] bg-black text-white px-2 py-0.5 rounded-md">Care</span>
+            </span>
+          </div>
+          
+          <nav className="flex flex-col gap-2 text-xs uppercase tracking-widest font-bold w-full overflow-y-auto max-h-[calc(100vh-140px)] pr-1 pt-12 lg:pt-0">
+            <Link href="/admin/dashboard" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>📊 Dashboard</Link>
+            <Link href="/admin/users" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>👥 Users</Link>
+            <Link href="/admin/vehicles" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>🚗 Vehicles</Link>
+            <Link href="/admin/bookings" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>📅 Bookings</Link>
+            <Link href="/admin/services" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>⚙️ Services</Link>
+            <Link href="/admin/service-centers" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>🛠️ Centers</Link>
+            <Link href="/admin/spare-parts" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>📦 Spare Parts</Link>
+            <Link href="/admin/invoices" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>💰 Invoices</Link>
+            <Link href="/admin/maintenance-reminders" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>⏰ Reminders</Link>
+            <Link href="/admin/reviews" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>⭐ Reviews</Link>
+            <Link href="/admin/service-status" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>🔄 Status</Link>
+          </nav>
+        </div>
+
+        <div className={`pt-4 border-t text-xs font-mono text-neutral-500 uppercase tracking-widest ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
+          AutoCare v2.6
+        </div>
+      </aside>
+    </>
   );
 }

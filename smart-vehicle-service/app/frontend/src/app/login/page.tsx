@@ -15,19 +15,29 @@ export default function AdminLoginPage() {
     try {
       setLoading(true);
       setErrorMsg("");
-      
-      // API call to backend login route
-      const data = await apiRequest("/api/auth/login", "POST", { email, password });
-      
-      // Extract and store token in localStorage for authenticated requests
-      const token = data?.token || data?.accessToken || data?.access_token;
-      if (token) {
-        localStorage.setItem("token", token);
-      }
 
-      router.push("/admin/dashboard");
+      // Real backend API call to NestJS Auth Controller (/api/auth/login)
+      const response = await apiRequest("/auth/login", "POST", { email, password });
+      
+      console.log("Login Response Data:", response);
+
+      // Handle all possible backend response key variations for the JWT token
+      const token = 
+        response?.access_token || 
+        response?.token || 
+        response?.accessToken || 
+        response?.data?.access_token || 
+        response?.data?.token;
+
+      if (token) {
+        // Store the real JWT token securely in localStorage
+        localStorage.setItem("autocare_token", token);
+        router.push("/admin/dashboard");
+      } else {
+        setErrorMsg("Login failed: Secure token not found in server response.");
+      }
     } catch (err: any) {
-      setErrorMsg(err.message || "Invalid credentials or backend error.");
+      setErrorMsg(err.message || "Invalid email or password. Please try again.");
     } finally {
       setLoading(false);
     }

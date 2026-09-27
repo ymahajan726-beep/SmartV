@@ -1,10 +1,11 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTheme } from "@/src/context/ThemeContext";
 
 export default function LandingPage() {
+  const { isLightMode, toggleTheme } = useTheme();
   const [showCustomerModal, setShowCustomerModal] = useState(false);
-  const [isLightMode, setIsLightMode] = useState(false);
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const [activeReview, setActiveReview] = useState<number | null>(0);
   
@@ -56,7 +57,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-500 overflow-x-hidden ${isLightMode ? "bg-[#f2f2ef] text-[#111111]" : "bg-[#08080a] text-[#f3f3f6]"}`}>
+    <div className={`min-h-screen font-sans transition-colors duration-200 overflow-x-hidden ${isLightMode ? "bg-[#f2f2ef] text-[#111111]" : "bg-[#08080a] text-[#f3f3f6]"}`}>
       
       {/* Top Professional Commercial Navbar */}
       <nav className={`w-full px-8 md:px-16 py-6 flex justify-between items-center border-b sticky top-0 backdrop-blur-2xl z-50 ${isLightMode ? "border-black/15 bg-[#f2f2ef]/95 text-black" : "border-white/10 bg-[#08080a]/95 text-white"}`}>
@@ -103,7 +104,7 @@ export default function LandingPage() {
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2">
             <Link 
-              href="/login" 
+              href="/admin/dashboard" 
               className={`px-5 py-2.5 rounded-xl border text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 ${
                 isLightMode 
                   ? "border-black/20 bg-neutral-200 text-black hover:bg-black hover:text-white" 
@@ -115,8 +116,8 @@ export default function LandingPage() {
           </div>
 
           <button
-            onClick={() => setIsLightMode(!isLightMode)}
-            className={`p-2.5 rounded-full border text-xs flex items-center justify-center transition-all ${isLightMode ? "border-black/20 bg-neutral-300 text-black" : "border-white/20 bg-neutral-900 text-[#cbf000]"}`}
+            onClick={toggleTheme}
+            className={`p-2.5 rounded-full border text-xs flex items-center justify-center transition-all cursor-pointer ${isLightMode ? "border-black/20 bg-neutral-300 text-black" : "border-white/20 bg-neutral-900 text-[#cbf000]"}`}
             title="Toggle Theme"
           >
             {isLightMode ? "🌙" : "☀️"}
@@ -169,7 +170,7 @@ export default function LandingPage() {
             <div
               key={index}
               onMouseEnter={() => setActiveReview(index)}
-              className={`p-8 rounded-[28px] border transition-all duration-500 cursor-pointer flex flex-col justify-between ${
+              className={`p-8 rounded-[28px] border transition-all duration-300 cursor-pointer flex flex-col justify-between ${
                 activeReview === index
                   ? isLightMode ? "bg-white border-black shadow-2xl scale-[1.04]" : "bg-[#141418] border-[#cbf000] shadow-2xl shadow-[#cbf000]/10 scale-[1.04]"
                   : isLightMode ? "bg-white/60 border-black/10 opacity-70" : "bg-neutral-900/40 border-white/10 opacity-60"
@@ -197,7 +198,7 @@ export default function LandingPage() {
       {/* Aerodynamic Car-Cockpit Styled Modal */}
       {showCustomerModal && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className={`w-full max-w-xl rounded-[70px] p-8 md:p-12 relative shadow-2xl border overflow-hidden transition-all duration-700 animate-smooth-car ${
+          <div className={`w-full max-w-xl rounded-[70px] p-8 md:p-12 relative shadow-2xl border overflow-hidden transition-all duration-300 ${
             isLightMode ? "bg-[#ffffff] border-neutral-400 text-black shadow-black/30" : "bg-[#0b0b0e] border-[#cbf000]/40 text-white shadow-2xl shadow-[#cbf000]/10"
           } ${shake ? "animate-bounce" : ""}`}>
             
@@ -205,7 +206,7 @@ export default function LandingPage() {
 
             <button 
               onClick={() => setShowCustomerModal(false)}
-              className="absolute top-6 right-6 text-neutral-400 hover:text-red-500 text-xs uppercase font-mono tracking-widest z-20 bg-black/60 px-4 py-2 rounded-full border border-white/15 text-white"
+              className="absolute top-6 right-6 text-neutral-400 hover:text-red-500 text-xs uppercase font-mono tracking-widest z-20 bg-black/60 px-4 py-2 rounded-full border border-white/15 text-white cursor-pointer"
             >
               [CLOSE]
             </button>

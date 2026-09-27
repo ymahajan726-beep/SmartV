@@ -31,9 +31,28 @@ export class UsersService {
     });
   }
 
-  async create(data: Partial<User>): Promise<User> {
-    const user = this.userRepository.create(data);
-    return this.userRepository.save(user);
+  async create(data: Partial<User> & { password?: string }): Promise<User> {
+    const allowedRoles = ['ADMIN', 'CUSTOMER', 'MANAGER', 'STAFF'];
+    let assignedRole = data.role ? String(data.role).toUpperCase() : 'CUSTOMER';
+    
+    if (!allowedRoles.includes(assignedRole)) {
+      assignedRole = 'CUSTOMER';
+    }
+
+    // Frontend se 'password' milta hai, lekin database column 'passwordHash' hai
+    const plainPassword = data.password || 'defaultPassword123';
+
+    const payload = {
+      ...data,
+      role: assignedRole,
+      passwordHash: plainPassword, // Database constraint fix karne ke liye map kiya gaya
+    };
+
+    // Remove raw password property if it exists in data to avoid entity conflicts
+    delete (payload as any).password;
+
+    const user = this.userRepository.create(payload as any);
+    return await this.userRepository.save(user as any);
   }
 
   async update(id: string, data: Partial<User>): Promise<User> {

@@ -2,6 +2,8 @@ export enum UserRole {
   CUSTOMER = 'CUSTOMER',
   SERVICE_CENTER = 'SERVICE_CENTER',
   ADMIN = 'ADMIN',
+  STAFF = 'STAFF',
+  MANAGER = 'MANAGER',
 }
 
 export enum BookingStatus {
