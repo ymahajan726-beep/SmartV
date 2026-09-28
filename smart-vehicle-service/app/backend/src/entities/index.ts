@@ -8,5 +8,5 @@ export * from './spare-part.entity.js';
 export * from './booking-spare-part.entity.js';
 export * from './invoice.entity.js';
 export * from './invoice-item.entity.js';
-export * from './maintenance-reminder.entity.js';
+export * from './reminder.entity.js';
 export * from './review.entity.js';

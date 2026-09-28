@@ -52,7 +52,6 @@ export class Vehicle {
   @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  // Yahan string 'User' aur type casting use karein
   @ManyToOne('User', (user: User) => user.vehicles, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'customerId' })
   customer: User;

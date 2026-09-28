@@ -9,9 +9,10 @@ export default function LandingPage() {
   const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const [activeReview, setActiveReview] = useState<number | null>(0);
   
-  // Login states & Notification
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Professional VIN / Mobile & OTP Login States
+  const [identifier, setIdentifier] = useState(""); 
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
   const [shake, setShake] = useState(false);
   const [carMoving, setCarMoving] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
@@ -40,15 +41,32 @@ export default function LandingPage() {
     },
   ];
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === "test@domain.com" || email.includes("@")) {
+    if (identifier.trim().length >= 3) {
+      setOtpSent(true);
+      setNotification("OTP sent successfully! (Test Bypass Code: 1234)");
+      setTimeout(() => setNotification(null), 4000);
+    } else {
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
+  };
+
+  const handleVerifyOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Testing bypass: accept '1234' or any 4-digit code in dev mode
+    if (otp === "1234" || otp.length === 4) {
       setCarMoving(true);
       setTimeout(() => {
-        setNotification("Login successful! Redirecting to Customer Dashboard...");
+        setNotification("Authentication successful! Redirecting to Customer Dashboard...");
         setShowCustomerModal(false);
         setCarMoving(false);
-        setTimeout(() => setNotification(null), 3000);
+        setOtpSent(false);
+        setIdentifier("");
+        setOtp("");
+        // Redirect to Customer Dashboard route
+        window.location.href = "/customer/dashboard";
       }, 1200);
     } else {
       setShake(true);
@@ -97,10 +115,9 @@ export default function LandingPage() {
           </div>
 
           <a href="#experience" className="hover:text-[#a8cc00] transition-colors">Client Reviews</a>
-          <a href="#inquiry" className="hover:text-[#a8cc00] transition-colors">Company</a>
         </div>
 
-        {/* Right Corner: Single Staff Portal Login Button & Theme Toggle */}
+        {/* Right Corner: Staff Portal Login Button & Theme Toggle */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2">
             <Link 
@@ -195,17 +212,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Aerodynamic Car-Cockpit Styled Modal */}
+      {/* Aerodynamic Mobile/VIN & OTP Quick Lookup Modal */}
       {showCustomerModal && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className={`w-full max-w-xl rounded-[70px] p-8 md:p-12 relative shadow-2xl border overflow-hidden transition-all duration-300 ${
+          <div className={`w-full max-w-xl rounded-[50px] p-8 md:p-12 relative shadow-2xl border overflow-hidden transition-all duration-300 ${
             isLightMode ? "bg-[#ffffff] border-neutral-400 text-black shadow-black/30" : "bg-[#0b0b0e] border-[#cbf000]/40 text-white shadow-2xl shadow-[#cbf000]/10"
           } ${shake ? "animate-bounce" : ""}`}>
-            
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-40 bg-gradient-to-b from-[#18181b] to-transparent rounded-b-[100%] opacity-60 pointer-events-none"></div>
 
             <button 
-              onClick={() => setShowCustomerModal(false)}
+              onClick={() => { setShowCustomerModal(false); setOtpSent(false); }}
               className="absolute top-6 right-6 text-neutral-400 hover:text-red-500 text-xs uppercase font-mono tracking-widest z-20 bg-black/60 px-4 py-2 rounded-full border border-white/15 text-white cursor-pointer"
             >
               [CLOSE]
@@ -216,49 +231,75 @@ export default function LandingPage() {
                 🏎️
               </div>
               <div>
-                <span className="text-[10px] font-mono text-[#a8cc00] uppercase tracking-widest">Cockpit Telemetry</span>
-                <h3 className="text-3xl font-light tracking-tight">Vehicle Garage Access</h3>
+                <span className="text-[10px] font-mono text-[#a8cc00] uppercase tracking-widest">Secure VIN Telemetry</span>
+                <h3 className="text-2xl font-light tracking-tight">Customer Garage Access</h3>
               </div>
             </div>
 
-            <form onSubmit={handleLoginSubmit} className="space-y-5 z-10 relative">
-              <div>
-                <label className="block text-xs uppercase font-mono text-neutral-400 mb-2">Registered Email / VIN</label>
-                <input 
-                  type="text" 
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@domain.com or VIN" 
-                  className="w-full bg-black/90 text-white border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#cbf000]"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-xs uppercase font-mono text-neutral-400 mb-2">Access Password</label>
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" 
-                  className="w-full bg-black/90 text-white border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#cbf000]"
-                  required
-                />
-              </div>
-              <button 
-                type="submit" 
-                className="w-full bg-[#cbf000] text-black font-bold uppercase tracking-wider py-4 rounded-2xl hover:bg-white transition-all text-xs mt-4 shadow-2xl flex items-center justify-center gap-3 cursor-pointer"
-              >
-                <span>Engage Drive & Enter</span>
-                <span>→</span>
-              </button>
-            </form>
+            {!otpSent ? (
+              <form onSubmit={handleRequestOtp} className="space-y-5 z-10 relative font-mono text-xs">
+                <div>
+                  <label className="block uppercase text-neutral-400 mb-2">Mobile Number / Vehicle VIN</label>
+                  <input 
+                    type="text" 
+                    value={identifier}
+                    onChange={(e) => setIdentifier(e.target.value)}
+                    placeholder="Enter Mobile Number or VIN" 
+                    className="w-full bg-black/90 text-white border border-white/20 rounded-2xl px-5 py-4 focus:outline-none focus:border-[#cbf000]"
+                    required
+                  />
+                  <span className="text-[10px] text-neutral-500 mt-1.5 block">Enter your mobile number or vehicle registration number.</span>
+                </div>
+                <button 
+                  type="submit" 
+                  className="w-full bg-[#cbf000] text-black font-bold uppercase tracking-wider py-4 rounded-2xl hover:bg-white transition-all text-xs mt-4 shadow-2xl flex items-center justify-center gap-3 cursor-pointer"
+                >
+                  <span>Request Verification OTP</span>
+                  <span>→</span>
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="space-y-5 z-10 relative font-mono text-xs">
+                <div className="p-4 rounded-2xl bg-[#cbf000]/10 border border-[#cbf000]/30 text-[#cbf000] text-center">
+                  OTP sent to mobile linked with <span className="font-bold">{identifier}</span>.<br />
+                  <span className="text-[10px] text-neutral-400">(Dev Bypass Code: **1234**)</span>
+                </div>
+                <div>
+                  <label className="block uppercase text-neutral-400 mb-2">Enter 4-Digit OTP</label>
+                  <input 
+                    type="text" 
+                    maxLength={4}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="1234" 
+                    className="w-full bg-black/90 text-white border border-white/20 rounded-2xl px-5 py-4 text-center tracking-widest text-lg font-bold focus:outline-none focus:border-[#cbf000]"
+                    required
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button 
+                    type="submit" 
+                    className="flex-1 bg-[#cbf000] text-black font-bold uppercase tracking-wider py-4 rounded-2xl hover:bg-white transition-all text-xs shadow-2xl cursor-pointer"
+                  >
+                    Verify & Enter Garage →
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setOtpSent(false)} 
+                    className="px-5 py-4 rounded-2xl border border-white/20 uppercase cursor-pointer hover:bg-white/5"
+                  >
+                    Back
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
 
-      {/* Right-Side Floating Success Notification */}
+      {/* Floating Notification */}
       {notification && (
-        <div className="fixed bottom-8 right-8 z-50 bg-[#cbf000] text-black px-6 py-4 rounded-2xl shadow-2xl border border-black/20 flex items-center gap-3 animate-in fade-in slide-in-from-right duration-500 font-semibold text-sm">
+        <div className="fixed bottom-8 right-8 z-50 bg-[#cbf000] text-black px-6 py-4 rounded-2xl shadow-2xl border border-black/20 flex items-center gap-3 font-semibold text-sm">
           <span>🏎️</span>
           <span>{notification}</span>
         </div>
@@ -267,10 +308,6 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="w-full px-8 md:px-16 py-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-xs text-neutral-500 uppercase tracking-widest gap-4">
         <span>© 2026 AutoCare Studio Platform. All rights reserved.</span>
-        <div className="flex gap-6">
-          <a href="#" className="hover:text-white">Privacy Policy</a>
-          <a href="#" className="hover:text-white">Terms of Service</a>
-        </div>
       </footer>
     </div>
   );

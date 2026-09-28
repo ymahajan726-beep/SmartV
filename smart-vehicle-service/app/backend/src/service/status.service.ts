@@ -5,7 +5,7 @@ import { Booking } from '../entities/booking.entity.js';
 import { UpdateBookingStatusDto } from '../dto/update-booking-status.dto.js';
 
 @Injectable()
-export class ServiceStatusService {
+export class StatusService {
   constructor(
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,

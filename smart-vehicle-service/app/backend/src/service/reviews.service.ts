@@ -41,6 +41,13 @@ export class ReviewsService {
     return review;
   }
 
+  // 🔥 Added for Admin Landing Page Curation
+  async toggleFeature(id: string, isFeatured: boolean): Promise<Review> {
+    const review = await this.findOne(id);
+    review.isFeatured = isFeatured;
+    return await this.reviewsRepository.save(review);
+  }
+
   async remove(id: string): Promise<void> {
     const review = await this.findOne(id);
     await this.reviewsRepository.remove(review);

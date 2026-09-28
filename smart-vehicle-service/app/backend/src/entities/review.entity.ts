@@ -32,6 +32,9 @@ export class Review {
   @Column({ type: 'text', nullable: true })
   comment?: string | null;
 
+  @Column({ type: 'boolean', default: false })
+  isFeatured: boolean; // 🔥 Added for landing page curation by admin
+
   @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 

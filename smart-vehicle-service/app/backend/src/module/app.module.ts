@@ -25,10 +25,11 @@ import { BookingsModule } from './bookings.module.js';
 import { SparePartsModule } from './spare-parts.module.js';
 import { InvoicesModule } from './invoices.module.js';
 import { ReviewsModule } from './reviews.module.js';
-import { MaintenanceRemindersModule } from './maintenance-reminders.module.js';
+import { RemindersService } from '../service/reminders.service.js';
 import { AdminDashboardModule } from './admin-dashboard.module.js';
 import { ServiceHistoryModule } from './service-history.module.js';
-import { ServiceStatusModule } from './service-status.module.js'; // <-- ServiceStatusModule import kiya gaya hai
+import { ServiceStatusModule } from './status.module.js';// <-- ServiceStatusModule import kiya gaya hai
+import { RemindersModule } from './reminders.module.js';
 
 @Module({
   imports: [
@@ -75,7 +76,7 @@ import { ServiceStatusModule } from './service-status.module.js'; // <-- Service
     SparePartsModule,
     InvoicesModule,
     ReviewsModule,
-    MaintenanceRemindersModule,
+   RemindersModule,
     AdminDashboardModule,
     ServiceHistoryModule,
     ServiceStatusModule, // <-- Yahan imports array mein register kar diya gaya hai

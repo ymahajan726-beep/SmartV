@@ -30,7 +30,7 @@ export default function AdminServiceHistoryPage() {
     <div className={`space-y-8 font-sans ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
       <header className={`pb-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
-          <span className="text-xs font-mono text-emerald-600 uppercase tracking-widest">[ Module 10: Service History ]</span>
+          
           <h1 className={`text-2xl md:text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>Vehicle & Customer History Lookup</h1>
         </div>
       </header>

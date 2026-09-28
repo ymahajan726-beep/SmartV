@@ -14,7 +14,7 @@ import { ServiceCenter } from './service-center.entity.js';
 import { Vehicle } from './vehicle.entity.js';
 import { Booking } from './booking.entity.js';
 import { Invoice } from './invoice.entity.js';
-import { MaintenanceReminder } from './maintenance-reminder.entity.js';
+import { MaintenanceReminder } from './reminder.entity.js';
 import { Review } from './review.entity.js';
 
 @Entity({ name: 'users' })

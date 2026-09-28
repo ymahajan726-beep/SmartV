@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MaintenanceReminder } from '../entities/maintenance-reminder.entity.js';
+import { MaintenanceReminder } from '../entities/reminder.entity.js';
 import { CreateMaintenanceReminderDto } from '../dto/create-maintenance-reminder.dto.js';
 
 @Injectable()
-export class MaintenanceRemindersService {
+export class RemindersService {
   constructor(
     @InjectRepository(MaintenanceReminder)
     private remindersRepository: Repository<MaintenanceReminder>,

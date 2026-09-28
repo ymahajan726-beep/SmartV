@@ -7,37 +7,66 @@ export default function AdminReviewsPage() {
   const { isLightMode } = useTheme();
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     fetchReviews();
   }, []);
 
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const fetchReviews = async () => {
     try {
       setLoading(true);
-      // Fallback safe handling agar backend endpoint abhi ready nahi hai
       const data = await apiRequest("/reviews", "GET").catch(() => []);
       setReviews(Array.isArray(data) ? data : []);
-      setErrorMsg("");
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to fetch reviews.");
+      showToast(err.message || "Failed to fetch reviews.", "error");
     } finally {
       setLoading(false);
     }
   };
 
+  const toggleFeature = async (id: string, currentStatus: boolean) => {
+    try {
+      await apiRequest(`/reviews/${id}/feature`, "PATCH", { isFeatured: !currentStatus });
+      setReviews(reviews.map(r => r.id === id ? { ...r, isFeatured: !currentStatus } : r));
+      showToast("Review feature status updated successfully!");
+    } catch (err: any) {
+      showToast(err.message || "Failed to update feature status.", "error");
+    }
+  };
+
+  const deleteReview = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this review?")) return;
+    try {
+      await apiRequest(`/reviews/${id}`, "DELETE");
+      setReviews(reviews.filter(r => r.id !== id));
+      showToast("Review deleted successfully!");
+    } catch (err: any) {
+      showToast(err.message || "Failed to delete review.", "error");
+    }
+  };
+
   return (
     <div className={`space-y-8 font-sans ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
+      {/* Toast Notification Component */}
+      {toast && (
+        <div className={`fixed top-6 right-6 z-50 px-5 py-3 rounded-2xl shadow-2xl text-xs font-mono border transition-all ${toast.type === "success" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"}`}>
+          {toast.type === "success" ? "✅" : "⚠️"} {toast.message}
+        </div>
+      )}
+
       <header className={`pb-6 border-b flex justify-between items-center ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
-          <span className="text-xs font-mono text-[#cbf000] uppercase tracking-widest">[ MODULE 9: REVIEWS & RATINGS ]</span>
-          <h1 className={`text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>Customer Feedback Database</h1>
+          
+          <h1 className={`text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>Customer Reviews Manager</h1>
         </div>
         <button onClick={fetchReviews} className={`px-4 py-2.5 rounded-xl border text-xs uppercase font-mono cursor-pointer transition-all ${isLightMode ? "border-gray-300 hover:border-black text-gray-800 bg-gray-50" : "border-white/20 hover:border-[#cbf000] text-white"}`}>🔄 Refresh</button>
       </header>
-
-      {errorMsg && <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-xs font-mono border border-red-500/20">⚠️ Note: {errorMsg}</div>}
 
       <div className={`rounded-[32px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
         <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
@@ -46,21 +75,32 @@ export default function AdminReviewsPage() {
               <th className="p-4">ID</th>
               <th className="p-4">Rating</th>
               <th className="p-4">Comment</th>
-              <th className="p-4 text-right">Action</th>
+              <th className="p-4 text-center">Landing Page Feature</th>
+              <th className="p-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
             {loading ? (
-              <tr><td colSpan={4} className="p-8 text-center text-neutral-400">Loading reviews...</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading reviews...</td></tr>
             ) : reviews.length === 0 ? (
-              <tr><td colSpan={4} className="p-8 text-center text-neutral-400">No reviews found in database.</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No reviews found in database.</td></tr>
             ) : (
               reviews.map((r) => (
                 <tr key={r.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
                   <td className="p-4 text-neutral-400">#{r.id.slice(-6)}</td>
                   <td className="p-4 text-[#cbf000]">⭐ {r.rating} / 5</td>
                   <td className={`p-4 lowercase ${isLightMode ? "text-gray-600" : "text-neutral-300"}`}>{r.comment || "No comment provided"}</td>
-                  <td className="p-4 text-right text-red-400 hover:text-red-300 cursor-pointer">Delete</td>
+                  <td className="p-4 text-center">
+                    <button 
+                      onClick={() => toggleFeature(r.id, r.isFeatured)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] uppercase font-mono transition-all cursor-pointer ${r.isFeatured ? "bg-[#cbf000]/20 text-[#cbf000] border border-[#cbf000]/40" : "bg-neutral-800 text-neutral-400 border border-neutral-700"}`}
+                    >
+                      {r.isFeatured ? "Featured" : "Normal"}
+                    </button>
+                  </td>
+                  <td className="p-4 text-right">
+                    <button onClick={() => deleteReview(r.id)} className="text-red-400 hover:text-red-300 cursor-pointer font-mono text-xs">Delete</button>
+                  </td>
                 </tr>
               ))
             )}

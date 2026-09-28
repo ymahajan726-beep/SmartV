@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards } from '@nestjs/common';
 import { ReviewsService } from '../service/reviews.service.js';
 import { CreateReviewDto } from '../dto/create-review.dto.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -21,6 +21,12 @@ export class ReviewsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reviewsService.findOne(id);
+  }
+
+  // 🔥 Added for Admin Landing Page Curation (Toggling Featured status)
+  @Patch(':id/feature')
+  toggleFeature(@Param('id') id: string, @Body() body: { isFeatured: boolean }) {
+    return this.reviewsService.toggleFeature(id, body.isFeatured);
   }
 
   @Delete(':id')
