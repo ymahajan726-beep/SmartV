@@ -5,17 +5,20 @@ const ThemeContext = createContext<{
   isLightMode: boolean;
   toggleTheme: () => void;
 }>({
-  isLightMode: false,
+  isLightMode: true, // Default to true
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Lazy initialization taaki initial render par hi correct theme mil jaye (no delay/flash)
+  // Lazy initialization: Check localStorage, default to 'true' (Light mode) if not set
   const [isLightMode, setIsLightMode] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("autocare_theme") === "light";
+      const savedTheme = localStorage.getItem("autocare_theme");
+      if (savedTheme !== null) {
+        return savedTheme === "light";
+      }
     }
-    return false;
+    return true; // Default default state is Light Mode
   });
 
   const toggleTheme = () => {

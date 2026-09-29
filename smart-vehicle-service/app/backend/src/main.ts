@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './module/app.module.js';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Yeh line zaroori hai taaki saari APIs ke aage '/api' lag jaye
+  // Saari APIs ke aage '/api' prefix set kiya gaya hai
   app.setGlobalPrefix('api');
 
   app.enableCors({
@@ -12,9 +12,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Port zaroor 3001 hona chahiye jahan frontend call kar raha hai
   const port = Number(process.env.PORT ?? 3001);
   await app.listen(port);
   console.log(`Backend running on: http://localhost:${port}/api`);
 }
-await bootstrap();
+
+bootstrap();

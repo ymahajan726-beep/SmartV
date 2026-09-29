@@ -12,8 +12,7 @@ import {
   SparePart,
   User,
   Vehicle,
-} from '../entities/index.js';
-
+ } from '../admin/entities';
 export default new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST ?? 'localhost',
