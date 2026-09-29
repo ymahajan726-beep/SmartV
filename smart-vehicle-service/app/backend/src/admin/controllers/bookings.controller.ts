@@ -17,11 +17,14 @@ export class AdminBookingsController {
   async findAllForAdmin(
     @Req() req: { user: { id: string; email: string; role: string; name: string } },
   ) {
-    // Admin role verification
-    if (!req.user || req.user.role !== 'admin') {
+    // Debug ke liye console log laga sakte hain taaki pata chale token mein kya role aa raha hai
+    console.log('Admin User Request:', req.user);
+
+    // Case-insensitive role check ('admin' ya 'ADMIN' dono chalenge)
+    if (!req.user || !req.user.role || req.user.role.toLowerCase() !== 'admin') {
       throw new UnauthorizedException('Access denied: Admin privileges required.');
     }
 
-    return this.bookingsService.findAllForAdmin();
+    return await this.bookingsService.findAllForAdmin();
   }
 }

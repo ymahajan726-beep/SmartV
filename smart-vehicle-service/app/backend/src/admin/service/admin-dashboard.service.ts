@@ -31,16 +31,15 @@ export class AdminDashboardService {
     const invoices = await this.invoiceRepository.find();
     const totalRevenue = invoices.reduce((sum, inv) => sum + Number(inv.totalAmount || 0), 0);
 
+    // Direct flat object return kar rahe hain taaki frontend ko access karne mein koi dikkat na ho
     return {
-      success: true,
-      data: {
-        totalUsers,
-        totalBookings,
-        totalVehicles,
-        totalServiceCenters,
-        totalSpareParts,
-        totalRevenue: totalRevenue.toFixed(2),
-      },
+      totalUsers,
+      totalBookings,
+      totalVehicles,
+      totalServiceCenters,
+      totalSpareParts,
+      totalRevenue: totalRevenue.toFixed(2),
+      systemHealth: 'ONLINE',
     };
   }
 }

@@ -13,14 +13,11 @@ export default function AdminVehiclesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Form States
-  const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
-  const [registrationNumber, setRegistrationNumber] = useState("");
-  const [year, setYear] = useState("");
+  // Form States matching backend entity properties
+  const [modelName, setModelName] = useState("");
+  const [vehicleNumber, setVehicleNumber] = useState("");
   const [fuelType, setFuelType] = useState("");
-  const [currentMileage, setCurrentMileage] = useState("");
-  const [color, setColor] = useState("");
+  const [mileage, setMileage] = useState("");
 
   useEffect(() => {
     fetchVehicles();
@@ -34,7 +31,7 @@ export default function AdminVehiclesPage() {
   const fetchVehicles = async () => {
     try {
       setLoading(true);
-      const data = await apiRequest("/vehicles", "GET").catch(() => []);
+      const data = await apiRequest("/admin/vehicles", "GET").catch(() => []);
       setVehicles(Array.isArray(data) ? data : []);
       setErrorMsg("");
     } catch (err: any) {
@@ -46,20 +43,16 @@ export default function AdminVehiclesPage() {
 
   const handleOpenCreateModal = () => {
     setEditingId(null);
-    setMake(""); setModel(""); setRegistrationNumber(""); setYear("");
-    setFuelType(""); setCurrentMileage(""); setColor("");
+    setModelName(""); setVehicleNumber(""); setFuelType(""); setMileage("");
     setShowModal(true);
   };
 
   const handleOpenEditModal = (v: any) => {
     setEditingId(v.id);
-    setMake(v.make || "");
-    setModel(v.model || "");
-    setRegistrationNumber(v.registrationNumber || "");
-    setYear(v.year ? String(v.year) : "");
+    setModelName(v.modelName || "");
+    setVehicleNumber(v.vehicleNumber || "");
     setFuelType(v.fuelType || "");
-    setCurrentMileage(v.currentMileage ? String(v.currentMileage) : "");
-    setColor(v.color || "");
+    setMileage(v.mileage ? String(v.mileage) : "");
     setShowModal(true);
   };
 
@@ -67,22 +60,17 @@ export default function AdminVehiclesPage() {
     e.preventDefault();
     try {
       const payload = {
-        make,
-        model,
-        registrationNumber,
-        year: year ? Number(year) : undefined,
+        modelName,
+        vehicleNumber,
         fuelType: fuelType || undefined,
-        currentMileage: currentMileage ? Number(currentMileage) : undefined,
-        color: color || undefined,
+        mileage: mileage ? Number(mileage) : undefined,
       };
 
       if (editingId) {
-        // UPDATE (PATCH)
-        await apiRequest(`/vehicles/${editingId}`, "PATCH", payload);
+        await apiRequest(`/admin/vehicles/${editingId}`, "PATCH", payload);
         showToast("Vehicle updated successfully!");
       } else {
-        // CREATE (POST)
-        await apiRequest("/vehicles", "POST", payload);
+        await apiRequest("/admin/vehicles", "POST", payload);
         showToast("Vehicle registered successfully!");
       }
 
@@ -96,7 +84,7 @@ export default function AdminVehiclesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this vehicle?")) return;
     try {
-      await apiRequest(`/vehicles/${id}`, "DELETE");
+      await apiRequest(`/admin/vehicles/${id}`, "DELETE");
       showToast("Vehicle deleted successfully!");
       fetchVehicles();
     } catch (err: any) {
@@ -106,7 +94,6 @@ export default function AdminVehiclesPage() {
 
   return (
     <div className={`space-y-8 font-sans ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
-      {/* Toast Notification Banner */}
       {toastMsg && (
         <div className="fixed top-6 right-6 z-50 px-6 py-3 rounded-2xl bg-[#cbf000] text-black font-mono text-xs font-bold uppercase shadow-2xl animate-bounce">
           ✨ {toastMsg}
@@ -115,7 +102,6 @@ export default function AdminVehiclesPage() {
 
       <header className={`pb-6 border-b flex justify-between items-center ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
-  
           <h1 className={`text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>Vehicles Database</h1>
         </div>
         <div className="flex gap-3">
@@ -133,26 +119,24 @@ export default function AdminVehiclesPage() {
           <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
             <tr>
               <th className="p-4">ID</th>
-              <th className="p-4">Make & Model</th>
+              <th className="p-4">Vehicle Model</th>
               <th className="p-4">Registration No</th>
-              <th className="p-4">Fuel / Color</th>
-              <th className="p-4">Year</th>
+              <th className="p-4">Fuel / Mileage</th>
               <th className="p-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
             {loading ? (
-              <tr><td colSpan={6} className="p-8 text-center text-neutral-400">Loading...</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading...</td></tr>
             ) : vehicles.length === 0 ? (
-              <tr><td colSpan={6} className="p-8 text-center text-neutral-400">No vehicles found.</td></tr>
+              <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No vehicles found.</td></tr>
             ) : (
               vehicles.map((v) => (
                 <tr key={v.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
-                  <td className="p-4 text-neutral-400">#{String(v.id).slice(-6)}</td>
-                  <td className={`p-4 font-bold ${isLightMode ? "text-gray-900" : "text-white"}`}>{v.make} {v.model}</td>
-                  <td className="p-4 text-[#cbf000]">{v.registrationNumber}</td>
-                  <td className="p-4 text-neutral-400">{v.fuelType || "N/A"} / {v.color || "N/A"}</td>
-                  <td className="p-4 text-neutral-400">{v.year || "N/A"}</td>
+                  <td className="p-4 text-neutral-400">#{String(v.id)}</td>
+                  <td className={`p-4 font-bold ${isLightMode ? "text-gray-900" : "text-white"}`}>{v.modelName || "N/A"}</td>
+                  <td className="p-4 text-[#cbf000]">{v.vehicleNumber || "N/A"}</td>
+                  <td className="p-4 text-neutral-400">{v.fuelType || "N/A"} / {v.mileage ? `${v.mileage} km` : "N/A"}</td>
                   <td className="p-4 text-right space-x-3">
                     <button onClick={() => handleOpenEditModal(v)} className="text-blue-400 hover:text-blue-300 cursor-pointer">Edit</button>
                     <button onClick={() => handleDelete(v.id)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
@@ -171,13 +155,10 @@ export default function AdminVehiclesPage() {
               {editingId ? "Edit Vehicle Record" : "Register Vehicle"}
             </h3>
             <form onSubmit={handleSubmitForm} className="space-y-4">
-              <input type="text" value={make} onChange={(e) => setMake(e.target.value)} placeholder="Make (e.g. Honda)" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="text" value={model} onChange={(e) => setModel(e.target.value)} placeholder="Model (e.g. City)" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="text" value={registrationNumber} onChange={(e) => setRegistrationNumber(e.target.value)} placeholder="Registration Number" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="text" value={modelName} onChange={(e) => setModelName(e.target.value)} placeholder="Model Name (e.g. Honda City)" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="text" value={vehicleNumber} onChange={(e) => setVehicleNumber(e.target.value)} placeholder="Vehicle Registration No (e.g. MH04AB1234)" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
               <input type="text" value={fuelType} onChange={(e) => setFuelType(e.target.value)} placeholder="Fuel Type (Optional - e.g. Petrol)" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="number" value={currentMileage} onChange={(e) => setCurrentMileage(e.target.value)} placeholder="Current Mileage (Optional - e.g. 15000)" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="text" value={color} onChange={(e) => setColor(e.target.value)} placeholder="Color (Optional - e.g. Black)" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="number" value={year} onChange={(e) => setYear(e.target.value)} placeholder="Year (Optional - e.g. 2023)" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="number" value={mileage} onChange={(e) => setMileage(e.target.value)} placeholder="Mileage (Optional - e.g. 15000)" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
               
               <div className="flex gap-4 pt-4">
                 <button type="submit" className={`flex-1 py-3.5 rounded-2xl font-bold uppercase text-xs cursor-pointer ${isLightMode ? "bg-gray-900 text-white hover:bg-gray-800" : "bg-[#cbf000] text-black hover:opacity-90"}`}>

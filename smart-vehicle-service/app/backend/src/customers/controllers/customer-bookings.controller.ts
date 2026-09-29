@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Headers, UnauthorizedException, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Headers, UnauthorizedException } from '@nestjs/common';
 import { CustomerBookingsService } from '../services/customer-bookings.service.js';
+import { CreateBookingDto } from '../dto/booking.dto.js';
 
 @Controller('customer/bookings')
 export class CustomerBookingsController {
@@ -8,16 +9,19 @@ export class CustomerBookingsController {
   @Get()
   async findAll(@Headers('user-id') userId: string) {
     if (!userId) {
-      throw new UnauthorizedException('Access denied: Missing user authentication header');
+      throw new UnauthorizedException('Missing user-id header.');
     }
-    return await this.customerBookingsService.findAllForCustomer(userId);
+    return this.customerBookingsService.findAllForCustomer(userId);
   }
 
   @Post()
-  async create(@Headers('user-id') userId: string, @Body() dto: any) {
+  async create(
+    @Headers('user-id') userId: string,
+    @Body() createBookingDto: CreateBookingDto,
+  ) {
     if (!userId) {
-      throw new UnauthorizedException('Access denied: Missing user authentication header');
+      throw new UnauthorizedException('Missing user-id header.');
     }
-    return await this.customerBookingsService.createBooking(userId, dto);
+    return this.customerBookingsService.create(userId, createBookingDto);
   }
 }

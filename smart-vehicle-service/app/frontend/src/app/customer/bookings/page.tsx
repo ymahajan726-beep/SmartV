@@ -28,6 +28,7 @@ export default function CustomerBookingsPage() {
   
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Form State
   const [selectedVehicle, setSelectedVehicle] = useState<string>('');
@@ -47,6 +48,13 @@ export default function CustomerBookingsPage() {
     fetchInitialData();
   }, []);
 
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4000);
+  };
+
   const fetchInitialData = async () => {
     try {
       setLoading(true);
@@ -62,7 +70,7 @@ export default function CustomerBookingsPage() {
         setBookings(bookingsData);
       }
 
-      // 2. Fetch Customer Vehicles from the same session
+      // 2. Fetch Customer Vehicles
       const vehiclesRes = await fetch(`${API_BASE_URL}/customer/vehicles`, {
         headers: { 'user-id': userId },
       });
@@ -97,17 +105,17 @@ export default function CustomerBookingsPage() {
 
       const result = await response.json();
       if (response.ok) {
-        alert('Booking successfully created!');
-        fetchInitialData();
+        showToast('🚀 Booking successfully created and added to history!');
+        await fetchInitialData(); // Turant list refresh karega
         setSelectedVehicle('');
         setSelectedService('');
         setSelectedCenter('');
         setBookingDate('');
       } else {
-        alert(result.message || 'Failed to create booking.');
+        showToast(result.message || '❌ Failed to create booking.');
       }
     } catch (err) {
-      alert('An error occurred while creating booking.');
+      showToast('❌ An error occurred while creating booking.');
     }
   };
 
@@ -116,6 +124,13 @@ export default function CustomerBookingsPage() {
   return (
     <div className={`w-full transition-colors duration-300 ${isLightMode ? "text-slate-900" : "text-[#f8fafc]"}`}>
       
+      {/* Toast Notification Banner */}
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 animate-bounce bg-cyan-500 text-slate-950 px-6 py-3 rounded-2xl shadow-2xl font-mono text-xs font-bold border border-cyan-300">
+          {toastMessage}
+        </div>
+      )}
+
       {/* Top Navbar with Theme Toggle */}
       <header className={`h-20 px-8 border-b flex justify-between items-center sticky top-0 z-30 backdrop-blur-xl ${isLightMode ? "bg-white/90 border-slate-200 shadow-sm" : "bg-[#060608]/90 border-white/[0.06]"}`}>
         <div className="flex items-center gap-2.5">

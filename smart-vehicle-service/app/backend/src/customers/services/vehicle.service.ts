@@ -11,21 +11,56 @@ export class VehicleService {
     private readonly vehicleRepository: Repository<VehicleEntity>,
   ) {}
 
+  // Helper: Agar userId phone number ya non-UUID hai, toh DB se valid UUID resolve karega
+  private async resolveUserId(userId: string): Promise<string> {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (userId && uuidRegex.test(userId)) {
+      return userId;
+    }
+
+    try {
+      const userRepo = this.vehicleRepository.manager.getRepository('User');
+      const foundUser = await userRepo.findOne({
+        where: [{ id: userId as any }, { phone: userId }],
+      });
+      if (foundUser) {
+        return (foundUser as any).id;
+      }
+    } catch (e) {
+      // Ignore and fallback
+    }
+
+    return userId;
+  }
+
   async findAll(userId: string): Promise<VehicleEntity[]> {
+    const resolvedId = await this.resolveUserId(userId);
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!resolvedId || !uuidRegex.test(resolvedId)) {
+      return []; // Crash hone se bachane ke liye safe empty array
+    }
+
     return await this.vehicleRepository.find({
-      where: { userId: userId }, // Sirf specific user ke vehicles filter honge
+      where: { userId: resolvedId } as any,
       order: { id: 'DESC' as any },
     });
   }
 
   async create(userId: string, dto: CreateVehicleDto): Promise<VehicleEntity> {
+    const resolvedId = await this.resolveUserId(userId);
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    
+    if (!resolvedId || !uuidRegex.test(resolvedId)) {
+      throw new NotFoundException('Invalid user session UUID. Please log in again.');
+    }
+
     const newVehicle = this.vehicleRepository.create({
       modelName: dto.modelName,
       vehicleNumber: dto.vehicleNumber,
       fuelType: dto.fuelType,
       mileage: Number(dto.mileage) || 0,
       imageUrl: dto.imageUrl && dto.imageUrl.trim() !== '' ? dto.imageUrl : null,
-      userId: userId,
+      userId: resolvedId,
     } as any);
 
     const result = await this.vehicleRepository.save(newVehicle);
@@ -33,9 +68,10 @@ export class VehicleService {
   }
 
   async remove(userId: string, id: any): Promise<{ success: boolean; message: string }> {
-    // Yeh ensure karta hai ki user sirf apna hi vehicle delete kar sake
+    const resolvedId = await this.resolveUserId(userId);
+
     const vehicle = await this.vehicleRepository.findOne({
-      where: { id, userId } as any,
+      where: { id, userId: resolvedId } as any,
     });
 
     if (!vehicle) {

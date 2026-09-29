@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Booking } from '../../admin/entities/index.js'; // Global/Admin entity use karein
+import { Booking } from '../../admin/entities/booking.entity.js';
+import { BookingStatus, PaymentStatus } from '../../common/enums/app.enums.js';
 
 @Injectable()
 export class CustomerBookingsService {
@@ -10,27 +11,45 @@ export class CustomerBookingsService {
     private readonly bookingRepository: Repository<Booking>,
   ) {}
 
-  // Customer apni booking create karega
-  async createBooking(customerId: string, data: Partial<Booking>): Promise<Booking> {
-    const booking = this.bookingRepository.create({
-      ...data,
-      customerId: customerId, // Customer ID map ho jayegi
-    });
-    return await this.bookingRepository.save(booking);
-  }
-
-  // Customer sirf apni bookings dekh sakega
   async findAllForCustomer(customerId: string): Promise<Booking[]> {
-    return await this.bookingRepository.find({
-      where: { customerId: customerId },
+    return this.bookingRepository.find({
+      where: { customerId },
+      relations: {
+        vehicle: true,
+        service: true,
+        serviceCenter: true,
+      },
       order: { createdAt: 'DESC' },
     });
   }
 
-  // == ADMIN REQUIREMENT: Admin ke liye saare customers ki bookings fetch karna ==
-  async findAllForAdmin(): Promise<Booking[]> {
-    return await this.bookingRepository.find({
-      order: { createdAt: 'DESC' },
-    }); // Yahan koi filter nahi hai, toh saari bookings admin ko dikhengi
+  async create(customerId: string, dto: any): Promise<Booking> {
+    const randomNum = Math.floor(100000 + Math.random() * 900000);
+    const bookingNumber = `BK-${randomNum}`;
+
+    // Helper function to validate UUID format
+    const isValidUuid = (id: string) => {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      return uuidRegex.test(id);
+    };
+
+    const serviceId = dto.serviceId && isValidUuid(dto.serviceId) ? dto.serviceId : null;
+    const serviceCenterId = dto.serviceCenterId && isValidUuid(dto.serviceCenterId) ? dto.serviceCenterId : null;
+
+    const newBooking = this.bookingRepository.create({
+      bookingNumber,
+      customerId,
+      vehicleId: Number(dto.vehicleId),
+      serviceId,
+      serviceCenterId,
+      bookingDate: dto.bookingDate,
+      bookingTime: '10:00:00',
+      notes: dto.notes || '',
+      estimatedAmount: 1499.00,
+      status: BookingStatus.BOOKED,
+      paymentStatus: PaymentStatus.UNPAID,
+    } as any);
+
+    return await this.bookingRepository.save(newBooking as any);
   }
 }

@@ -46,10 +46,13 @@ export default function CustomerDashboardPage() {
       ]);
 
       if (profileData) {
+        // Strict check: Agar logged-in user admin hai, toh customer dashboard par use Admin / Super Admin na dikhayein balki Guest ya standard customer handle karein
+        const isAdmin = profileData.role === "ADMIN" || profileData.role === "admin";
+        
         setCustomer({
-          name: profileData.name || (profileData.isGuest ? "Guest User" : "Valued Customer"),
-          id: profileData.id || "8092",
-          isGuest: profileData.isGuest ?? false,
+          name: isAdmin ? "Guest User" : (profileData.name || "Valued Customer"),
+          id: isAdmin ? "0000" : (profileData.id || "8092"),
+          isGuest: isAdmin ? true : (profileData.isGuest ?? false),
         });
       }
 

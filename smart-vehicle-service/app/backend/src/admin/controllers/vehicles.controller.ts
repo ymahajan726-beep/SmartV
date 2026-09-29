@@ -17,8 +17,8 @@ export class AdminVehiclesController {
   async findAllForAdmin(
     @Req() req: { user: { id: string; email: string; role: string; name: string } },
   ) {
-    // Industry-level check: Ensure user has admin privileges
-    if (!req.user || req.user.role !== 'admin') {
+    // Case-insensitive role verification ('admin' ya 'ADMIN' dono allow honge)
+    if (!req.user || !req.user.role || req.user.role.toLowerCase() !== 'admin') {
       throw new UnauthorizedException('Access denied: Admin privileges required.');
     }
 

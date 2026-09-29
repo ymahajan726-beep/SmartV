@@ -4,6 +4,8 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,6 +14,9 @@ import type { User } from './user.entity.js';
 import type { Vehicle } from './vehicle.entity.js';
 import type { Service } from './service.entity.js';
 import type { ServiceCenter } from './service-center.entity.js';
+import { BookingSparePart } from './booking-spare-part.entity.js';
+import { Invoice } from './invoice.entity.js';
+import { Review } from './review.entity.js';
 
 @Entity({ name: 'bookings' })
 export class Booking {
@@ -27,10 +32,10 @@ export class Booking {
   @Column({ type: 'int' })
   vehicleId: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   serviceId: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   serviceCenterId: string;
 
   @Column({ type: 'date' })
@@ -75,4 +80,13 @@ export class Booking {
   @ManyToOne('ServiceCenter', (serviceCenter: ServiceCenter) => serviceCenter.bookings, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'serviceCenterId' })
   serviceCenter: ServiceCenter;
+
+  @OneToMany(() => BookingSparePart, (bookingSparePart) => bookingSparePart.booking)
+  bookingSpareParts: BookingSparePart[];
+
+  @OneToMany(() => Invoice, (invoice) => invoice.booking)
+  invoices: Invoice[];
+
+  @OneToOne(() => Review, (review) => review.booking)
+  review?: Review | null;
 }

@@ -46,12 +46,27 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ accessToken: string; user: Partial<User> }> {
-    const user = await this.usersService.findByEmail(loginDto.email);
+    // Root Cause Fix: Support login via either email OR phone number
+    let user: User | null = null;
+    const identifier = loginDto.email; // Yeh login form se email ya phone number kuch bhi ho sakta hai
 
-    if (!user || !(await bcrypt.compare(loginDto.password, user.passwordHash))) {
-      throw new UnauthorizedException('Invalid email or password.');
+    if (identifier) {
+      if (identifier.includes('@')) {
+        user = await this.usersService.findByEmail(identifier);
+      } else {
+        // Agar phone number diya gaya hai, toh phone se user find karein
+        const userRepo = this.usersService['userRepository'] || null; // fallback repository check
+        if (userRepo) {
+          user = await userRepo.findOne({ where: { phone: identifier } });
+        }
+      }
     }
 
+    if (!user || !(await bcrypt.compare(loginDto.password, user.passwordHash))) {
+      throw new UnauthorizedException('Invalid credentials (email/phone or password).');
+    }
+
+    // Hamesha database ki valid UUID (`user.id`) hi payload mein jayegi
     const payload = { sub: user.id, email: user.email, role: user.role };
 
     return {
