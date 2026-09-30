@@ -8,42 +8,54 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import type { User } from './user.entity.js';
 import { Booking } from './booking.entity.js';
 
 @Entity({ name: 'vehicles' })
 export class Vehicle {
-  @PrimaryGeneratedColumn()
-  id: number; // Integer ID
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ name: 'userId', nullable: true })
-  userId: string;
+  @Column({ type: 'uuid', nullable: true }) // ya nullable: false jaisa bhi ho
+customerId: string;
 
-  @Column({ name: 'customerId', nullable: true })
-  customerId: string;
+  @Column({ type: 'varchar', unique: true })
+  registrationNumber: string;
 
-  @Column({ name: 'vehicleNumber' })
-  vehicleNumber: string; // <-- Yeh 'registrationNumber' ki jagah 'vehicleNumber' hai
+  @Column({ type: 'varchar' })
+  make: string;
 
-  @Column({ name: 'modelName' })
-  modelName: string;
+  @Column({ type: 'varchar' })
+  model: string;
 
-  @Column({ name: 'fuelType', nullable: true })
+  @Column({ type: 'varchar', nullable: true })
+  variant?: string;
+
+  @Column({ type: 'int' })
+  year: number;
+
+  @Column({ type: 'varchar' })
   fuelType: string;
 
-  @Column({ name: 'mileage', type: 'float', nullable: true })
-  mileage: number;
+  @Column({ type: 'int' })
+  currentMileage: number;
 
-  @Column({ name: 'imageUrl', nullable: true })
-  imageUrl: string;
+  @Column({ type: 'varchar' })
+  color: string;
 
-  @CreateDateColumn({ name: 'createdAt' })
+  @Column({ type: 'varchar', nullable: true })
+  imageUrl?: string;
+
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updatedAt' })
+  @UpdateDateColumn({ type: 'timestamptz' })
   updatedAt: Date;
 
-  @ManyToOne('User', (user: User) => user.vehicles, { onDelete: 'CASCADE' })
+  @ManyToOne('User', (user: User) => user.vehicles, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'customerId' })
   customer: User;
 

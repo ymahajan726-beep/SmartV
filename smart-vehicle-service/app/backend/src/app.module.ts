@@ -33,7 +33,7 @@ import { ServiceStatusModule } from './admin/module/status.module.js';
 import { RemindersModule } from './admin/module/reminders.module.js';
 
 // Customer module ko alias name ke sath import kiya gaya hai
-import { VehicleModule as CustomerVehicleModule } from './customers/modules/vehicle.module.js';
+import { CustomerVehicleModule } from './customers/modules/customer-vehicle.module.js';
 
 @Module({
   imports: [

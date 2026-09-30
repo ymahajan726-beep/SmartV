@@ -17,7 +17,7 @@ interface Booking {
   status: string;
   estimatedAmount: number;
   createdAt: string;
-  vehicle?: Vehicle;
+  vehicle?: any;
 }
 
 export default function CustomerBookingsPage() {
@@ -60,24 +60,41 @@ export default function CustomerBookingsPage() {
       setLoading(true);
       setError(null);
       const userId = localStorage.getItem("user-id") || "default-user";
+      const token = localStorage.getItem("customer_token") || localStorage.getItem("token") || "";
+
+      const headers: Record<string, string> = {
+        'user-id': userId,
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
 
       // 1. Fetch Customer Bookings
-      const bookingsRes = await fetch(`${API_BASE_URL}/customer/bookings`, {
-        headers: { 'user-id': userId },
-      });
-      const bookingsData = await bookingsRes.json();
+      const bookingsRes = await fetch(`${API_BASE_URL}/customer/bookings`, { headers });
+      const bookingsData = await bookingsRes.json().catch(() => []);
       if (bookingsRes.ok && Array.isArray(bookingsData)) {
         setBookings(bookingsData);
       }
 
       // 2. Fetch Customer Vehicles
-      const vehiclesRes = await fetch(`${API_BASE_URL}/customer/vehicles`, {
-        headers: { 'user-id': userId },
-      });
-      const vehiclesData = await vehiclesRes.json();
-      if (vehiclesRes.ok && Array.isArray(vehiclesData)) {
-        setVehicles(vehiclesData);
+      const vehiclesRes = await fetch(`${API_BASE_URL}/vehicles`, { headers });
+      const vehiclesData = await vehiclesRes.json().catch(() => []);
+      
+      let finalVehicles = [];
+      if (Array.isArray(vehiclesData)) {
+        finalVehicles = vehiclesData;
+      } else if (vehiclesData && Array.isArray(vehiclesData.data)) {
+        finalVehicles = vehiclesData.data;
       }
+
+      const mappedVehicles = finalVehicles.map((v: any) => ({
+        id: v.id,
+        modelName: v.modelName || v.model || v.make || "Vehicle",
+        vehicleNumber: v.vehicleNumber || v.registrationNumber || "MH-04",
+        fuelType: v.fuelType,
+      }));
+
+      setVehicles(mappedVehicles);
     } catch (err) {
       setError('Failed to load booking details.');
     } finally {
@@ -89,12 +106,19 @@ export default function CustomerBookingsPage() {
     e.preventDefault();
     try {
       const userId = localStorage.getItem("user-id") || "default-user";
+      const token = localStorage.getItem("customer_token") || localStorage.getItem("token") || "";
+
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'user-id': userId,
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${API_BASE_URL}/customer/bookings`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'user-id': userId,
-        },
+        headers,
         body: JSON.stringify({
           vehicleId: Number(selectedVehicle),
           serviceId: selectedService || '1',
@@ -103,10 +127,10 @@ export default function CustomerBookingsPage() {
         }),
       });
 
-      const result = await response.json();
+      const result = await response.json().catch(() => ({}));
       if (response.ok) {
-        showToast('🚀 Booking successfully created and added to history!');
-        await fetchInitialData(); // Turant list refresh karega
+        showToast('🚀 Booking successfully created & Admin notification dispatched!');
+        await fetchInitialData(); 
         setSelectedVehicle('');
         setSelectedService('');
         setSelectedCenter('');
@@ -234,23 +258,27 @@ export default function CustomerBookingsPage() {
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${isLightMode ? "divide-slate-200 text-slate-800" : "divide-white/[0.06] text-slate-300"}`}>
-                  {bookings.map((b) => (
-                    <tr key={b.id} className={`transition ${isLightMode ? "hover:bg-slate-50" : "hover:bg-white/[0.02]"}`}>
-                      <td className={`p-4 font-bold ${isLightMode ? "text-cyan-600" : "text-[#00F0FF]"}`}>{b.bookingNumber}</td>
-                      <td className="p-4">
-                        {b.vehicle ? `${b.vehicle.modelName} (${b.vehicle.vehicleNumber})` : 'N/A'}
-                      </td>
-                      <td className="p-4 font-bold">₹{b.estimatedAmount}</td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                          b.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                          b.status === 'CANCELLED' ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                        }`}>
-                          {b.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {bookings.map((b) => {
+                    const vName = b.vehicle?.modelName || b.vehicle?.model || b.vehicle?.make || 'Vehicle';
+                    const vNum = b.vehicle?.vehicleNumber || b.vehicle?.registrationNumber || 'MH-04';
+                    return (
+                      <tr key={b.id} className={`transition ${isLightMode ? "hover:bg-slate-50" : "hover:bg-white/[0.02]"}`}>
+                        <td className={`p-4 font-bold ${isLightMode ? "text-cyan-600" : "text-[#00F0FF]"}`}>{b.bookingNumber}</td>
+                        <td className="p-4">
+                          {b.vehicle ? `${vName} (${vNum})` : 'N/A'}
+                        </td>
+                        <td className="p-4 font-bold">₹{b.estimatedAmount ?? 1499}</td>
+                        <td className="p-4">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                            b.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
+                            b.status === 'CANCELLED' ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                          }`}>
+                            {b.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

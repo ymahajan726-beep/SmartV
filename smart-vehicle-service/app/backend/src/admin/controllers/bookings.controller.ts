@@ -1,6 +1,9 @@
 import {
   Controller,
   Get,
+  Patch,
+  Delete,
+  Param,
   Req,
   UseGuards,
   UnauthorizedException,
@@ -17,14 +20,38 @@ export class AdminBookingsController {
   async findAllForAdmin(
     @Req() req: { user: { id: string; email: string; role: string; name: string } },
   ) {
-    // Debug ke liye console log laga sakte hain taaki pata chale token mein kya role aa raha hai
     console.log('Admin User Request:', req.user);
 
-    // Case-insensitive role check ('admin' ya 'ADMIN' dono chalenge)
     if (!req.user || !req.user.role || req.user.role.toLowerCase() !== 'admin') {
       throw new UnauthorizedException('Access denied: Admin privileges required.');
     }
 
     return await this.bookingsService.findAllForAdmin();
+  }
+
+  @Patch(':id/cancel')
+  async cancelBooking(
+    @Param('id') id: string,
+    @Req() req: { user: { id: string; email: string; role: string; name: string } },
+  ) {
+    if (!req.user || !req.user.role || req.user.role.toLowerCase() !== 'admin') {
+      throw new UnauthorizedException('Access denied: Admin privileges required.');
+    }
+
+    // Admin ke liye direct booking cancel karne ka call
+    return await this.bookingsService.cancelByAdmin(id);
+  }
+
+  @Delete(':id')
+  async deleteBooking(
+    @Param('id') id: string,
+    @Req() req: { user: { id: string; email: string; role: string; name: string } },
+  ) {
+    if (!req.user || !req.user.role || req.user.role.toLowerCase() !== 'admin') {
+      throw new UnauthorizedException('Access denied: Admin privileges required.');
+    }
+
+    // Admin ke liye direct booking delete karne ka call
+    return await this.bookingsService.remove(id);
   }
 }

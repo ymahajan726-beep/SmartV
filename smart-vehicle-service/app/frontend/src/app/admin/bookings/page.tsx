@@ -26,10 +26,10 @@ export default function AdminBookingsPage() {
     }
   };
 
-  const handleCancel = async (id: string) => {
-    if (!confirm("Cancel booking?")) return;
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this booking?")) return;
     try {
-      await apiRequest(`/admin/bookings/${id}/cancel`, "PATCH");
+      await apiRequest(`/admin/bookings/${id}`, "DELETE");
       fetchBookings();
     } catch (err: any) {
       alert("Failed: " + err.message);
@@ -52,32 +52,61 @@ export default function AdminBookingsPage() {
           <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
             <tr>
               <th className="p-4">ID</th>
+              <th className="p-4">Customer Info</th>
               <th className="p-4">Vehicle Details</th>
               <th className="p-4">Service Type</th>
               <th className="p-4">Status</th>
-              <th className="p-4">Date</th>
+              <th className="p-4">Date & Address</th>
               <th className="p-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
             {loading ? (
-              <tr><td colSpan={6} className="p-8 text-center text-neutral-400">Loading...</td></tr>
+              <tr><td colSpan={7} className="p-8 text-center text-neutral-400">Loading...</td></tr>
             ) : bookings.length === 0 ? (
-              <tr><td colSpan={6} className="p-8 text-center text-neutral-400">No bookings found.</td></tr>
+              <tr><td colSpan={7} className="p-8 text-center text-neutral-400">No bookings found.</td></tr>
             ) : (
               bookings.map((b) => (
                 <tr key={b.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
                   <td className="p-4 text-neutral-400">#{b.id.slice(-6)}</td>
-                  <td className="p-4 font-bold">
-                    {b.vehicle ? `${b.vehicle.modelName} (${b.vehicle.vehicleNumber})` : 'N/A'}
+                  
+                  {/* Customer Name & Phone */}
+                  <td className="p-4">
+                    <div className="font-bold">{b.customer?.name || "N/A"}</div>
+                    <div className="text-[10px] text-neutral-400">{b.customer?.phone || "No Phone"}</div>
                   </td>
+
+                  {/* Vehicle Details */}
+                  <td className="p-4">
+                    <div className="font-bold">
+                      {b.vehicle ? `${b.vehicle.make || ""} ${b.vehicle.model || ""}` : "N/A"}
+                    </div>
+                    <div className="text-[10px] text-neutral-400">
+                      {b.vehicle?.registrationNumber || "No Reg No"}
+                    </div>
+                  </td>
+
                   <td className="p-4">{b.service?.name || "Standard"}</td>
                   <td className="p-4 text-[#cbf000]">{b.status || "PENDING"}</td>
-                  <td className="p-4 text-neutral-400">{b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : "N/A"}</td>
-                  <td className="p-4 text-right">
-                    {b.status !== 'CANCELLED' && (
-                      <button onClick={() => handleCancel(b.id)} className="text-red-400 hover:text-red-300 cursor-pointer">Cancel</button>
+                  
+                  {/* Date & Service Center Address (Hidden if not provided) */}
+                  <td className="p-4">
+                    <div>{b.bookingDate ? new Date(b.bookingDate).toLocaleDateString() : "N/A"}</div>
+                    {b.serviceCenter?.address && (
+                      <div className="text-[10px] text-neutral-400 truncate max-w-[150px]">
+                        {b.serviceCenter.address}
+                      </div>
                     )}
+                  </td>
+
+                  {/* Actions: Permanent Delete Button */}
+                  <td className="p-4 text-right">
+                    <button 
+                      onClick={() => handleDelete(b.id)} 
+                      className="text-red-400 hover:text-red-300 font-medium cursor-pointer"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
               ))

@@ -8,7 +8,8 @@ export default function CustomerDashboardPage() {
   const { isLightMode, toggleTheme } = useTheme();
   
   const [mounted, setMounted] = useState(false);
-  const [customer, setCustomer] = useState({ name: "Guest User", id: "0000", isGuest: true });
+  const [customer, setCustomer] = useState({ name: "Valued Customer", id: "", isGuest: false });
+  const [greeting, setGreeting] = useState("Good Afternoon");
 
   // Data States
   const [vehicles, setVehicles] = useState<any[]>([]);
@@ -21,8 +22,26 @@ export default function CustomerDashboardPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  // Profile Completion Modal States
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [profileName, setProfileName] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
+  const [profileAddress, setProfileAddress] = useState("");
+  const [profilePhone, setProfilePhone] = useState("");
+
   useEffect(() => {
     setMounted(true);
+    
+    // Time-based dynamic greeting logic
+    const currentHour = new Date().getHours();
+    if (currentHour < 12) {
+      setGreeting("Good Morning");
+    } else if (currentHour < 17) {
+      setGreeting("Good Afternoon");
+    } else {
+      setGreeting("Good Evening");
+    }
+
     fetchCustomerTelemetryAndProfile();
   }, []);
 
@@ -38,7 +57,7 @@ export default function CustomerDashboardPage() {
 
       // Parallel fetching of user profile and real backend database records
       const [profileData, vData, iData, rData, sData] = await Promise.all([
-        apiRequest("/auth/me", "GET").catch(() => ({ name: "Guest User", isGuest: true })),
+        apiRequest("/auth/customer/me", "GET").catch(() => null),
         apiRequest("/vehicles", "GET").catch(() => []),
         apiRequest("/invoices", "GET").catch(() => []),
         apiRequest("/maintenance-reminders", "GET").catch(() => []),
@@ -46,13 +65,31 @@ export default function CustomerDashboardPage() {
       ]);
 
       if (profileData) {
-        // Strict check: Agar logged-in user admin hai, toh customer dashboard par use Admin / Super Admin na dikhayein balki Guest ya standard customer handle karein
         const isAdmin = profileData.role === "ADMIN" || profileData.role === "admin";
         
+        // ROBUST CHECK: Case-insensitive check for development/placeholder names to trigger Modal
+        const nameLower = (profileData.name || "").toLowerCase();
+        if (
+          !profileData.name || 
+          nameLower.includes("development") || 
+          nameLower.includes("dev.customer") || 
+          profileData.name === "Valued Customer"
+        ) {
+          setShowProfileModal(true);
+          setProfileName("");
+          setProfileEmail(profileData.email && !profileData.email.includes("autocare.local") ? profileData.email : "");
+          setProfileAddress(profileData.address || "");
+          setProfilePhone(profileData.phone || "");
+        }
+
+        const fetchedName = profileData.name && !nameLower.includes("development") && !nameLower.includes("dev.customer") && profileData.name !== "Valued Customer"
+          ? profileData.name 
+          : "Valued Customer";
+
         setCustomer({
-          name: isAdmin ? "Guest User" : (profileData.name || "Valued Customer"),
-          id: isAdmin ? "0000" : (profileData.id || "8092"),
-          isGuest: isAdmin ? true : (profileData.isGuest ?? false),
+          name: isAdmin ? "Super Admin" : fetchedName,
+          id: profileData.id || "",
+          isGuest: false,
         });
       }
 
@@ -67,6 +104,25 @@ export default function CustomerDashboardPage() {
     }
   };
 
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await apiRequest("/users/update-my-profile", "PATCH", {
+        name: profileName,
+        email: profileEmail,
+        address: profileAddress,
+        phone: profilePhone,
+      });
+
+      setCustomer((prev) => ({ ...prev, name: profileName }));
+      setShowProfileModal(false);
+      showToast("Profile completed successfully!", "success");
+      fetchCustomerTelemetryAndProfile();
+    } catch (err: any) {
+      showToast("Failed to update profile: " + err.message, "error");
+    }
+  };
+  
   if (!mounted) {
     return null;
   }
@@ -82,21 +138,96 @@ export default function CustomerDashboardPage() {
       {/* Toast Notifications */}
       {toast && (
         <div className={`fixed top-6 right-6 z-50 px-6 py-3.5 rounded-2xl shadow-2xl text-xs font-mono border backdrop-blur-md ${toast.type === "success" ? "bg-cyan-500/10 text-cyan-600 border-cyan-500/30 font-bold" : "bg-red-500/10 text-red-600 border-red-500/30"}`}>
-          {toast.type === "success" ? "⚡" : "⚠️"} {toast.message}
+          {toast.type === "success" ? "⚡" : "⚠"} {toast.message}
         </div>
       )}
 
-      {/* Top Navbar */}
-      <header className={`h-20 px-8 border-b flex justify-between items-center sticky top-0 z-30 backdrop-blur-xl ${isLightMode ? "bg-white/90 border-slate-200 shadow-sm" : "bg-[#060608]/90 border-white/[0.06]"}`}>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Live Garage Telemetry Active</span>
+      {/* Profile Completion Mandatory Modal for Onboarding with Close/Skip Option */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl relative ${isLightMode ? "bg-white border-slate-200 text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
+            
+            {/* Close Button */}
+            <button 
+              onClick={() => setShowProfileModal(false)}
+              className="absolute top-6 right-6 text-neutral-400 hover:text-white font-mono text-xs cursor-pointer p-2"
+              title="Close Modal"
+            >
+              ✕
+            </button>
+
+            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-500 font-bold">Onboarding Required</span>
+            <h3 className="text-xl font-light tracking-tight mt-1 mb-2">Complete Your Profile</h3>
+            <p className="text-xs font-mono text-neutral-400 mb-6">Please enter your real name, email, mobile number, and address.</p>
+            
+            <form onSubmit={handleSaveProfile} className="space-y-4 font-mono text-xs">
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={profileName}
+                  onChange={(e) => setProfileName(e.target.value)}
+                  placeholder="e.g. Rajesh Kumar"
+                  required
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Email Address</label>
+                <input
+                  type="email"
+                  value={profileEmail}
+                  onChange={(e) => setProfileEmail(e.target.value)}
+                  placeholder="e.g. rajesh@gmail.com"
+                  required
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Mobile Number</label>
+                <input
+                  type="text"
+                  value={profilePhone}
+                  onChange={(e) => setProfilePhone(e.target.value)}
+                  placeholder="e.g. 9876543210"
+                  required
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Service Address</label>
+                <textarea
+                  value={profileAddress}
+                  onChange={(e) => setProfileAddress(e.target.value)}
+                  placeholder="Enter your complete address..."
+                  required
+                  rows={3}
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none resize-none ${isLightMode ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-2xl bg-cyan-500 text-slate-950 font-bold uppercase tracking-wider cursor-pointer hover:opacity-90 transition-all shadow-lg"
+              >
+                Save & Enter Garage →
+              </button>
+            </form>
           </div>
         </div>
+      )}
 
-        <div className="flex items-center gap-4">
-          {/* Theme Toggle Button */}
+      {/* Unified Header matching bookings page layout */}
+      <div className={`w-full px-8 py-4 border-b flex justify-between items-center ${isLightMode ? "bg-white border-slate-200 text-slate-500" : "bg-[#060608] border-white/[0.06] text-slate-400"}`}>
+        <div className="flex items-center gap-2.5">
+           <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
+          <span className="text-[10px] font-mono uppercase tracking-widest font-bold">Secure Garage Vault</span>
+        </div>
+
+        <div className="flex items-center">
           <button
             onClick={toggleTheme}
             className={`group relative px-4 py-2 rounded-2xl border text-xs font-mono tracking-wider flex items-center gap-3 transition-all duration-300 cursor-pointer shadow-md ${
@@ -116,22 +247,12 @@ export default function CustomerDashboardPage() {
               {isLightMode ? "Light Deck" : "Cyber Dark"}
             </span>
           </button>
-
-          <div className="flex items-center gap-3 pl-3 border-l border-slate-300">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 text-white font-bold flex items-center justify-center font-mono text-sm shadow-md">
-              {customer.name.charAt(0).toUpperCase()}
-            </div>
-            <div className="hidden sm:block text-left font-mono">
-              <div className="text-xs font-bold text-slate-900">{customer.name}</div>
-              <div className="text-[10px] text-slate-500 font-semibold">{customer.isGuest ? "Guest Visitor" : "Verified Owner"}</div>
-            </div>
-          </div>
         </div>
-      </header>
+      </div>
 
       {/* Dashboard Body */}
       <main className="p-8 md:p-12 space-y-10 max-w-7xl mx-auto w-full">
-        
+
         {/* Hero Welcome Section */}
         <div className={`relative overflow-hidden p-8 md:p-12 rounded-[36px] border shadow-xl ${isLightMode ? "bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 border-slate-200/80" : "bg-gradient-to-r from-[#111118] via-[#161622] to-[#0d0d14] border-white/[0.08]"}`}>
           <div className="absolute right-0 top-0 w-1/2 h-full opacity-10 pointer-events-none bg-[radial-gradient(#00F0FF_1px,transparent_1px)] [background-size:16px_16px]"></div>
@@ -141,7 +262,7 @@ export default function CustomerDashboardPage() {
               ⚡ DIGITAL COCKPIT V2.6
             </span>
             <h1 className={`text-3xl sm:text-5xl font-light tracking-tight ${isLightMode ? "text-slate-900" : "text-white"}`}>
-              Good Afternoon, <span className={`font-bold ${isLightMode ? "text-cyan-600" : "text-[#00F0FF]"}`}>{customer.name}</span>
+              {greeting}, <span className={`font-bold ${isLightMode ? "text-cyan-600" : "text-[#00F0FF]"}`}>{customer.name}</span>
             </h1>
             <p className={`text-xs sm:text-sm font-mono leading-relaxed ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>
               Your luxury garage, live service bays, and automated maintenance records — streamlined in real-time.
@@ -150,9 +271,9 @@ export default function CustomerDashboardPage() {
               <Link href="/customer/bookings" className={`px-7 py-3.5 rounded-2xl font-bold text-xs font-mono uppercase tracking-wider transition-all shadow-lg ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/20" : "bg-[#00F0FF] text-slate-950 hover:opacity-90 shadow-[#00F0FF]/20"}`}>
                 + Book New Service
               </Link>
-              <Link href="/customer/vehicles" className={`px-7 py-3.5 rounded-2xl border text-xs font-mono uppercase tracking-wider transition-all font-semibold ${isLightMode ? "border-slate-300 hover:bg-slate-100 text-slate-800" : "border-white/20 hover:bg-white/5 text-white"}`}>
-                Explore Garage →
-              </Link>
+              <button onClick={() => setShowProfileModal(true)} className={`px-7 py-3.5 rounded-2xl border text-xs font-mono uppercase tracking-wider transition-all font-semibold ${isLightMode ? "border-cyan-600 text-cyan-700 hover:bg-cyan-50" : "border-[#00F0FF] text-[#00F0FF] hover:bg-white/5"}`}>
+                ✏️ Update Profile & Name
+              </button>
             </div>
           </div>
         </div>
@@ -213,98 +334,18 @@ export default function CustomerDashboardPage() {
                       <div className="flex justify-between items-start">
                         <div>
                           <span className={`text-[10px] uppercase font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>Verified Asset</span>
-                          <h4 className={`text-base font-bold uppercase mt-0.5 ${isLightMode ? "text-slate-900" : "text-white"}`}>{v.modelName || "Vehicle Model"}</h4>
+                          <h4 className={`text-base font-bold uppercase mt-0.5 ${isLightMode ? "text-slate-900" : "text-white"}`}>{v.modelName || v.model || "Vehicle Model"}</h4>
                         </div>
-                        <span className={`px-3 py-1 rounded-lg border font-bold ${isLightMode ? "bg-white border-slate-200 text-slate-800 shadow-xs" : "bg-white/5 border-white/10 text-slate-300"}`}>{v.vehicleNumber || "MH-04"}</span>
+                        <span className={`px-3 py-1 rounded-lg border font-bold ${isLightMode ? "bg-white border-slate-200 text-slate-800 shadow-xs" : "bg-white/5 border-white/10 text-slate-300"}`}>{v.vehicleNumber || v.registrationNumber || "MH-04"}</span>
                       </div>
                       <div className={`grid grid-cols-2 gap-2 pt-2 border-t ${isLightMode ? "text-slate-600 border-slate-200" : "text-slate-400 border-white/[0.06]"}`}>
-                        <div>Mileage: <strong className={isLightMode ? "text-slate-900 font-bold" : "text-white"}>{v.mileage || 32000} KM</strong></div>
+                        <div>Mileage: <strong className={isLightMode ? "text-slate-900 font-bold" : "text-white"}>{v.mileage || v.currentMileage || 32000} KM</strong></div>
                         <div>Fuel: <strong className={`uppercase ${isLightMode ? "text-slate-900 font-bold" : "text-white"}`}>{v.fuelType || "Petrol"}</strong></div>
-                      </div>
-                      <div className="pt-2 flex gap-3">
-                        <Link href="/customer/vehicles" className={`px-4 py-3 rounded-xl border uppercase transition-all font-semibold ${isLightMode ? "border-slate-300 text-slate-800 hover:bg-slate-200" : "border-white/20 text-white hover:bg-white/5"}`}>View</Link>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-
-            {/* Active Service Status Card */}
-            {activeServiceItem ? (
-              <div className={`p-8 md:p-10 rounded-[36px] border shadow-sm ${isLightMode ? "bg-white border-slate-200" : "bg-[#0d0d14] border-white/[0.06]"}`}>
-                <span className={`text-[10px] font-mono uppercase tracking-widest font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>Active Bay Telemetry</span>
-                <h3 className={`text-2xl font-light tracking-tight mt-1 mb-6 ${isLightMode ? "text-slate-900" : "text-white"}`}>Live Service Progress</h3>
-                
-                <div className={`p-6 rounded-2xl border font-mono text-xs space-y-4 shadow-xs ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#161622] border-white/[0.06]"}`}>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-500 font-bold">Booking Reference: #{activeServiceItem.bookingId ? activeServiceItem.bookingId.slice(-6) : "N/A"}</span>
-                    <span className={`px-4 py-1.5 rounded-full border font-bold uppercase tracking-wider ${isLightMode ? "bg-cyan-50 text-cyan-700 border-cyan-300 shadow-xs" : "bg-[#00F0FF]/15 text-[#00F0FF] border-[#00F0FF]/30"}`}>{activeServiceItem.status}</span>
-                  </div>
-                  <div className={`flex items-center gap-2 pt-3 border-t ${isLightMode ? "text-slate-700 border-slate-200 font-semibold" : "text-slate-300 border-white/[0.06]"}`}>
-                    <span>✓ Booked</span> → <span>✓ Received</span> → <span className={`font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>● {activeServiceItem.status}</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className={`p-10 rounded-[36px] border text-center space-y-4 shadow-sm ${isLightMode ? "bg-white border-slate-200" : "bg-[#0d0d14] border-white/[0.06]"}`}>
-                <span className={`text-[10px] font-mono uppercase tracking-widest font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>Active Status</span>
-                <h3 className={`text-xl font-light tracking-tight ${isLightMode ? "text-slate-900 font-normal" : "text-white"}`}>No Active Service Running</h3>
-                <p className={`text-xs font-mono ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>All your vehicles are currently in pristine condition.</p>
-                <div>
-                  <Link href="/customer/bookings" className={`inline-block px-8 py-3.5 rounded-2xl font-mono text-xs uppercase shadow-md font-bold mt-2 ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-[#00F0FF] text-slate-950 shadow-[#00F0FF]/20"}`}>Schedule Service Now →</Link>
-                </div>
-              </div>
-            )}
-
-            {/* Reminders & Recent History Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              {/* Reminders */}
-              <div className={`p-8 rounded-[36px] border shadow-sm ${isLightMode ? "bg-white border-slate-200" : "bg-[#0d0d14] border-white/[0.06]"}`}>
-                <span className={`text-[10px] font-mono uppercase tracking-widest font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>Maintenance</span>
-                <h3 className={`text-xl font-light tracking-tight mt-1 mb-6 ${isLightMode ? "text-slate-900" : "text-white"}`}>Scheduled Reminders</h3>
-                {reminders.length === 0 ? (
-                  <p className={`text-xs font-mono ${isLightMode ? "text-slate-500 font-semibold" : "text-slate-400"}`}>You're all caught up! No reminders due.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {reminders.map((rem) => (
-                      <div key={rem.id} className={`p-5 rounded-2xl border font-mono text-xs flex justify-between items-center shadow-xs ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#161622] border-white/[0.06]"}`}>
-                        <div>
-                          <div className={`font-bold uppercase ${isLightMode ? "text-slate-900" : "text-white"}`}>{rem.notes || "Periodic Maintenance"}</div>
-                          <div className="text-[10px] text-slate-500 mt-1 font-bold">Target Mileage: {rem.dueMileage || 5000} KM</div>
-                        </div>
-                        <span className={`font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>{new Date(rem.reminderDate).toLocaleDateString()}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Recent Service History */}
-              <div className={`p-8 rounded-[36px] border shadow-sm ${isLightMode ? "bg-white border-slate-200" : "bg-[#0d0d14] border-white/[0.06]"}`}>
-                <span className={`text-[10px] font-mono uppercase tracking-widest font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>Logs</span>
-                <h3 className={`text-xl font-light tracking-tight mt-1 mb-6 ${isLightMode ? "text-slate-900" : "text-white"}`}>Recent Service History</h3>
-                {invoices.length === 0 ? (
-                  <p className={`text-xs font-mono ${isLightMode ? "text-slate-500 font-semibold" : "text-slate-400"}`}>No service history records found.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {invoices.slice(0, 3).map((inv) => (
-                      <div key={inv.id} className={`p-5 rounded-2xl border font-mono text-xs flex justify-between items-center shadow-xs ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#161622] border-white/[0.06]"}`}>
-                        <div>
-                          <div className={`font-bold uppercase ${isLightMode ? "text-slate-900" : "text-white"}`}>Invoice #{inv.id.slice(-6)}</div>
-                          <div className="text-[10px] text-emerald-600 mt-1 font-bold">Quality Checked & Settled</div>
-                        </div>
-                        <div className="text-right">
-                          <span className={`font-bold text-sm ${isLightMode ? "text-slate-900" : "text-white"}`}>₹{inv.amount || 0}</span>
-                          <div className={`text-[10px] font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>PAID</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
             </div>
           </>
         )}

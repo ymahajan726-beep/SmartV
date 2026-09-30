@@ -21,9 +21,9 @@ export class BookingsService {
   ) {}
 
   async create(customerId: string, createBookingDto: CreateBookingDto): Promise<Booking> {
-    // 1. Verify Vehicle belongs to user (vehicleId ko Number() mein cast kiya gaya hai)
+    // 1. Verify Vehicle belongs to user
     const vehicle = await this.vehicleRepository.findOne({
-      where: { id: Number(createBookingDto.vehicleId), customerId },
+      where: { id: createBookingDto.vehicleId, customerId },
     });
     if (!vehicle) {
       throw new NotFoundException('Vehicle not found or does not belong to user.');
@@ -50,7 +50,7 @@ export class BookingsService {
 
     const booking = this.bookingRepository.create({
       ...createBookingDto,
-      vehicleId: Number(createBookingDto.vehicleId), // Ensure vehicleId matches number type
+      vehicleId: String(createBookingDto.vehicleId),
       customerId,
       bookingNumber,
       estimatedAmount: service.basePrice,
@@ -60,9 +60,9 @@ export class BookingsService {
     return await this.bookingRepository.save(booking);
   }
 
-  // == ADMIN REQUIREMENT: Saare customers ki bookings fetch karne ke liye ==
+  // == ADMIN REQUIREMENT: Saare customers ki bookings fetch karne ke liye (Safe Manager Query) ==
   async findAllForAdmin(): Promise<Booking[]> {
-    return await this.bookingRepository.find({
+    const bookings = await this.bookingRepository.find({
       relations: {
         vehicle: true,
         service: true,
@@ -70,6 +70,21 @@ export class BookingsService {
       },
       order: { createdAt: 'DESC' },
     });
+
+    // Manually customer data attach kar rahe hain manager ke zariye
+    for (const booking of bookings) {
+      if (booking.customerId) {
+        const customer = await this.bookingRepository.manager.findOne('users', {
+          where: { id: booking.customerId },
+        }).catch(() => null);
+        
+        if (customer) {
+          (booking as any).customer = customer;
+        }
+      }
+    }
+
+    return bookings;
   }
 
   async findAllForCustomer(customerId: string): Promise<Booking[]> {
@@ -102,6 +117,16 @@ export class BookingsService {
     if (!booking) {
       throw new NotFoundException('Booking not found.');
     }
+
+    if (booking.customerId) {
+      const customer = await this.bookingRepository.manager.findOne('users', {
+        where: { id: booking.customerId },
+      }).catch(() => null);
+      if (customer) {
+        (booking as any).customer = customer;
+      }
+    }
+
     return booking;
   }
 
@@ -118,5 +143,21 @@ export class BookingsService {
     }
     booking.status = BookingStatus.CANCELLED;
     return await this.bookingRepository.save(booking);
+  }
+
+  // Admin ke liye direct cancel method
+  async cancelByAdmin(id: string): Promise<Booking> {
+    const booking = await this.findOne(id);
+    if (booking.status === BookingStatus.COMPLETED) {
+      throw new BadRequestException('Completed bookings cannot be cancelled.');
+    }
+    booking.status = BookingStatus.CANCELLED;
+    return await this.bookingRepository.save(booking);
+  }
+
+  // Admin ke liye booking delete karne ka method
+  async remove(id: string): Promise<void> {
+    const booking = await this.findOne(id);
+    await this.bookingRepository.remove(booking);
   }
 }

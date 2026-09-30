@@ -32,6 +32,9 @@ export class User {
   @Column()
   phone: string;
 
+  @Column({ nullable: true })
+  address: string;
+
   @Column()
   passwordHash: string;
 

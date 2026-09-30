@@ -26,11 +26,11 @@ export class Booking {
   @Column({ unique: true })
   bookingNumber: string;
 
-  @Column()
+  @Column({ type: 'uuid', nullable: true })
   customerId: string;
 
-  @Column({ type: 'int' })
-  vehicleId: number;
+  @Column({ type: 'uuid' })
+  vehicleId: string; // <-- Yahan 'number' se badal kar 'string' kar diya gaya hai
 
   @Column({ type: 'uuid', nullable: true })
   serviceId: string;

@@ -13,7 +13,7 @@ export default function AdminVehiclesPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  // Form States matching backend entity properties
+  // Form States updated to match backend properties
   const [modelName, setModelName] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [fuelType, setFuelType] = useState("");
@@ -49,10 +49,10 @@ export default function AdminVehiclesPage() {
 
   const handleOpenEditModal = (v: any) => {
     setEditingId(v.id);
-    setModelName(v.modelName || "");
-    setVehicleNumber(v.vehicleNumber || "");
+    setModelName(v.modelName || v.model || v.make || "");
+    setVehicleNumber(v.vehicleNumber || v.registrationNumber || "");
     setFuelType(v.fuelType || "");
-    setMileage(v.mileage ? String(v.mileage) : "");
+    setMileage(v.mileage || v.currentMileage ? String(v.mileage || v.currentMileage) : "");
     setShowModal(true);
   };
 
@@ -134,9 +134,9 @@ export default function AdminVehiclesPage() {
               vehicles.map((v) => (
                 <tr key={v.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
                   <td className="p-4 text-neutral-400">#{String(v.id)}</td>
-                  <td className={`p-4 font-bold ${isLightMode ? "text-gray-900" : "text-white"}`}>{v.modelName || "N/A"}</td>
-                  <td className="p-4 text-[#cbf000]">{v.vehicleNumber || "N/A"}</td>
-                  <td className="p-4 text-neutral-400">{v.fuelType || "N/A"} / {v.mileage ? `${v.mileage} km` : "N/A"}</td>
+                  <td className={`p-4 font-bold ${isLightMode ? "text-gray-900" : "text-white"}`}>{v.modelName || v.model || v.make || "N/A"}</td>
+                  <td className="p-4 text-[#cbf000]">{v.vehicleNumber || v.registrationNumber || "N/A"}</td>
+                  <td className="p-4 text-neutral-400">{v.fuelType || "N/A"} / {v.mileage || v.currentMileage ? `${v.mileage || v.currentMileage} km` : "N/A"}</td>
                   <td className="p-4 text-right space-x-3">
                     <button onClick={() => handleOpenEditModal(v)} className="text-blue-400 hover:text-blue-300 cursor-pointer">Edit</button>
                     <button onClick={() => handleDelete(v.id)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>

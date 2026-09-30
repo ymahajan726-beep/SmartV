@@ -13,7 +13,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET', 'change_this_secret'),
+      secretOrKey: configService.get<string>(
+        'JWT_SECRET',
+        'change_this_secret',
+      ),
     });
   }
 
@@ -23,6 +26,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Invalid or inactive user.');
     }
+
+    console.log('JWT USER DEBUG:', {
+      tokenPayloadRole: payload.role,
+      databaseUserId: user.id,
+      databaseUserRole: user.role,
+      databaseUserName: user.name,
+    });
 
     return {
       id: user.id,

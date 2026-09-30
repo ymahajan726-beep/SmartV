@@ -23,7 +23,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
       )}
 
       {/* Customer Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-40 w-72 border-r flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} ${isLightMode ? "bg-white border-slate-200 text-slate-900 shadow-xl shadow-slate-200/50" : "bg-[#0d0d12] border-white/[0.06] text-slate-100"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 w-72 border-r flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} ${isLightMode ? "bg-white border-slate-200 text-slate-900 shadow-xl" : "bg-[#0d0d12] border-white/[0.06] text-slate-100"}`}>
         <div className="p-8 border-inherit flex items-center justify-between">
           <span className="text-xl font-black tracking-tighter uppercase flex items-center gap-2">
             Auto<span className="text-black bg-[#00F0FF] px-2 py-0.5 rounded-lg shadow-sm">Care</span>
@@ -63,31 +63,23 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         </nav>
 
         <div className="p-6 border-t border-inherit">
-          <button onClick={() => { localStorage.removeItem("user-id"); window.location.href = "/"; }} className="w-full text-center py-3 rounded-xl border border-red-500/30 text-red-500 text-xs font-mono uppercase tracking-widest hover:bg-red-500/10 transition-colors font-bold cursor-pointer">
+          <button onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "/"; }} className="w-full text-center py-3 rounded-xl border border-red-500/30 text-red-500 text-xs font-mono uppercase tracking-widest hover:bg-red-500/10 transition-colors font-bold cursor-pointer">
             Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Main Content Wrapper */}
+      {/* Main Content Wrapper - No extra layout headers here, pure container */}
       <div className="flex-1 flex flex-col md:pl-72 w-full">
-        
-        {/* Global Top Bar with Hamburger Toggle for Mobile */}
-        <header className={`h-20 px-6 md:px-8 border-b flex justify-between items-center sticky top-0 z-20 backdrop-blur-xl ${isLightMode ? "bg-white/90 border-slate-200 shadow-sm" : "bg-[#060608]/90 border-white/[0.06]"}`}>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setSidebarOpen(true)} 
-              className="md:hidden text-lg font-mono p-2 rounded-xl border border-white/10 cursor-pointer"
-              title="Open Menu"
-            >
-              ☰
-            </button>
-            <div className="hidden sm:flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
-              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Secure Cockpit Active</span>
-            </div>
-          </div>
-        </header>
+        {/* Mobile Toggle Bar only */}
+        <div className="md:hidden p-4 flex items-center border-b border-white/[0.06]">
+          <button 
+            onClick={() => setSidebarOpen(true)} 
+            className="text-lg font-mono p-2 rounded-xl border border-white/10 cursor-pointer"
+          >
+            ☰ Menu
+          </button>
+        </div>
 
         {/* Page Content */}
         <div className="w-full flex-1">

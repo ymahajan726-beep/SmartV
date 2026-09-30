@@ -12,7 +12,7 @@ export class ServiceHistoryService {
 
   async getVehicleHistory(vehicleId: string): Promise<Booking[]> {
     return await this.bookingRepository.find({
-    where: { vehicleId: Number(vehicleId) },
+    where: { vehicleId: String(vehicleId) },
       relations: {
         service: true,
         serviceCenter: true,

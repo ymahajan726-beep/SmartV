@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Delete,
+  Param,
   Req,
   UseGuards,
   UnauthorizedException,
@@ -17,11 +19,23 @@ export class AdminVehiclesController {
   async findAllForAdmin(
     @Req() req: { user: { id: string; email: string; role: string; name: string } },
   ) {
-    // Case-insensitive role verification ('admin' ya 'ADMIN' dono allow honge)
     if (!req.user || !req.user.role || req.user.role.toLowerCase() !== 'admin') {
       throw new UnauthorizedException('Access denied: Admin privileges required.');
     }
 
-    return await this.vehiclesService.findAllForAdmin();
+    return await this.vehiclesService.findAll();
+  }
+
+  // ✅ Naya Delete Route Admin ke liye
+  @Delete(':id')
+  async remove(
+    @Param('id') id: string,
+    @Req() req: { user: { id: string; email: string; role: string; name: string } },
+  ) {
+    if (!req.user || !req.user.role || req.user.role.toLowerCase() !== 'admin') {
+      throw new UnauthorizedException('Access denied: Admin privileges required.');
+    }
+
+    return await this.vehiclesService.remove(id);
   }
 }
