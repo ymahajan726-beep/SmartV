@@ -1,0 +1,170 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  WORKSHOP
+}
+
+enum BookingStatus {
+  BOOKED
+  IN_PROGRESS
+  QUALITY_CHECK
+  READY_FOR_DELIVERY
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+model User {
+  id              String        @id @default(uuid()) @db.Uuid
+  name            String
+  email           String        @unique
+  phone           String?
+  address         String?
+  passwordHash    String
+  role            Role          @default(CUSTOMER)
+  serviceCenterId String?       @db.Uuid
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  vehicles        Vehicle[]     @relation("CustomerVehicles")
+  bookings        Booking[]     @relation("CustomerBookings")
+  reviews         Review[]
+  invoices        Invoice[]
+
+  @@map("users")
+}
+
+model ServiceCenter {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String
+  location     String
+  phone        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  bookings     Booking[]
+  
+  @@map("service_centers")
+}
+
+model Vehicle {
+  id                 String        @id @default(uuid()) @db.Uuid
+  customerId         String        @db.Uuid
+  registrationNumber String        @unique
+  make               String
+  model              String
+  variant            String?
+  year               Int?
+  fuelType           String?
+  currentMileage     Int?
+  color              String?
+  imageUrl           String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  customer           User          @relation("CustomerVehicles", fields: [customerId], references: [id], onDelete: Cascade)
+  bookings           Booking[]
+
+  @@map("vehicles")
+}
+
+model Service {
+  id          String        @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  price       Decimal       @db.Decimal(10, 2)
+  duration    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  bookings    Booking[]
+
+  @@map("services")
+}
+
+model Booking {
+  id              String           @id @default(uuid()) @db.Uuid
+  bookingNumber   String           @unique
+  customerId      String           @db.Uuid
+  vehicleId       String           @db.Uuid
+  serviceId       String?          @db.Uuid
+  serviceCenterId String?          @db.Uuid
+  bookingDate     DateTime         @db.Date
+  bookingTime     String?
+  notes           String?
+  estimatedAmount Decimal?         @db.Decimal(10, 2)
+  finalAmount     Decimal?         @db.Decimal(10, 2)
+  status          BookingStatus    @default(BOOKED)
+  paymentStatus   PaymentStatus    @default(UNPAID)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  customer        User             @relation("CustomerBookings", fields: [customerId], references: [id], onDelete: Cascade)
+  vehicle         Vehicle          @relation(fields: [vehicleId], references: [id], onDelete: Restrict)
+  service         Service?         @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+  serviceCenter   ServiceCenter?   @relation(fields: [serviceCenterId], references: [id], onDelete: SetNull)
+  
+  spareParts      BookingSparePart[]
+  invoices        Invoice[]
+  review          Review?
+
+  @@map("bookings")
+}
+
+model BookingSparePart {
+  id        String   @id @default(uuid()) @db.Uuid
+  bookingId String   @db.Uuid
+  partName  String
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_spare_parts")
+}
+
+model Invoice {
+  id            String        @id @default(uuid()) @db.Uuid
+  invoiceNumber String        @unique
+  bookingId     String        @db.Uuid
+  customerId    String        @db.Uuid
+  totalAmount   Decimal       @db.Decimal(10, 2)
+  taxAmount     Decimal?      @db.Decimal(10, 2)
+  status        PaymentStatus @default(UNPAID)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customer      User          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("invoices")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @db.Uuid
+  bookingId  String   @unique @db.Uuid
+  customerId String   @db.Uuid
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customer   User     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}

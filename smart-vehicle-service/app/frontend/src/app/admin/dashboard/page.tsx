@@ -5,9 +5,8 @@ import { useTheme } from "@/src/context/ThemeContext";
 
 export default function AdminDashboardPage() {
   const { isLightMode } = useTheme();
-  const [stats, setStats] = useState<any>({});
+  const [stats, setStats] = useState({ totalVehicles: 0, totalCustomers: 0, totalBookings: 0 });
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     fetchStats();
@@ -16,51 +15,53 @@ export default function AdminDashboardPage() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const data = await apiRequest("/admin/dashboard/stats", "GET").catch(() => ({}));
-      setStats(data || {});
-      setErrorMsg("");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to load dashboard metrics.");
+      const data = await apiRequest("/admin/stats", "GET"); // Backend stats endpoint
+      setStats({
+        totalVehicles: data.totalVehicles || 0,
+        totalCustomers: data.totalCustomers || 0,
+        totalBookings: data.totalBookings || 0,
+      });
+    } catch (err) {
+      console.error("Failed to load dashboard stats:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-8 font-sans">
-      <header className={`pb-6 border-b flex justify-between items-center ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
-        <div>
-          <span className="text-xs font-mono text-[#cbf000] uppercase tracking-widest">[ ADMIN CONTROL CENTER ]</span>
-          <h1 className={`text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>Live Database Metrics</h1>
-        </div>
-        <button onClick={fetchStats} className={`px-4 py-2.5 rounded-xl border text-xs uppercase font-mono tracking-wider cursor-pointer transition-all ${isLightMode ? "border-gray-300 hover:border-black text-gray-800 bg-gray-50" : "border-white/20 hover:border-[#cbf000] text-white"}`}>
-          🔄 Refresh Stats
-        </button>
+    <div className={`space-y-8 font-sans ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
+      <header className="pb-6 border-b border-white/10">
+        <h1 className="text-3xl font-light tracking-tight">Admin Control Center</h1>
+        <p className="text-xs font-mono text-neutral-400 mt-1">Real-time platform telemetry and garage metrics.</p>
       </header>
 
-      {errorMsg && (
-        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
-          ⚠️ {errorMsg} (Using safe fallback defaults)
+      {/* Stats Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 font-mono">
+        
+        {/* Total Vehicles Card */}
+        <div className={`p-6 rounded-[28px] border shadow-md ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
+          <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-1">Total Fleet Vehicles</span>
+          <div className="text-3xl font-bold text-[#cbf000]">
+            {loading ? "..." : stats.totalVehicles} <span className="text-xs text-neutral-400 font-normal">Registered</span>
+          </div>
         </div>
-      )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className={`p-6 rounded-[28px] border shadow-xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
-          <span className="text-xs font-mono text-neutral-400 uppercase">Total Users</span>
-          <h3 className="text-3xl font-black mt-2 text-[#cbf000]">{loading ? "..." : (stats.totalUsers ?? 0)}</h3>
+        {/* Total Customers Card */}
+        <div className={`p-6 rounded-[28px] border shadow-md ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
+          <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-1">Total Customers</span>
+          <div className="text-3xl font-bold text-cyan-400">
+            {loading ? "..." : stats.totalCustomers} <span className="text-xs text-neutral-400 font-normal">Active</span>
+          </div>
         </div>
-        <div className={`p-6 rounded-[28px] border shadow-xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
-          <span className="text-xs font-mono text-neutral-400 uppercase">Total Bookings</span>
-          <h3 className="text-3xl font-black mt-2 text-[#cbf000]">{loading ? "..." : (stats.totalBookings ?? 0)}</h3>
+
+        {/* Total Bookings Card */}
+        <div className={`p-6 rounded-[28px] border shadow-md ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
+          <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-1">Service Bookings</span>
+          <div className="text-3xl font-bold text-amber-400">
+            {loading ? "..." : stats.totalBookings} <span className="text-xs text-neutral-400 font-normal">Total</span>
+          </div>
         </div>
-        <div className={`p-6 rounded-[28px] border shadow-xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
-          <span className="text-xs font-mono text-neutral-400 uppercase">Total Vehicles</span>
-          <h3 className="text-3xl font-black mt-2 text-[#cbf000]">{loading ? "..." : (stats.totalVehicles ?? 0)}</h3>
-        </div>
-        <div className={`p-6 rounded-[28px] border shadow-xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
-          <span className="text-xs font-mono text-neutral-400 uppercase">System Health</span>
-          <h3 className="text-xl font-bold mt-3 text-green-400 font-mono">🟢 ONLINE</h3>
-        </div>
+
       </div>
     </div>
   );

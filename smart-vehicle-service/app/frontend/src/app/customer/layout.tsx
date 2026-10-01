@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "@/src/context/ThemeContext";
@@ -7,9 +7,24 @@ import { useTheme } from "@/src/context/ThemeContext";
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const { isLightMode } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isActive = (path: string) => pathname === path;
+
+  // Hydration mismatch prevent karne ke liye safe default return jab tak mount na ho
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex bg-[#060608] text-white">
+        <div className="w-72 border-r border-white/10 p-6 font-mono text-xs">Loading Cockpit...</div>
+        <main className="flex-1 p-8">{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex font-sans transition-colors duration-300 ${isLightMode ? "bg-[#f8f9fa] text-slate-900" : "bg-[#060608] text-[#f8fafc]"}`}>
@@ -69,7 +84,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         </div>
       </aside>
 
-      {/* Main Content Wrapper - No extra layout headers here, pure container */}
+      {/* Main Content Wrapper */}
       <div className="flex-1 flex flex-col md:pl-72 w-full">
         {/* Mobile Toggle Bar only */}
         <div className="md:hidden p-4 flex items-center border-b border-white/[0.06]">

@@ -55,9 +55,8 @@ export default function CustomerDashboardPage() {
       setLoading(true);
       setErrorMsg("");
 
-      // Parallel fetching of user profile and real backend database records
       const [profileData, vData, iData, rData, sData] = await Promise.all([
-        apiRequest("/auth/customer/me", "GET").catch(() => null),
+        apiRequest("/customer/users/profile", "GET").catch(() => null),
         apiRequest("/vehicles", "GET").catch(() => []),
         apiRequest("/invoices", "GET").catch(() => []),
         apiRequest("/maintenance-reminders", "GET").catch(() => []),
@@ -67,7 +66,6 @@ export default function CustomerDashboardPage() {
       if (profileData) {
         const isAdmin = profileData.role === "ADMIN" || profileData.role === "admin";
         
-        // ROBUST CHECK: Case-insensitive check for development/placeholder names to trigger Modal
         const nameLower = (profileData.name || "").toLowerCase();
         if (
           !profileData.name || 
@@ -76,11 +74,18 @@ export default function CustomerDashboardPage() {
           profileData.name === "Valued Customer"
         ) {
           setShowProfileModal(true);
+          // Baaki fields explicitly empty rakhi gayi hain taaki user khud enter kare
           setProfileName("");
+          setProfileEmail("");
+          setProfileAddress("");
+        } else {
+          setProfileName(profileData.name || "");
           setProfileEmail(profileData.email && !profileData.email.includes("autocare.local") ? profileData.email : "");
           setProfileAddress(profileData.address || "");
-          setProfilePhone(profileData.phone || "");
         }
+
+        // Sirf mobile number auto-fill hoga jo OTP se verified hai
+        setProfilePhone(profileData.phone || "");
 
         const fetchedName = profileData.name && !nameLower.includes("development") && !nameLower.includes("dev.customer") && profileData.name !== "Valued Customer"
           ? profileData.name 
@@ -107,7 +112,7 @@ export default function CustomerDashboardPage() {
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest("/users/update-my-profile", "PATCH", {
+      await apiRequest("/customer/users/profile", "PATCH", {
         name: profileName,
         email: profileEmail,
         address: profileAddress,
@@ -142,12 +147,11 @@ export default function CustomerDashboardPage() {
         </div>
       )}
 
-      {/* Profile Completion Mandatory Modal for Onboarding with Close/Skip Option */}
+      {/* Profile Completion Mandatory Modal */}
       {showProfileModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl relative ${isLightMode ? "bg-white border-slate-200 text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
             
-            {/* Close Button */}
             <button 
               onClick={() => setShowProfileModal(false)}
               className="absolute top-6 right-6 text-neutral-400 hover:text-white font-mono text-xs cursor-pointer p-2"
@@ -158,7 +162,7 @@ export default function CustomerDashboardPage() {
 
             <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-500 font-bold">Onboarding Required</span>
             <h3 className="text-xl font-light tracking-tight mt-1 mb-2">Complete Your Profile</h3>
-            <p className="text-xs font-mono text-neutral-400 mb-6">Please enter your real name, email, mobile number, and address.</p>
+            <p className="text-xs font-mono text-neutral-400 mb-6">Please enter your real name, email, and address. Verified mobile number is auto-linked.</p>
             
             <form onSubmit={handleSaveProfile} className="space-y-4 font-mono text-xs">
               <div>
@@ -186,14 +190,13 @@ export default function CustomerDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Mobile Number</label>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Mobile Number (Verified)</label>
                 <input
                   type="text"
                   value={profilePhone}
-                  onChange={(e) => setProfilePhone(e.target.value)}
-                  placeholder="e.g. 9876543210"
-                  required
-                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  readOnly
+                  disabled
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none opacity-85 cursor-not-allowed ${isLightMode ? "bg-slate-200 border-slate-300 text-slate-700" : "bg-white/5 border-white/10 text-cyan-400 font-bold"}`}
                 />
               </div>
 
@@ -220,7 +223,7 @@ export default function CustomerDashboardPage() {
         </div>
       )}
 
-      {/* Unified Header matching bookings page layout */}
+      {/* Unified Header */}
       <div className={`w-full px-8 py-4 border-b flex justify-between items-center ${isLightMode ? "bg-white border-slate-200 text-slate-500" : "bg-[#060608] border-white/[0.06] text-slate-400"}`}>
         <div className="flex items-center gap-2.5">
            <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
@@ -246,6 +249,7 @@ export default function CustomerDashboardPage() {
             <span className={`text-[10px] font-bold uppercase ${isLightMode ? "text-slate-900" : "text-[#00F0FF]"}`}>
               {isLightMode ? "Light Deck" : "Cyber Dark"}
             </span>
+
           </button>
         </div>
       </div>

@@ -1,290 +1,314 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useTheme } from '@/src/context/ThemeContext';
-
-interface Vehicle {
-  id: number;
-  modelName: string;
-  vehicleNumber: string;
-  fuelType?: string;
-}
-
-interface Booking {
-  id: string;
-  bookingNumber: string;
-  status: string;
-  estimatedAmount: number;
-  createdAt: string;
-  vehicle?: any;
-}
+"use client";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation"; // 1. Import search params
+import { apiRequest } from "@/src/services/api";
+import { useTheme } from "@/src/context/ThemeContext";
 
 export default function CustomerBookingsPage() {
-  const { isLightMode, toggleTheme } = useTheme();
+  const { isLightMode } = useTheme();
+  const searchParams = useSearchParams(); // 2. Read URL parameters
+  const prefilledVehicleId = searchParams.get("vehicleId");
+
   const [mounted, setMounted] = useState(false);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [vehicles, setVehicles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
+  const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
 
-  // Form State
-  const [selectedVehicle, setSelectedVehicle] = useState<string>('');
-  const [selectedService, setSelectedService] = useState<string>('');
-  const [selectedCenter, setSelectedCenter] = useState<string>('');
-  const [bookingDate, setBookingDate] = useState<string>('');
+  // Toast State
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error">("success");
 
-  const API_BASE_URL = 'http://localhost:4000/api';
+  // Form States
+  const [vehicleId, setVehicleId] = useState("");
+  const [serviceCenterId, setServiceCenterId] = useState("");
+  const [bookingDate, setBookingDate] = useState("");
+  const [bookingTime, setBookingTime] = useState("");
+  const [notes, setNotes] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    let userId = localStorage.getItem("user-id");
-    if (!userId) {
-      userId = "cust-" + Math.floor(100000 + Math.random() * 900000);
-      localStorage.setItem("user-id", userId);
-    }
-    fetchInitialData();
-  }, []);
-
-  const showToast = (message: string) => {
+  const triggerToast = (message: string, type: "success" | "error" = "success") => {
     setToastMessage(message);
+    setToastType(type);
     setTimeout(() => {
-      setToastMessage(null);
+      setToastMessage("");
     }, 4000);
   };
 
-  const fetchInitialData = async () => {
+  useEffect(() => {
+    setMounted(true);
+    fetchData();
+  }, []);
+
+  // 3. Agar URL mein vehicleId aayi hai, toh modal automatically open kar do aur vehicle select kar lo
+  useEffect(() => {
+    if (prefilledVehicleId && vehicles.length > 0) {
+      setVehicleId(prefilledVehicleId);
+      setShowModal(true);
+    }
+  }, [prefilledVehicleId, vehicles]);
+
+  const fetchData = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const userId = localStorage.getItem("user-id") || "default-user";
-      const token = localStorage.getItem("customer_token") || localStorage.getItem("token") || "";
-
-      const headers: Record<string, string> = {
-        'user-id': userId,
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-
-      // 1. Fetch Customer Bookings
-      const bookingsRes = await fetch(`${API_BASE_URL}/customer/bookings`, { headers });
-      const bookingsData = await bookingsRes.json().catch(() => []);
-      if (bookingsRes.ok && Array.isArray(bookingsData)) {
-        setBookings(bookingsData);
-      }
-
-      // 2. Fetch Customer Vehicles
-      const vehiclesRes = await fetch(`${API_BASE_URL}/vehicles`, { headers });
-      const vehiclesData = await vehiclesRes.json().catch(() => []);
-      
-      let finalVehicles = [];
-      if (Array.isArray(vehiclesData)) {
-        finalVehicles = vehiclesData;
-      } else if (vehiclesData && Array.isArray(vehiclesData.data)) {
-        finalVehicles = vehiclesData.data;
-      }
-
-      const mappedVehicles = finalVehicles.map((v: any) => ({
-        id: v.id,
-        modelName: v.modelName || v.model || v.make || "Vehicle",
-        vehicleNumber: v.vehicleNumber || v.registrationNumber || "MH-04",
-        fuelType: v.fuelType,
-      }));
-
-      setVehicles(mappedVehicles);
-    } catch (err) {
-      setError('Failed to load booking details.');
+      const [bData, vData] = await Promise.all([
+        apiRequest("/customer/bookings", "GET").catch(() => []),
+        apiRequest("/vehicles", "GET").catch(() => []),
+      ]);
+      setBookings(Array.isArray(bData) ? bData : []);
+      setVehicles(Array.isArray(vData) ? vData : []);
+    } catch (err: any) {
+      triggerToast(err?.message || "Failed to load bookings telemetry.", "error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateBooking = async (e: React.FormEvent) => {
+  const resetForm = () => {
+    setVehicleId("");
+    setServiceCenterId("");
+    setBookingDate("");
+    setBookingTime("");
+    setNotes("");
+    setEditingBookingId(null);
+  };
+
+  const openCreateModal = () => {
+    resetForm();
+    setShowModal(true);
+  };
+
+  const openEditModal = (booking: any) => {
+    setEditingBookingId(booking.id);
+    setVehicleId(booking.vehicleId || "");
+    setBookingDate(booking.bookingDate ? booking.bookingDate.split("T")[0] : "");
+    setBookingTime(booking.bookingTime || "");
+    setNotes(booking.notes || "");
+    setShowModal(true);
+  };
+
+  const handleSaveBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const userId = localStorage.getItem("user-id") || "default-user";
-      const token = localStorage.getItem("customer_token") || localStorage.getItem("token") || "";
-
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-        'user-id': userId,
+      setSubmitting(true);
+      const payload = {
+        vehicleId,
+        serviceCenterId: serviceCenterId || null,
+        bookingDate,
+        bookingTime: bookingTime || "10:00 AM",
+        notes,
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
-      const response = await fetch(`${API_BASE_URL}/customer/bookings`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          vehicleId: Number(selectedVehicle),
-          serviceId: selectedService || '1',
-          serviceCenterId: selectedCenter || '1',
-          bookingDate: bookingDate,
-        }),
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (response.ok) {
-        showToast('🚀 Booking successfully created & Admin notification dispatched!');
-        await fetchInitialData(); 
-        setSelectedVehicle('');
-        setSelectedService('');
-        setSelectedCenter('');
-        setBookingDate('');
+      if (editingBookingId) {
+        await apiRequest(`/customer/bookings/${editingBookingId}`, "PATCH", payload);
+        triggerToast("Booking rescheduled successfully!", "success");
       } else {
-        showToast(result.message || '❌ Failed to create booking.');
+        await apiRequest("/customer/bookings", "POST", payload);
+        triggerToast("Service successfully booked in your vault!", "success");
       }
-    } catch (err) {
-      showToast('❌ An error occurred while creating booking.');
+
+      setShowModal(false);
+      resetForm();
+      fetchData();
+    } catch (err: any) {
+      triggerToast(err?.message || "Failed to save booking.", "error");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  if (!mounted) return null;
+  const handleDeleteBooking = async (bookingId: string) => {
+    const confirmed = window.confirm("Are you sure you want to permanently delete this booking record?");
+    if (!confirmed) return;
+
+    try {
+      setSubmitting(true);
+      await apiRequest(`/customer/bookings/${bookingId}`, "DELETE");
+      triggerToast("Booking deleted successfully.", "success");
+      fetchData();
+    } catch (err: any) {
+      triggerToast(err?.message || "Failed to delete booking.", "error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const renderStatusBadge = (status: string) => {
+    switch (status) {
+      case "BOOKED":
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">🔵 BOOKED</span>;
+      case "IN_PROGRESS":
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">🟡 IN PROGRESS</span>;
+      case "QUALITY_CHECK":
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20">🟣 QUALITY CHECK</span>;
+      case "READY_FOR_DELIVERY":
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-teal-500/10 text-teal-400 border border-teal-500/20">🟢 READY FOR DELIVERY</span>;
+      case "COMPLETED":
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">✅ COMPLETED</span>;
+      case "CANCELLED":
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">🔴 CANCELLED</span>;
+      default:
+        return <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-gray-500/10 text-gray-400 border border-gray-500/20">{status}</span>;
+    }
+  };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
-    <div className={`w-full transition-colors duration-300 ${isLightMode ? "text-slate-900" : "text-[#f8fafc]"}`}>
+    <div className={`p-8 md:p-12 space-y-8 font-sans max-w-7xl mx-auto relative ${isLightMode ? "text-slate-900" : "text-white"}`}>
       
-      {/* Toast Notification Banner */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 animate-bounce bg-cyan-500 text-slate-950 px-6 py-3 rounded-2xl shadow-2xl font-mono text-xs font-bold border border-cyan-300">
-          {toastMessage}
+        <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-xs font-mono border flex items-center gap-3 ${toastType === "success" ? "bg-emerald-500 text-slate-950 font-bold border-emerald-400" : "bg-red-500 text-white font-bold border-red-400"}`}>
+          <span>{toastType === "success" ? "⚡" : "⚠"}</span>
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Top Navbar with Theme Toggle */}
-      <header className={`h-20 px-8 border-b flex justify-between items-center sticky top-0 z-30 backdrop-blur-xl ${isLightMode ? "bg-white/90 border-slate-200 shadow-sm" : "bg-[#060608]/90 border-white/[0.06]"}`}>
-        <div className="flex items-center gap-2.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
-          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Service Bay Control</span>
+      <div className="flex justify-between items-center border-b pb-6">
+        <div>
+          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest">[ SERVICE VAULT ]</span>
+          <h1 className="text-3xl font-light tracking-tight mt-1">My Service Bookings</h1>
         </div>
-
         <button
-          onClick={toggleTheme}
-          className={`group relative px-4 py-2 rounded-2xl border text-xs font-mono tracking-wider flex items-center gap-3 transition-all duration-300 cursor-pointer shadow-md ${
-            isLightMode 
-              ? "border-slate-300 bg-gradient-to-r from-slate-100 to-white text-slate-800 hover:border-cyan-500 shadow-slate-200/60" 
-              : "border-white/10 bg-gradient-to-r from-[#12121c] to-[#1a1a26] text-slate-200 hover:border-[#00F0FF]/50 shadow-black/50"
-          }`}
-          title="Switch Theme"
+          onClick={openCreateModal}
+          className="px-6 py-3.5 rounded-2xl bg-[#00F0FF] text-slate-950 font-bold uppercase text-xs font-mono tracking-wider cursor-pointer shadow-lg hover:opacity-90"
         >
-          <span className="flex items-center gap-1.5 font-bold">
-            <span className={`transition-transform duration-500 ${isLightMode ? "rotate-0 scale-100" : "-rotate-90 scale-75 opacity-40"}`}>☀️</span>
-            <span className="text-[10px] text-slate-400 font-normal">/</span>
-            <span className={`transition-transform duration-500 ${!isLightMode ? "rotate-0 scale-100" : "rotate-90 scale-75 opacity-40"}`}>🌙</span>
-          </span>
-          <span className={`h-3 w-[1px] ${isLightMode ? "bg-slate-300" : "bg-white/20"}`}></span>
-          <span className={`text-[10px] font-bold uppercase ${isLightMode ? "text-slate-900" : "text-[#00F0FF]"}`}>
-            {isLightMode ? "Light" : "Cyber"}
-          </span>
+          + Book New Service
         </button>
-      </header>
+      </div>
 
-      {/* Main Body */}
-      <main className="p-8 md:p-12 space-y-8 max-w-7xl mx-auto w-full">
-        <h1 className="text-3xl font-light tracking-tight">My Service Bookings</h1>
+      {loading ? (
+        <div className="py-20 text-center font-mono text-xs text-neutral-400">Loading bookings telemetry...</div>
+      ) : bookings.length === 0 ? (
+        <div className="p-12 text-center rounded-[32px] border border-dashed border-neutral-600 font-mono text-xs text-neutral-400">
+          No active service bookings found. Click "+ Book New Service" to schedule one.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
+          {bookings.map((b) => (
+            <div key={b.id} className={`p-6 rounded-[28px] border shadow-md space-y-4 flex flex-col justify-between ${isLightMode ? "bg-white border-slate-200" : "bg-[#141418] border-white/10 text-white"}`}>
+              <div className="space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] text-[#00F0FF] font-bold uppercase">{b.bookingNumber}</span>
+                    <h3 className="text-base font-bold uppercase mt-0.5">{b.vehicle?.make} {b.vehicle?.model}</h3>
+                  </div>
+                  <div>{renderStatusBadge(b.status)}</div>
+                </div>
 
-        {error && (
-          <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-xs font-mono font-bold">
-            {error}
-          </div>
-        )}
+                <div className="pt-3 border-t border-white/10 space-y-1.5 text-neutral-300">
+                  <div>Vehicle No: <strong className="text-white">{b.vehicle?.registrationNumber}</strong></div>
+                  <div>Scheduled Date: <strong className="text-white">{new Date(b.bookingDate).toLocaleDateString()} ({b.bookingTime || "10:00 AM"})</strong></div>
+                  <div>Est. Amount: <strong className="text-emerald-400">₹{b.estimatedAmount || 1500}</strong></div>
+                  {b.notes && <div className="text-neutral-400 text-[10px] italic">Note: {b.notes}</div>}
+                </div>
+              </div>
 
-        {/* Booking Form Section */}
-        <div className={`p-8 rounded-[32px] border shadow-xl ${isLightMode ? "bg-white border-slate-200" : "bg-[#0d0d14] border-white/[0.06]"}`}>
-          <h2 className={`text-lg font-bold mb-6 uppercase tracking-wider text-xs font-mono ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>Book a New Service</h2>
-          <form onSubmit={handleCreateBooking} className="grid grid-cols-1 md:grid-cols-2 gap-6 font-mono text-xs">
+              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
+                <button
+                  onClick={() => openEditModal(b)}
+                  disabled={submitting}
+                  className="py-2 rounded-xl border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 font-bold uppercase text-[10px] cursor-pointer disabled:opacity-50"
+                >
+                  ✏️ Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteBooking(b.id)}
+                  disabled={submitting}
+                  className="py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold uppercase text-[10px] cursor-pointer disabled:opacity-50"
+                >
+                  🗑️ Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Booking Modal (Create / Edit) */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
+            <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F0FF] mb-6">
+              {editingBookingId ? "Edit Service Booking" : "Schedule Garage Service"}
+            </h3>
             
-            <div>
-              <label className={`block uppercase tracking-widest mb-2 font-bold ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>Select Vehicle</label>
-              <select
-                value={selectedVehicle}
-                onChange={(e) => setSelectedVehicle(e.target.value)}
-                required
-                className={`w-full p-3.5 rounded-2xl border outline-none transition ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-[#161622] border-white/10 text-white focus:border-[#00F0FF]"}`}
-              >
-                <option value="">-- Choose Vehicle --</option>
-                {vehicles.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.modelName} ({v.vehicleNumber})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <form onSubmit={handleSaveBooking} className="space-y-4 font-mono text-xs">
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Your Vehicle</label>
+                <select
+                  value={vehicleId}
+                  onChange={(e) => setVehicleId(e.target.value)}
+                  required
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                >
+                  <option value="">-- Choose Registered Vehicle --</option>
+                  {vehicles.map((v) => (
+                    <option key={v.id} value={v.id}>
+                      {v.make} {v.model} ({v.registrationNumber})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <label className={`block uppercase tracking-widest mb-2 font-bold ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>Booking Date</label>
-              <input
-                type="date"
-                value={bookingDate}
-                onChange={(e) => setBookingDate(e.target.value)}
-                required
-                className={`w-full p-3.5 rounded-2xl border outline-none transition ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-[#161622] border-white/10 text-white focus:border-[#00F0FF]"}`}
-              />
-            </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] uppercase text-neutral-400 mb-1">Booking Date</label>
+                  <input
+                    type="date"
+                    value={bookingDate}
+                    onChange={(e) => setBookingDate(e.target.value)}
+                    required
+                    className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase text-neutral-400 mb-1">Preferred Time</label>
+                  <input
+                    type="text"
+                    value={bookingTime}
+                    onChange={(e) => setBookingTime(e.target.value)}
+                    placeholder="e.g. 11:15 AM"
+                    required
+                    className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  />
+                </div>
+              </div>
 
-            <div className="md:col-span-2 flex justify-end mt-4">
-              <button
-                type="submit"
-                className={`px-8 py-3.5 rounded-2xl font-bold uppercase tracking-wider transition shadow-lg cursor-pointer ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/20" : "bg-[#00F0FF] text-slate-950 hover:opacity-90 shadow-[#00F0FF]/20"}`}
-              >
-                Confirm Booking
-              </button>
-            </div>
-          </form>
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Service Notes / Issues</label>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Describe any specific problem..."
+                  rows={2}
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none resize-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                />
+              </div>
+
+              <div className="flex gap-4 pt-4">
+                <button 
+                  type="submit" 
+                  disabled={submitting} 
+                  className="flex-1 py-3.5 rounded-2xl bg-[#00F0FF] text-slate-950 font-bold uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                >
+                  {submitting ? "Processing..." : editingBookingId ? "Update Booking" : "Confirm Booking"}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowModal(false)} 
+                  className="px-6 py-3.5 rounded-2xl border border-white/20 text-neutral-300 uppercase cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        {/* Bookings List Section */}
-        <div className={`p-8 rounded-[32px] border shadow-xl ${isLightMode ? "bg-white border-slate-200" : "bg-[#0d0d14] border-white/[0.06]"}`}>
-          <h2 className={`text-lg font-bold mb-6 uppercase tracking-wider text-xs font-mono ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>Booking History</h2>
-          {loading ? (
-            <p className="text-slate-500 font-mono text-xs animate-pulse font-bold">Loading bookings...</p>
-          ) : bookings.length === 0 ? (
-            <div className={`p-8 text-center border border-dashed rounded-2xl font-mono text-xs font-bold ${isLightMode ? "border-slate-300 text-slate-500" : "border-white/10 text-slate-500"}`}>
-              No bookings found.
-            </div>
-          ) : (
-            <div className="overflow-x-auto font-mono text-xs">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className={`border-b uppercase tracking-widest text-[10px] ${isLightMode ? "border-slate-200 text-slate-600 bg-slate-50" : "border-white/10 text-slate-400 bg-transparent"}`}>
-                    <th className="p-4">Booking ID</th>
-                    <th className="p-4">Vehicle</th>
-                    <th className="p-4">Amount</th>
-                    <th className="p-4">Status</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${isLightMode ? "divide-slate-200 text-slate-800" : "divide-white/[0.06] text-slate-300"}`}>
-                  {bookings.map((b) => {
-                    const vName = b.vehicle?.modelName || b.vehicle?.model || b.vehicle?.make || 'Vehicle';
-                    const vNum = b.vehicle?.vehicleNumber || b.vehicle?.registrationNumber || 'MH-04';
-                    return (
-                      <tr key={b.id} className={`transition ${isLightMode ? "hover:bg-slate-50" : "hover:bg-white/[0.02]"}`}>
-                        <td className={`p-4 font-bold ${isLightMode ? "text-cyan-600" : "text-[#00F0FF]"}`}>{b.bookingNumber}</td>
-                        <td className="p-4">
-                          {b.vehicle ? `${vName} (${vNum})` : 'N/A'}
-                        </td>
-                        <td className="p-4 font-bold">₹{b.estimatedAmount ?? 1499}</td>
-                        <td className="p-4">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                            b.status === 'COMPLETED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' :
-                            b.status === 'CANCELLED' ? 'bg-red-500/10 text-red-400 border-red-500/30' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                          }`}>
-                            {b.status}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </main>
+      )}
     </div>
   );
 }

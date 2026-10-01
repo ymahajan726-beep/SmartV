@@ -44,7 +44,7 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await apiRequest("/users", "GET");
+      const data = await apiRequest("/admin/users/directory/staff", "GET");
       setUsers(Array.isArray(data) ? data : []);
       setErrorMsg("");
     } catch (err: any) {
@@ -57,7 +57,7 @@ export default function AdminUsersPage() {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const data = await apiRequest("/users/customers", "GET");
+      const data = await apiRequest("/admin/users/directory/customers", "GET");
       setCustomers(Array.isArray(data) ? data : []);
       setErrorMsg("");
     } catch (err: any) {
@@ -70,7 +70,7 @@ export default function AdminUsersPage() {
   const handleCreateStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await apiRequest("/users/staff", "POST", { name, email, phone, password, role });
+      await apiRequest("/admin/users", "POST", { name, email, phone, password, role });
       setShowModal(false);
       setName(""); setEmail(""); setPhone(""); setPassword(""); setRole("STAFF");
       showToast("Staff member registered successfully in Database!");
@@ -93,7 +93,7 @@ export default function AdminUsersPage() {
     e.preventDefault();
     if (!editingUserId) return;
     try {
-      await apiRequest(`/users/${editingUserId}`, "PATCH", {
+      await apiRequest(`/admin/users/${editingUserId}`, "PATCH", {
         name: editName,
         email: editEmail,
         phone: editPhone,
@@ -117,7 +117,7 @@ export default function AdminUsersPage() {
 
     if (!confirm(`Are you sure you want to delete ${u.name || u.email}?`)) return;
     try {
-      await apiRequest(`/users/${u.id}`, "DELETE");
+      await apiRequest(`/admin/users/${u.id}`, "DELETE");
       showToast("User deleted from database successfully!");
       if (activeTab === "staff") fetchUsers(); else fetchCustomers();
     } catch (err: any) {
@@ -268,9 +268,8 @@ export default function AdminUsersPage() {
                       {c.address || "No Address"}
                     </td>
 
-                    {/* Actions */}
-                    <td className="p-4 text-right space-x-3">
-                      <button onClick={() => handleOpenEdit(c)} className="text-blue-400 hover:text-blue-300 cursor-pointer">Edit</button>
+                    {/* Actions - Edit option removed */}
+                    <td className="p-4 text-right">
                       <button onClick={() => handleDelete(c)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
                     </td>
                   </tr>
@@ -306,7 +305,7 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* Edit Modal */}
+      {/* Edit Modal (Only used for Staff / Admin now) */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-lg p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>

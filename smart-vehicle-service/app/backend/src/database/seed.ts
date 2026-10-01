@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import * as bcrypt from "bcrypt";
 import * as dotenv from "dotenv";
+import { randomUUID } from "crypto"; // <-- UUID generate karne ke liye import kiya
 
 dotenv.config();
 
@@ -45,17 +46,19 @@ async function seed() {
     }
 
     const hashedPassword = await bcrypt.hash("admin123", 10);
+    const adminId = randomUUID(); // <-- Unique UUID generate kiya
 
-    // 3. Map correct column names dynamically including phone and role
+    // 3. Map correct column names dynamically including id, phone and role
     const nameCol = columns.includes("name") ? "name" : columns.includes("fullName") ? "fullName" : null;
     const passCol = columns.includes("passwordHash") ? "passwordHash" : columns.includes("password") ? "password" : "passwordHash";
     const roleCol = columns.includes("role") ? "role" : null;
     const phoneCol = columns.includes("phone") ? "phone" : null;
 
-    let fields = [emailCol, passCol];
-    let values: any = ["admin@autocare.com", hashedPassword];
-    let placeholders = ["$1", "$2"];
-    let paramIndex = 3;
+    // 'id' column ko mandatory fields mein shamil kiya
+    let fields = ["id", emailCol, passCol];
+    let values: any = [adminId, "admin@autocare.com", hashedPassword];
+    let placeholders = ["$1", "$2", "$3"];
+    let paramIndex = 4;
 
     if (nameCol) {
       fields.push(nameCol);
@@ -64,7 +67,7 @@ async function seed() {
     }
     if (phoneCol) {
       fields.push(phoneCol);
-      values.push("9999999999"); // Mandatory phone field default value
+      values.push("9999999999");
       placeholders.push(`$${paramIndex++}`);
     }
     if (roleCol) {
