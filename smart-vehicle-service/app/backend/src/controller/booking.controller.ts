@@ -53,10 +53,36 @@ export class BookingController {
     return this.bookingService.findAllBookingsForAdmin();
   }
 
+  // 👈 Archived Bookings Fetch Endpoint Added
+  @Get('admin/bookings/archived')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.WORKSHOP)
+  getArchivedBookingsForAdmin() {
+    return this.bookingService.findArchivedBookingsForAdmin();
+  }
+
   @Patch('admin/bookings/:id/status')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.WORKSHOP)
   updateBookingStatusByAdmin(@Param('id') id: string, @Body() dto: { status: any }) {
     return this.bookingService.updateBookingStatusByAdmin(id, dto.status);
+  }
+
+  @Post('admin/bookings/:id/spare-parts')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.WORKSHOP)
+  async addSparePart(
+    @Param('id') bookingId: string,
+    @Body() dto: { inventoryPartId: string; quantity: number },
+  ) {
+    return this.bookingService.addSparePartToBooking(bookingId, dto);
+  }
+
+  // 👈 Permanent Delete Archived Booking Endpoint Added
+  @Delete('admin/bookings/:id/archive')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.WORKSHOP)
+  permanentDeleteArchive(@Param('id') id: string) {
+    return this.bookingService.permanentDeleteArchivedBooking(id);
   }
 }

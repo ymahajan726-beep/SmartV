@@ -8,7 +8,7 @@ export default function CustomerDashboardPage() {
   const { isLightMode, toggleTheme } = useTheme();
   
   const [mounted, setMounted] = useState(false);
-  const [customer, setCustomer] = useState({ name: "Valued Customer", id: "", isGuest: false });
+  const [customer, setCustomer] = useState({ name: "Fellow Motorist", id: "", isGuest: false });
   const [greeting, setGreeting] = useState("Good Afternoon");
 
   // Data States
@@ -65,16 +65,19 @@ export default function CustomerDashboardPage() {
 
       if (profileData) {
         const isAdmin = profileData.role === "ADMIN" || profileData.role === "admin";
-        
         const nameLower = (profileData.name || "").toLowerCase();
-        if (
+        
+        // Check if name is default, guest, or placeholder containing Customer/development
+        const isDefaultName = 
           !profileData.name || 
           nameLower.includes("development") || 
           nameLower.includes("dev.customer") || 
-          profileData.name === "Valued Customer"
-        ) {
+          nameLower.includes("customer") || 
+          profileData.name === "Valued Customer";
+
+        if (isDefaultName) {
           setShowProfileModal(true);
-          // Baaki fields explicitly empty rakhi gayi hain taaki user khud enter kare
+          // Fields explicitly empty rakhi gayi hain taaki modal blank khule
           setProfileName("");
           setProfileEmail("");
           setProfileAddress("");
@@ -87,9 +90,7 @@ export default function CustomerDashboardPage() {
         // Sirf mobile number auto-fill hoga jo OTP se verified hai
         setProfilePhone(profileData.phone || "");
 
-        const fetchedName = profileData.name && !nameLower.includes("development") && !nameLower.includes("dev.customer") && profileData.name !== "Valued Customer"
-          ? profileData.name 
-          : "Valued Customer";
+        const fetchedName = !isDefaultName ? profileData.name : "Fellow Motorist";
 
         setCustomer({
           name: isAdmin ? "Super Admin" : fetchedName,
@@ -147,7 +148,7 @@ export default function CustomerDashboardPage() {
         </div>
       )}
 
-      {/* Profile Completion Mandatory Modal */}
+      {/* Profile Completion Mandatory Modal - Now opens completely blank */}
       {showProfileModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl relative ${isLightMode ? "bg-white border-slate-200 text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
@@ -171,7 +172,7 @@ export default function CustomerDashboardPage() {
                   type="text"
                   value={profileName}
                   onChange={(e) => setProfileName(e.target.value)}
-                  placeholder="e.g. Rajesh Kumar"
+                  placeholder="Enter your real name..."
                   required
                   className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                 />
@@ -183,7 +184,7 @@ export default function CustomerDashboardPage() {
                   type="email"
                   value={profileEmail}
                   onChange={(e) => setProfileEmail(e.target.value)}
-                  placeholder="e.g. rajesh@gmail.com"
+                  placeholder="Enter your email address..."
                   required
                   className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                 />

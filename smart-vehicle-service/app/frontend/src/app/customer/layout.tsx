@@ -16,7 +16,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
 
   const isActive = (path: string) => pathname === path;
 
-  // Hydration mismatch prevent karne ke liye safe default return jab tak mount na ho
   if (!mounted) {
     return (
       <div className="min-h-screen flex bg-[#060608] text-white">
@@ -29,7 +28,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   return (
     <div className={`min-h-screen flex font-sans transition-colors duration-300 ${isLightMode ? "bg-[#f8f9fa] text-slate-900" : "bg-[#060608] text-[#f8fafc]"}`}>
       
-      {/* Mobile Backdrop Overlay */}
       {sidebarOpen && (
         <div 
           onClick={() => setSidebarOpen(false)} 
@@ -37,7 +35,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         ></div>
       )}
 
-      {/* Customer Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-40 w-72 border-r flex flex-col transition-transform duration-300 md:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} ${isLightMode ? "bg-white border-slate-200 text-slate-900 shadow-xl" : "bg-[#0d0d12] border-white/[0.06] text-slate-100"}`}>
         <div className="p-8 border-inherit flex items-center justify-between">
           <span className="text-xl font-black tracking-tighter uppercase flex items-center gap-2">
@@ -60,12 +57,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           <Link href="/customer/bookings" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/bookings') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
             <span>📅</span> My Bookings
           </Link>
-          <Link href="/customer/tracking" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/tracking') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
-            <span>📡</span> Live Tracking
-          </Link>
-          <Link href="/customer/history" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/history') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
-            <span>📜</span> History & Logs
-          </Link>
           <Link href="/customer/invoices" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/invoices') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
             <span>💳</span> Invoices
           </Link>
@@ -84,9 +75,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         </div>
       </aside>
 
-      {/* Main Content Wrapper */}
       <div className="flex-1 flex flex-col md:pl-72 w-full">
-        {/* Mobile Toggle Bar only */}
         <div className="md:hidden p-4 flex items-center border-b border-white/[0.06]">
           <button 
             onClick={() => setSidebarOpen(true)} 
@@ -96,7 +85,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           </button>
         </div>
 
-        {/* Page Content */}
         <div className="w-full flex-1">
           {children}
         </div>

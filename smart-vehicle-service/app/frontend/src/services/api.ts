@@ -3,19 +3,24 @@ const API_BASE_URL = "http://localhost:4000/api";
 export async function apiRequest(endpoint: string, method: string = "GET", body?: any) {
   let token = "";
   if (typeof window !== "undefined") {
-    const isAdminRoute = endpoint.startsWith("/admin");
+    // Admin routes, invoices, aur reviews ke admin endpoints ko yahan detect karenge
+    const isAdminRoute = 
+      endpoint.startsWith("/admin") || 
+      endpoint.startsWith("/service-centers") || 
+      endpoint.startsWith("/services") ||
+      endpoint.startsWith("/invoices") || // 👈 Yeh /invoices endpoint ko bhi admin token ke liye pakad lega
+      endpoint.includes("/admin/");
 
     if (isAdminRoute) {
-      // Admin routes ke liye pehle 'autocare_token' dekhein
+      // Admin/Workshop protected routes ke liye primary tokens
       token = 
         localStorage.getItem("autocare_token") || 
         localStorage.getItem("token") || 
         localStorage.getItem("access_token") || 
         localStorage.getItem("authToken") || 
-        localStorage.getItem("jwt") || 
-        localStorage.getItem("customer_token") || "";
+        localStorage.getItem("jwt") || "";
     } else {
-      // Customer routes ke liye pehle 'customer_token' dekhein
+      // Pure customer routes ke liye
       token = 
         localStorage.getItem("customer_token") || 
         localStorage.getItem("autocare_token") || 

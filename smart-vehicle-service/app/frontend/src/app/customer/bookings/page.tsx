@@ -1,17 +1,19 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation"; // 1. Import search params
+import { useSearchParams } from "next/navigation";
 import { apiRequest } from "@/src/services/api";
 import { useTheme } from "@/src/context/ThemeContext";
 
 export default function CustomerBookingsPage() {
   const { isLightMode } = useTheme();
-  const searchParams = useSearchParams(); // 2. Read URL parameters
+  const searchParams = useSearchParams();
   const prefilledVehicleId = searchParams.get("vehicleId");
 
   const [mounted, setMounted] = useState(false);
   const [bookings, setBookings] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
+  const [serviceCenters, setServiceCenters] = useState<any[]>([]);
+  const [availableServices, setAvailableServices] = useState<any[]>([]); // 👈 Center-wise services state
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
@@ -23,6 +25,8 @@ export default function CustomerBookingsPage() {
   // Form States
   const [vehicleId, setVehicleId] = useState("");
   const [serviceCenterId, setServiceCenterId] = useState("");
+  const [serviceId, setServiceId] = useState(""); // 👈 Selected Service ID
+  const [estimatedAmount, setEstimatedAmount] = useState<number | null>(null); // 👈 Dynamic Price
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -41,7 +45,6 @@ export default function CustomerBookingsPage() {
     fetchData();
   }, []);
 
-  // 3. Agar URL mein vehicleId aayi hai, toh modal automatically open kar do aur vehicle select kar lo
   useEffect(() => {
     if (prefilledVehicleId && vehicles.length > 0) {
       setVehicleId(prefilledVehicleId);
@@ -52,12 +55,14 @@ export default function CustomerBookingsPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [bData, vData] = await Promise.all([
+      const [bData, vData, cData] = await Promise.all([
         apiRequest("/customer/bookings", "GET").catch(() => []),
         apiRequest("/vehicles", "GET").catch(() => []),
+        apiRequest("/service-centers", "GET").catch(() => []),
       ]);
       setBookings(Array.isArray(bData) ? bData : []);
       setVehicles(Array.isArray(vData) ? vData : []);
+      setServiceCenters(Array.isArray(cData) ? cData : []);
     } catch (err: any) {
       triggerToast(err?.message || "Failed to load bookings telemetry.", "error");
     } finally {
@@ -65,9 +70,40 @@ export default function CustomerBookingsPage() {
     }
   };
 
+  // ✅ Service Center change hone par us center ki services fetch karna
+  const handleCenterChange = async (centerId: string) => {
+    setServiceCenterId(centerId);
+    setServiceId("");
+    setEstimatedAmount(null);
+    setAvailableServices([]);
+
+    if (!centerId) return;
+
+    try {
+      const data = await apiRequest(`/services?serviceCenterId=${centerId}`, "GET");
+      setAvailableServices(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setAvailableServices([]);
+    }
+  };
+
+  // ✅ Service select hone par price automatically update karna
+  const handleServiceChange = (sId: string) => {
+    setServiceId(sId);
+    const selectedSvc = availableServices.find((s) => s.id === sId);
+    if (selectedSvc) {
+      setEstimatedAmount(Number(selectedSvc.price));
+    } else {
+      setEstimatedAmount(null);
+    }
+  };
+
   const resetForm = () => {
     setVehicleId("");
     setServiceCenterId("");
+    setServiceId("");
+    setEstimatedAmount(null);
+    setAvailableServices([]);
     setBookingDate("");
     setBookingTime("");
     setNotes("");
@@ -79,12 +115,26 @@ export default function CustomerBookingsPage() {
     setShowModal(true);
   };
 
-  const openEditModal = (booking: any) => {
+  const openEditModal = async (booking: any) => {
     setEditingBookingId(booking.id);
     setVehicleId(booking.vehicleId || "");
+    setServiceCenterId(booking.serviceCenterId || "");
+    setServiceId(booking.serviceId || "");
+    setEstimatedAmount(booking.estimatedAmount ? Number(booking.estimatedAmount) : null);
     setBookingDate(booking.bookingDate ? booking.bookingDate.split("T")[0] : "");
     setBookingTime(booking.bookingTime || "");
     setNotes(booking.notes || "");
+
+    // Agar center pehle se selected hai toh uski services load karein
+    if (booking.serviceCenterId) {
+      try {
+        const data = await apiRequest(`/services?serviceCenterId=${booking.serviceCenterId}`, "GET");
+        setAvailableServices(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setAvailableServices([]);
+      }
+    }
+
     setShowModal(true);
   };
 
@@ -95,6 +145,8 @@ export default function CustomerBookingsPage() {
       const payload = {
         vehicleId,
         serviceCenterId: serviceCenterId || null,
+        serviceId: serviceId || null,
+        estimatedAmount: estimatedAmount !== null ? Number(estimatedAmount) : null,
         bookingDate,
         bookingTime: bookingTime || "10:00 AM",
         notes,
@@ -110,6 +162,7 @@ export default function CustomerBookingsPage() {
 
       setShowModal(false);
       resetForm();
+      window.history.replaceState({}, "", window.location.pathname);
       fetchData();
     } catch (err: any) {
       triggerToast(err?.message || "Failed to save booking.", "error");
@@ -201,8 +254,10 @@ export default function CustomerBookingsPage() {
 
                 <div className="pt-3 border-t border-white/10 space-y-1.5 text-neutral-300">
                   <div>Vehicle No: <strong className="text-white">{b.vehicle?.registrationNumber}</strong></div>
+                  <div>Service Package: <strong className="text-cyan-400">{b.service?.name || "General Inspection"}</strong></div>
                   <div>Scheduled Date: <strong className="text-white">{new Date(b.bookingDate).toLocaleDateString()} ({b.bookingTime || "10:00 AM"})</strong></div>
-                  <div>Est. Amount: <strong className="text-emerald-400">₹{b.estimatedAmount || 1500}</strong></div>
+                  <div>Service Center: <strong className="text-white">{b.serviceCenter?.name || "Main Garage"}</strong></div>
+                  {b.estimatedAmount && <div>Estimated Cost: <strong className="text-emerald-400">₹{b.estimatedAmount}</strong></div>}
                   {b.notes && <div className="text-neutral-400 text-[10px] italic">Note: {b.notes}</div>}
                 </div>
               </div>
@@ -253,6 +308,51 @@ export default function CustomerBookingsPage() {
                   ))}
                 </select>
               </div>
+
+              {/* Service Center Selection Dropdown */}
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Service Center</label>
+                <select
+                  value={serviceCenterId}
+                  onChange={(e) => handleCenterChange(e.target.value)}
+                  required
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                >
+                  <option value="">-- Choose Workshop / Center --</option>
+                  {serviceCenters.map((center) => (
+                    <option key={center.id} value={center.id}>
+                      {center.name} - {center.location}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ✅ Service Package Dropdown */}
+              <div>
+                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Service Package</label>
+                <select
+                  value={serviceId}
+                  onChange={(e) => handleServiceChange(e.target.value)}
+                  required
+                  disabled={!serviceCenterId}
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none disabled:opacity-50 ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                >
+                  <option value="">-- Choose Service Package --</option>
+                  {availableServices.map((svc) => (
+                    <option key={svc.id} value={svc.id}>
+                      {svc.name} - ₹{svc.price} ({svc.duration || "Standard"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* ✅ Dynamic Cost Calculation Display */}
+              {estimatedAmount !== null && (
+                <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex justify-between items-center text-cyan-400 font-bold">
+                  <span>Estimated Service Cost:</span>
+                  <span className="text-sm">₹{estimatedAmount}</span>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
