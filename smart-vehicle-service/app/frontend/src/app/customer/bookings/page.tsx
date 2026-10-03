@@ -1,11 +1,12 @@
 "use client";
 export const dynamic = 'force-dynamic';
-import React, { useState, useEffect } from "react";
+
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { apiRequest } from "@/src/services/api";
 import { useTheme } from "@/src/context/ThemeContext";
 
-export default function CustomerBookingsPage() {
+function CustomerBookingsContent() {
   const { isLightMode } = useTheme();
   const searchParams = useSearchParams();
   const prefilledVehicleId = searchParams.get("vehicleId");
@@ -14,7 +15,7 @@ export default function CustomerBookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [serviceCenters, setServiceCenters] = useState<any[]>([]);
-  const [availableServices, setAvailableServices] = useState<any[]>([]); // 👈 Center-wise services state
+  const [availableServices, setAvailableServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
@@ -26,8 +27,8 @@ export default function CustomerBookingsPage() {
   // Form States
   const [vehicleId, setVehicleId] = useState("");
   const [serviceCenterId, setServiceCenterId] = useState("");
-  const [serviceId, setServiceId] = useState(""); // 👈 Selected Service ID
-  const [estimatedAmount, setEstimatedAmount] = useState<number | null>(null); // 👈 Dynamic Price
+  const [serviceId, setServiceId] = useState("");
+  const [estimatedAmount, setEstimatedAmount] = useState<number | null>(null);
   const [bookingDate, setBookingDate] = useState("");
   const [bookingTime, setBookingTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -71,7 +72,6 @@ export default function CustomerBookingsPage() {
     }
   };
 
-  // ✅ Service Center change hone par us center ki services fetch karna
   const handleCenterChange = async (centerId: string) => {
     setServiceCenterId(centerId);
     setServiceId("");
@@ -88,7 +88,6 @@ export default function CustomerBookingsPage() {
     }
   };
 
-  // ✅ Service select hone par price automatically update karna
   const handleServiceChange = (sId: string) => {
     setServiceId(sId);
     const selectedSvc = availableServices.find((s) => s.id === sId);
@@ -126,7 +125,6 @@ export default function CustomerBookingsPage() {
     setBookingTime(booking.bookingTime || "");
     setNotes(booking.notes || "");
 
-    // Agar center pehle se selected hai toh uski services load karein
     if (booking.serviceCenterId) {
       try {
         const data = await apiRequest(`/services?serviceCenterId=${booking.serviceCenterId}`, "GET");
@@ -213,7 +211,6 @@ export default function CustomerBookingsPage() {
 
   return (
     <div className={`p-8 md:p-12 space-y-8 font-sans max-w-7xl mx-auto relative ${isLightMode ? "text-slate-900" : "text-white"}`}>
-      
       {toastMessage && (
         <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-xs font-mono border flex items-center gap-3 ${toastType === "success" ? "bg-emerald-500 text-slate-950 font-bold border-emerald-400" : "bg-red-500 text-white font-bold border-red-400"}`}>
           <span>{toastType === "success" ? "⚡" : "⚠"}</span>
@@ -284,7 +281,6 @@ export default function CustomerBookingsPage() {
         </div>
       )}
 
-      {/* Booking Modal (Create / Edit) */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
@@ -310,7 +306,6 @@ export default function CustomerBookingsPage() {
                 </select>
               </div>
 
-              {/* Service Center Selection Dropdown */}
               <div>
                 <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Service Center</label>
                 <select
@@ -328,7 +323,6 @@ export default function CustomerBookingsPage() {
                 </select>
               </div>
 
-              {/* ✅ Service Package Dropdown */}
               <div>
                 <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Service Package</label>
                 <select
@@ -347,7 +341,6 @@ export default function CustomerBookingsPage() {
                 </select>
               </div>
 
-              {/* ✅ Dynamic Cost Calculation Display */}
               {estimatedAmount !== null && (
                 <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex justify-between items-center text-cyan-400 font-bold">
                   <span>Estimated Service Cost:</span>
@@ -411,5 +404,13 @@ export default function CustomerBookingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CustomerBookingsPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center font-mono text-xs text-neutral-400">Loading module...</div>}>
+      <CustomerBookingsContent />
+    </Suspense>
   );
 }
