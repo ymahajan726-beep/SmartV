@@ -8,7 +8,7 @@ export async function apiRequest(endpoint: string, method: string = "GET", body?
       endpoint.startsWith("/admin") || 
       endpoint.startsWith("/service-centers") || 
       endpoint.startsWith("/services") ||
-      endpoint.startsWith("/invoices") || // 👈 Yeh /invoices endpoint ko bhi admin token ke liye pakad lega
+      endpoint.startsWith("/invoices") || 
       endpoint.includes("/admin/");
 
     if (isAdminRoute) {
@@ -31,7 +31,14 @@ export async function apiRequest(endpoint: string, method: string = "GET", body?
     }
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  // ✅ URL ko clean aur safe tareeqey se construct karna taaki 404 error na aaye
+  const cleanBase = API_BASE_URL.replace(/\/api\/?$/, ""); // Agar base URL mein /api hai toh use temporarily trim karein
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  
+  // Final URL hamesha exactly `${cleanBase}/api${cleanEndpoint}` banega (e.g. .../api/auth/login)
+  const finalUrl = `${cleanBase}/api${cleanEndpoint}`;
+
+  const response = await fetch(finalUrl, {
     method,
     headers: {
       "Content-Type": "application/json",
