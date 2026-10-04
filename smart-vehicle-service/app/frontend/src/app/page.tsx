@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "@/src/context/ThemeContext";
 
-const API_BASE_URL = "http://localhost:4000/api";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://autocare-backend-p1v3.onrender.com/api";
 
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
