@@ -8,7 +8,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+    origin: true, // 👈 Isse kisi bhi Vercel/Live domain se request allow ho jayegi
     credentials: true,
   });
 
