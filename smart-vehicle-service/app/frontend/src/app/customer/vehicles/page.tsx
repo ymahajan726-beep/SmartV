@@ -21,8 +21,8 @@ type Vehicle = {
 };
 
 type ToastType = "success" | "error";
-
-const API_BASE_URL = "http://localhost:4000/api";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://autocare-backend-p1v3.onrender.com/api";
 
 export default function CustomerVehiclesPage() {
   const { isLightMode, toggleTheme } = useTheme();
