@@ -3,7 +3,6 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/a
 export async function apiRequest(endpoint: string, method: string = "GET", body?: any) {
   let token = "";
   if (typeof window !== "undefined") {
-    // Admin routes, invoices, aur reviews ke admin endpoints ko yahan detect karenge
     const isAdminRoute = 
       endpoint.startsWith("/admin") || 
       endpoint.startsWith("/service-centers") || 
@@ -12,7 +11,6 @@ export async function apiRequest(endpoint: string, method: string = "GET", body?
       endpoint.includes("/admin/");
 
     if (isAdminRoute) {
-      // Admin/Workshop protected routes ke liye primary tokens
       token = 
         localStorage.getItem("autocare_token") || 
         localStorage.getItem("token") || 
@@ -20,7 +18,6 @@ export async function apiRequest(endpoint: string, method: string = "GET", body?
         localStorage.getItem("authToken") || 
         localStorage.getItem("jwt") || "";
     } else {
-      // Pure customer routes ke liye
       token = 
         localStorage.getItem("customer_token") || 
         localStorage.getItem("autocare_token") || 
@@ -31,12 +28,14 @@ export async function apiRequest(endpoint: string, method: string = "GET", body?
     }
   }
 
-  // ✅ URL ko clean aur safe tareeqey se construct karna taaki 404 error na aaye
-  const cleanBase = API_BASE_URL.replace(/\/api\/?$/, ""); // Agar base URL mein /api hai toh use temporarily trim karein
+  // ✅ Clean trailing/leading slashes to prevent 308 redirects and 404 errors
+  const cleanBase = API_BASE_URL.replace(/\/+$/, ""); // Remove trailing slashes from base URL
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  
-  // Final URL hamesha exactly `${cleanBase}/api${cleanEndpoint}` banega (e.g. .../api/auth/login)
-  const finalUrl = `${cleanBase}/api${cleanEndpoint}`;
+
+  // If base already contains /api, don't duplicate it
+  const finalUrl = cleanBase.endsWith("/api") 
+    ? `${cleanBase}${cleanEndpoint}` 
+    : `${cleanBase}/api${cleanEndpoint}`;
 
   const response = await fetch(finalUrl, {
     method,
