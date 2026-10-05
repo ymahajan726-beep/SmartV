@@ -47,7 +47,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Customer Cockpit</span>
         </div>
 
-        {/* 👈 Added onClick={() => setSidebarOpen(false)} on each Link to auto-close sidebar on mobile */}
         <nav className="flex-1 px-6 py-4 space-y-1.5 text-xs uppercase tracking-widest font-mono overflow-y-auto">
           <Link 
             href="/customer/dashboard" 
@@ -103,7 +102,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
       <div className="flex-1 flex flex-col md:pl-72 w-full min-w-0">
         <div className="md:hidden p-4 flex items-center border-b border-white/[0.06]">
           <button 
-            onClick={() => setSidebarOpen(true)} // 👈 Fixed: changed from false to true so menu opens correctly
+            onClick={() => setSidebarOpen(true)} 
             className="text-lg font-mono p-2 rounded-xl border border-white/10 cursor-pointer"
           >
             ☰ Menu

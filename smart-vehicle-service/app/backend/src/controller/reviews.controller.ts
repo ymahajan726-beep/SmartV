@@ -9,13 +9,10 @@ import { Role } from '@prisma/client';
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
-  // Public Landing Page Testimonials
   @Get('public')
   getPublicReviews() {
     return this.reviewService.getPublicFeaturedReviews();
   }
-
-  // Customer Reviews
   @Get('customer')
   @UseGuards(JwtAuthGuard)
   getCustomerReviews(@Req() req: any) {
@@ -29,8 +26,6 @@ export class ReviewController {
     const userId = req.user.userId || req.user.id;
     return this.reviewService.createReview(userId, dto);
   }
-
-  // Admin Reviews Moderation
   @Get('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
  //@Roles(Role.ADMIN)

@@ -10,19 +10,15 @@ export default function CustomerDashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [customer, setCustomer] = useState({ name: "Fellow Motorist", id: "", isGuest: false });
   const [greeting, setGreeting] = useState("Good Afternoon");
-
-  // Data States
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
   const [reminders, setReminders] = useState<any[]>([]);
   const [statuses, setStatuses] = useState<any[]>([]);
-  
-  // UI States
+
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  // Profile Completion Modal States
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileName, setProfileName] = useState("");
   const [profileEmail, setProfileEmail] = useState("");
@@ -32,7 +28,6 @@ export default function CustomerDashboardPage() {
   useEffect(() => {
     setMounted(true);
     
-    // Time-based dynamic greeting logic
     const currentHour = new Date().getHours();
     if (currentHour < 12) {
       setGreeting("Good Morning");
@@ -66,8 +61,7 @@ export default function CustomerDashboardPage() {
       if (profileData) {
         const isAdmin = profileData.role === "ADMIN" || profileData.role === "admin";
         const nameLower = (profileData.name || "").toLowerCase();
-        
-        // Check if name is default, guest, or placeholder containing Customer/development
+      
         const isDefaultName = 
           !profileData.name || 
           nameLower.includes("development") || 
@@ -77,7 +71,6 @@ export default function CustomerDashboardPage() {
 
         if (isDefaultName) {
           setShowProfileModal(true);
-          // Fields explicitly empty rakhi gayi hain taaki modal blank khule
           setProfileName("");
           setProfileEmail("");
           setProfileAddress("");
@@ -86,8 +79,6 @@ export default function CustomerDashboardPage() {
           setProfileEmail(profileData.email && !profileData.email.includes("autocare.local") ? profileData.email : "");
           setProfileAddress(profileData.address || "");
         }
-
-        // Sirf mobile number auto-fill hoga jo OTP se verified hai
         setProfilePhone(profileData.phone || "");
 
         const fetchedName = !isDefaultName ? profileData.name : "Fellow Motorist";
@@ -141,14 +132,12 @@ export default function CustomerDashboardPage() {
   return (
     <div className={`w-full transition-colors duration-300 ${isLightMode ? "text-slate-900" : "text-[#f8fafc]"}`}>
       
-      {/* Toast Notifications */}
       {toast && (
         <div className={`fixed top-6 right-6 z-50 px-6 py-3.5 rounded-2xl shadow-2xl text-xs font-mono border backdrop-blur-md ${toast.type === "success" ? "bg-cyan-500/10 text-cyan-600 border-cyan-500/30 font-bold" : "bg-red-500/10 text-red-600 border-red-500/30"}`}>
           {toast.type === "success" ? "⚡" : "⚠"} {toast.message}
         </div>
       )}
 
-      {/* Profile Completion Mandatory Modal - Now opens completely blank */}
       {showProfileModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl relative ${isLightMode ? "bg-white border-slate-200 text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
@@ -224,7 +213,6 @@ export default function CustomerDashboardPage() {
         </div>
       )}
 
-      {/* Unified Header */}
       <div className={`w-full px-8 py-4 border-b flex justify-between items-center ${isLightMode ? "bg-white border-slate-200 text-slate-500" : "bg-[#060608] border-white/[0.06] text-slate-400"}`}>
         <div className="flex items-center gap-2.5">
            <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
@@ -255,10 +243,10 @@ export default function CustomerDashboardPage() {
         </div>
       </div>
 
-      {/* Dashboard Body */}
+    
       <main className="p-8 md:p-12 space-y-10 max-w-7xl mx-auto w-full">
 
-        {/* Hero Welcome Section */}
+  
         <div className={`relative overflow-hidden p-8 md:p-12 rounded-[36px] border shadow-xl ${isLightMode ? "bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 border-slate-200/80" : "bg-gradient-to-r from-[#111118] via-[#161622] to-[#0d0d14] border-white/[0.08]"}`}>
           <div className="absolute right-0 top-0 w-1/2 h-full opacity-10 pointer-events-none bg-[radial-gradient(#00F0FF_1px,transparent_1px)] [background-size:16px_16px]"></div>
           
@@ -295,7 +283,7 @@ export default function CustomerDashboardPage() {
           </div>
         ) : (
           <>
-            {/* Quick Stats Grid */}
+          
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-mono">
               <div className={`p-6 rounded-[28px] border shadow-md relative overflow-hidden ${isLightMode ? "bg-white border-slate-200" : "bg-[#12121a] border-white/[0.06]"}`}>
                 <span className="text-[10px] text-slate-500 uppercase tracking-widest block mb-1 font-bold">My Garage</span>
@@ -318,7 +306,6 @@ export default function CustomerDashboardPage() {
               </div>
             </div>
 
-            {/* My Garage Vehicles Section */}
             <div className={`p-8 md:p-10 rounded-[36px] border shadow-sm ${isLightMode ? "bg-white border-slate-200" : "bg-[#0d0d14] border-white/[0.06]"}`}>
               <div className="flex justify-between items-center mb-8">
                 <div>

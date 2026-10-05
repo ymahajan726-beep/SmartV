@@ -8,7 +8,6 @@ export class AppGateway {
 
   @SubscribeMessage('newClientEntry')
   handleNewClient(@MessageBody() data: any): void {
-    // Sabhi connected clients ko broadcast karega
     this.server.emit('clientAdded', data);
   }
 }

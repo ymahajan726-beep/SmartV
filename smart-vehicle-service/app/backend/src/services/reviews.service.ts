@@ -5,7 +5,6 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ReviewService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // --- CUSTOMER: Create or Submit Review for a Booking ---
   async createReview(customerId: string, dto: { bookingId: string; rating: number; comment?: string }) {
     // 1. Check if booking exists and belongs to customer
     const booking = await this.prisma.booking.findUnique({
@@ -16,13 +15,10 @@ export class ReviewService {
     if (!booking) throw new NotFoundException('Booking not found.');
     if (booking.customerId !== customerId) throw new ForbiddenException('Unauthorized access.');
 
-    // 2. Check if booking is completed or paid
     const isPaid = booking.invoices.some(inv => inv.status === 'PAID') || booking.paymentStatus === 'PAID';
     if (!isPaid && booking.status !== 'COMPLETED') {
       throw new BadRequestException('You can only review completed or paid service bookings.');
     }
-
-    // 3. Check if review already exists for this booking
     const existingReview = await this.prisma.review.findUnique({
       where: { bookingId: dto.bookingId },
     });
@@ -37,8 +33,6 @@ export class ReviewService {
         },
       });
     }
-
-    // 4. Create new review (By default high ratings like 4 or 5 can be featured on landing page)
     const isFeatured = Number(dto.rating) >= 4;
 
     return this.prisma.review.create({
@@ -52,7 +46,6 @@ export class ReviewService {
     });
   }
 
-  // --- CUSTOMER: Get My Reviews ---
   async getReviewsByUser(customerId: string) {
     return this.prisma.review.findMany({
       where: { customerId },
@@ -68,7 +61,6 @@ export class ReviewService {
     });
   }
 
-  // --- ADMIN: Get All Reviews ---
   async getAllReviewsForAdmin() {
     return this.prisma.review.findMany({
       include: {
@@ -78,8 +70,6 @@ export class ReviewService {
       orderBy: { createdAt: 'desc' },
     });
   }
-
-  // --- PUBLIC: Get Featured Reviews for Landing Page ---
   async getPublicFeaturedReviews() {
     return this.prisma.review.findMany({
       where: { isFeatured: true, rating: { gte: 4 } },
@@ -92,7 +82,6 @@ export class ReviewService {
     });
   }
 
-  // --- ADMIN / OWNER: Delete Review ---
   async deleteReview(id: string) {
     const review = await this.prisma.review.findUnique({ where: { id } });
     if (!review) throw new NotFoundException('Review not found.');
@@ -102,7 +91,6 @@ export class ReviewService {
     });
   }
 
-  // --- ADMIN: Toggle Featured Status for Landing Page ---
   async toggleFeatureReview(id: string) {
     const review = await this.prisma.review.findUnique({ where: { id } });
     if (!review) throw new NotFoundException('Review not found.');

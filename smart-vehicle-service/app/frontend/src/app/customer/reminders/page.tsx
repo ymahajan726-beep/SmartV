@@ -79,8 +79,6 @@ export default function CustomerRemindersPage() {
       <p className="text-xs font-mono text-slate-400 mb-8 uppercase tracking-widest">
         Track upcoming services and custom vehicle alerts
       </p>
-
-      {/* Add Reminder Form */}
       <form onSubmit={handleCreate} className="bg-[#12121c] border border-white/10 p-6 rounded-3xl mb-10 grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs">
         <div>
           <label className="block text-slate-400 mb-1">Reminder Title</label>
@@ -122,7 +120,6 @@ export default function CustomerRemindersPage() {
         </div>
       </form>
 
-      {/* Reminders List */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {loading ? (
           <p className="text-xs font-mono text-slate-500">Loading reminders...</p>

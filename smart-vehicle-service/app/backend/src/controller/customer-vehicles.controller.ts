@@ -24,7 +24,6 @@ export class CustomerVehiclesController {
     return this.vehiclesService.updateVehicle(userId, id, dto);
   }
 
-  // ✅ Added Delete Vehicle Route
   @Delete(':id')
   deleteVehicle(@Req() req: any, @Param('id') id: string) {
     const userId = req.user.userId || req.user.id;

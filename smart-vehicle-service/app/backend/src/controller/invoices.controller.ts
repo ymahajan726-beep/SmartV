@@ -16,8 +16,6 @@ export class InvoicesController {
   findAllInvoices() {
     return this.invoicesService.findAllInvoices();
   }
-
-  // Dashboard ke liye recent paid invoices route
   @Get('recent-paid')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.WORKSHOP)

@@ -9,14 +9,11 @@ export default function CustomerReviewsPage() {
   const [reviews, setReviews] = useState<any[]>([]);
   const [completedBookings, setCompletedBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Modal State for Submitting/Editing Review
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [rating, setRating] = useState<number>(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Toast
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
 
@@ -118,7 +115,6 @@ export default function CustomerReviewsPage() {
         </button>
       </header>
 
-      {/* Submitted Reviews Section */}
       <div className={`p-8 rounded-[32px] border shadow-xl ${isLightMode ? "bg-white border-slate-200" : "bg-[#141418] border-white/10"}`}>
         <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F0FF] mb-6">Your Submitted Reviews (Editable / Deletable)</h3>
         
@@ -177,7 +173,6 @@ export default function CustomerReviewsPage() {
         )}
       </div>
 
-      {/* Eligible Bookings for Review Section */}
       <div className={`p-8 rounded-[32px] border shadow-xl ${isLightMode ? "bg-white border-slate-200" : "bg-[#141418] border-white/10"}`}>
         <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F0FF] mb-2">Rate Completed Service Bookings</h3>
         <p className="text-xs font-mono text-neutral-400 mb-6">Select any finished service booking to submit your rating and feedback.</p>
@@ -211,7 +206,6 @@ export default function CustomerReviewsPage() {
         )}
       </div>
 
-      {/* Review Modal for Add/Edit */}
       {selectedBookingId && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>

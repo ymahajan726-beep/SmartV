@@ -6,7 +6,7 @@ export class ResetPasswordDto {
   email: string;
 
   @IsNotEmpty()
-  token: string; // Reset token ya OTP jo email par ya response mein milega
+  token: string; 
 
   @IsNotEmpty()
   @MinLength(6)

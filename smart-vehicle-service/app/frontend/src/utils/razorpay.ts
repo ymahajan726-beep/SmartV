@@ -35,7 +35,7 @@ export const payWithRazorpay = async ({
 
   const options = {
     key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_mockkey',
-    amount: Math.round(amount * 100), // Amount in paise
+    amount: Math.round(amount * 100), 
     currency: 'INR',
     name: 'AutoCare Enterprise',
     description: `Invoice Payment: ${invoiceNumber}`,

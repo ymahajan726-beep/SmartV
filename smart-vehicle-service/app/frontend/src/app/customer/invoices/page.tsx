@@ -26,7 +26,6 @@ export default function CustomerInvoicesPage() {
     }
   };
 
-  // Consistent SSR/Client initial placeholder to prevent Hydration Mismatch
   if (!mounted) {
     return (
       <div className="space-y-6 font-sans p-6 text-white max-w-5xl mx-auto font-mono text-xs">

@@ -42,8 +42,6 @@ export class CustomerVehiclesService {
       },
     });
   }
-
-  // ✅ Update Vehicle Logic
   async updateVehicle(userId: string, vehicleId: string, dto: any) {
     const vehicle = await this.prisma.vehicle.findUnique({
       where: { id: vehicleId },
@@ -84,8 +82,6 @@ export class CustomerVehiclesService {
       },
     });
   }
-
-  // ✅ Delete Vehicle Logic
   async deleteVehicle(userId: string, vehicleId: string) {
     const vehicle = await this.prisma.vehicle.findUnique({
       where: { id: vehicleId },

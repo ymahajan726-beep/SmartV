@@ -16,8 +16,6 @@ export class ServiceCenterService {
       data: dto,
     });
   }
-
-  // 👇 Yeh method hona zaroori hai taaki TypeScript error na de
   async update(id: string, dto: { name: string; location: string; phone?: string }) {
     return this.prisma.serviceCenter.update({
       where: { id },

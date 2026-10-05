@@ -58,7 +58,6 @@ export default function CustomerViewInvoicePage() {
         </button>
       </div>
 
-      {/* Full A4 Tax Invoice Document Layout */}
       <div className="w-full max-w-3xl bg-white text-slate-900 p-8 sm:p-12 rounded-[32px] shadow-2xl font-mono space-y-8">
         <div className="border-b pb-6 flex justify-between items-start">
           <div>

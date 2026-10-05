@@ -16,8 +16,7 @@ export class RolesGuard implements CanActivate {
     }
 
     const { user } = context.switchToHttp().getRequest();
-    
-    // Yahan check karein ki user ke paas role hai aur woh required roles se match karta hai
+
     if (!user || !user.role) {
       return false;
     }

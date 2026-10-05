@@ -10,7 +10,6 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false); // 👈 Toggle for Forgot Password view
   
-  // Forgot/Reset state variables
   const [resetEmail, setResetEmail] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -170,7 +169,7 @@ export default function AdminLoginPage() {
             </button>
           </form>
         ) : (
-          // FORGOT & RESET PASSWORD FLOW
+        
           <div className="space-y-4">
             {!resetToken ? (
               <form onSubmit={handleForgotPassword} className="space-y-4">

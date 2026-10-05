@@ -19,12 +19,8 @@ function CustomerBookingsContent() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingBookingId, setEditingBookingId] = useState<string | null>(null);
-
-  // Toast State
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
-
-  // Form States
   const [vehicleId, setVehicleId] = useState("");
   const [serviceCenterId, setServiceCenterId] = useState("");
   const [serviceId, setServiceId] = useState("");

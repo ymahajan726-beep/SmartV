@@ -8,8 +8,6 @@ export default function AdminServicesPage() {
   const [services, setServices] = useState<any[]>([]);
   const [serviceCenters, setServiceCenters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Form states
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -17,8 +15,6 @@ export default function AdminServicesPage() {
   const [serviceCenterId, setServiceCenterId] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // Toast Notification State
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
 
@@ -103,7 +99,6 @@ export default function AdminServicesPage() {
   return (
     <div className={`space-y-8 font-sans ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
       
-      {/* Toast Notification Banner */}
       {toastMessage && (
         <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-xs font-mono border flex items-center gap-3 ${toastType === "success" ? "bg-emerald-500 text-slate-950 font-bold border-emerald-400" : "bg-red-500 text-white font-bold border-red-400"}`}>
           <span>{toastType === "success" ? "⚡" : "⚠"}</span>
@@ -118,10 +113,8 @@ export default function AdminServicesPage() {
         </div>
       </header>
 
-      {/* Responsive Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Form Section */}
         <div className={`p-6 rounded-[28px] border shadow-xl h-fit ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F0FF]">
@@ -207,8 +200,6 @@ export default function AdminServicesPage() {
             </button>
           </form>
         </div>
-
-        {/* List Table Section with Responsive Scroll */}
         <div className={`lg:col-span-2 rounded-[28px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <div className="p-6 border-b border-white/10 font-mono text-xs uppercase tracking-widest text-[#00F0FF]">
             Available Services ({services.length})

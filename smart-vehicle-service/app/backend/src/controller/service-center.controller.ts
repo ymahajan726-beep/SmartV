@@ -13,22 +13,19 @@ export class ServiceCenterController {
   findAll() {
     return this.serviceCenterService.findAll();
   }
-
-  @Post()
+ @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   create(@Body() dto: { name: string; location: string; phone?: string }) {
     return this.serviceCenterService.create(dto);
   }
-
-  @Patch(':id')
+ @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() dto: { name: string; location: string; phone?: string }) {
     return this.serviceCenterService.update(id, dto);
   }
-
-  @Delete(':id')
+ @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {

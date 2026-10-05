@@ -21,8 +21,7 @@ export class InvoicesService {
       orderBy: { createdAt: 'desc' }
     });
   }
-
-  async findInvoicesByCustomer(customerId: string) {
+ async findInvoicesByCustomer(customerId: string) {
     return this.prisma.invoice.findMany({
       where: { customerId },
       include: {
@@ -38,8 +37,6 @@ export class InvoicesService {
       orderBy: { createdAt: 'desc' }
     });
   }
-
-  // Dashboard ke liye recent paid invoices fetch karne ka method
   async findRecentPaidInvoices() {
     const twoDaysAgo = new Date();
     twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);

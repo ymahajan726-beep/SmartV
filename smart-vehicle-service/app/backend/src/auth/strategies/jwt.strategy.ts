@@ -14,7 +14,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    // Yeh payload wahi hai jo AuthService mein sign kiya tha: { userId, email, role }
+    
     return { userId: payload.userId, email: payload.email, role: payload.role };
   }
 }

@@ -8,15 +8,12 @@ export default function AdminInventoryPage() {
   const [parts, setParts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form states
   const [partName, setPartName] = useState("");
   const [sku, setSku] = useState("");
   const [stockQty, setStockQty] = useState("");
   const [unitPrice, setUnitPrice] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // Toast
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
 
@@ -103,7 +100,7 @@ export default function AdminInventoryPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Form */}
+      
         <div className={`p-6 rounded-[28px] border shadow-xl h-fit ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F0FF]">
@@ -168,7 +165,6 @@ export default function AdminInventoryPage() {
           </form>
         </div>
 
-        {/* Table */}
         <div className={`lg:col-span-2 rounded-[28px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <div className="p-6 border-b border-white/10 font-mono text-xs uppercase tracking-widest text-[#00F0FF]">
             Current Inventory Stock ({parts.length})

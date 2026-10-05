@@ -10,22 +10,17 @@ const API_BASE_URL =
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
   const { isLightMode, toggleTheme } = useTheme();
-
-  const [showCustomerModal, setShowCustomerModal] = useState(false);
+ const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [activeReview, setActiveReview] = useState<number | null>(0);
-
-  const [identifier, setIdentifier] = useState("");
+ const [identifier, setIdentifier] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [shake, setShake] = useState(false);
   const [carMoving, setCarMoving] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  // Dynamic Public Reviews state
   const [publicReviews, setPublicReviews] = useState<any[]>([]);
 
-  // Hero Section Slideshow Images (Car Images - Unchanged)
   const heroImages = [
     "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&auto=format&fit=crop&q=80",
     "https://images.unsplash.com/photo-1555353540-64580b51c258?w=1600&auto=format&fit=crop&q=80",
@@ -197,7 +192,6 @@ export default function LandingPage() {
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 overflow-x-hidden ${isLightMode ? "bg-[#f8f9fa] text-slate-900" : "bg-[#060608] text-[#f8fafc]"}`}>
       
-      {/* NAVBAR */}
       <nav className={`w-full px-8 md:px-16 py-6 flex justify-between items-center border-b sticky top-0 backdrop-blur-2xl z-50 ${isLightMode ? "border-slate-200 bg-white/90 text-slate-900" : "border-white/[0.06] bg-[#0d0d12]/90 text-white"}`}>
         <div className="flex items-center gap-3">
           <span className="text-xl font-black tracking-tighter uppercase">
@@ -205,7 +199,6 @@ export default function LandingPage() {
           </span>
         </div>
 
-        {/* Smooth Scrolling Links */}
         <div className={`hidden lg:flex items-center gap-10 text-xs uppercase tracking-widest font-mono font-semibold ${isLightMode ? "text-slate-700" : "text-slate-300"}`}>
           <a href="#features" className="hover:text-[#00F0FF] transition-colors">Features</a>
           <a href="#why-choose" className="hover:text-[#00F0FF] transition-colors">Why Choose Us</a>
@@ -220,7 +213,6 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Modernized Theme Toggle Button */}
           <button onClick={toggleTheme} className={`px-3.5 py-2 rounded-xl border text-xs font-mono flex items-center gap-2 transition-all cursor-pointer ${isLightMode ? "border-slate-300 bg-slate-100 text-slate-900 hover:bg-slate-200" : "border-white/10 bg-[#12121c] text-[#00F0FF] hover:bg-white/10"}`}>
             <span>{isLightMode ? "🌙" : "☀️"}</span>
             <span className="text-[10px] uppercase font-bold">{isLightMode ? "Dark" : "Light"}</span>
@@ -228,7 +220,6 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* HERO SECTION */}
       <section className="container mx-auto px-8 md:px-16 pt-24 pb-20">
         <div className="max-w-5xl mb-16">
           <span className="text-[#00F0FF] text-xs font-mono uppercase tracking-widest block mb-4 font-bold">
@@ -246,7 +237,6 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* HERO CAROUSEL SLIDESHOW (Car Image Unchanged) */}
         <div className="relative w-full h-[400px] md:h-[500px] rounded-[32px] overflow-hidden border border-white/10 bg-neutral-900 group shadow-2xl">
           {heroImages.map((imgUrl, idx) => (
             <img
@@ -316,7 +306,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* WHY CHOOSE US SECTION */}
       <section id="why-choose" className="container mx-auto px-8 md:px-16 py-24 border-t border-white/10">
         <div className="max-w-xl mb-16">
           <span className="text-[#00F0FF] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">
@@ -354,7 +343,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CLIENT REVIEWS SECTION */}
       <section id="reviews" className={`container mx-auto px-8 md:px-16 py-24 border-t ${isLightMode ? "border-slate-200 bg-slate-50/50" : "border-white/10 bg-black/20"}`}>
         <div className="max-w-xl mb-16">
           <span className="text-[#00F0FF] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">
@@ -408,7 +396,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CONTACT US SECTION */}
       <section id="contact" className="container mx-auto px-8 md:px-16 py-24 border-t border-white/10">
         <div className="max-w-xl mb-12">
           <span className="text-[#00F0FF] text-xs font-mono uppercase tracking-widest block mb-2 font-bold">
@@ -440,8 +427,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* CUSTOMER LOGIN MODAL */}
       {showCustomerModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className={`w-full max-w-xl rounded-[40px] p-8 md:p-12 relative shadow-2xl border overflow-hidden ${isLightMode ? "bg-white border-slate-300 text-slate-900" : "bg-[#0d0d14] border-[#00F0FF]/40 text-white"} ${shake ? "animate-bounce" : ""}`}>
@@ -540,7 +525,6 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* NOTIFICATION */}
       {notification && (
         <div className="fixed bottom-8 right-8 z-[100] bg-[#00F0FF] text-slate-950 px-6 py-4 rounded-2xl shadow-2xl border border-black/20 flex items-center gap-3 font-mono font-bold text-xs max-w-md">
           <span>🏎️</span>
@@ -548,7 +532,6 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* FOOTER */}
       <footer className="w-full px-8 md:px-16 py-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center text-xs text-slate-500 uppercase tracking-widest gap-4 font-mono">
         <span>© 2026 AutoCare Studio Platform. All rights reserved.</span>
       </footer>

@@ -9,26 +9,20 @@ import { ResetPasswordDto } from '../dto/reset-password.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // Customer Signup endpoint
   @Post('register/customer')
   registerCustomer(@Body() dto: CustomerRegisterDto) {
     return this.authService.registerCustomer(dto);
   }
 
-  // Universal Login endpoint (Admin / Workshop / Customer)
   @Post('login')
   login(@Body() dto: AuthLoginDto) {
     return this.authService.login(dto);
   }
-
-  // Forgot Password endpoint
   @Post('forgot-password')
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
   }
-
-  // Reset Password endpoint
-  @Post('reset-password')
+ @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
   }

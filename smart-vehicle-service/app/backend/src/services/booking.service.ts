@@ -1,11 +1,10 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service'; // Aapke project ke hisab se import path check kar lein
+import { PrismaService } from '../prisma/prisma.service'; 
 
 @Injectable()
 export class BookingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // --- CUSTOMER: Get Bookings with Center, Vehicle, Service & Spare Parts details ---
   async findBookingsByUser(userId: string) {
     return this.prisma.booking.findMany({
       where: { customerId: userId },
@@ -13,13 +12,12 @@ export class BookingService {
         vehicle: true,
         serviceCenter: true,
         service: true,
-        spareParts: true, // 👈 Spare parts included
+        spareParts: true, 
       },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  // --- CUSTOMER: Create Booking with Service Center & Service Package ---
   async createBooking(userId: string, dto: any) {
     const bookingNumber = `BK-${Math.floor(100000 + Math.random() * 900000)}`;
     
@@ -57,7 +55,6 @@ export class BookingService {
     });
   }
 
-  // --- CUSTOMER: Update Booking ---
   async updateBookingByCustomer(userId: string, bookingId: string, dto: any) {
     const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) throw new NotFoundException('Booking not found.');
@@ -94,7 +91,6 @@ export class BookingService {
     });
   }
 
-  // --- CUSTOMER: Permanent Delete Booking ---
   async cancelBooking(userId: string, bookingId: string) {
     const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) throw new NotFoundException('Booking not found.');
@@ -105,10 +101,9 @@ export class BookingService {
     });
   }
 
-  // --- ADMIN: Get All Active (Non-Archived) Bookings ---
   async findAllBookingsForAdmin() {
     return this.prisma.booking.findMany({
-      where: { isArchived: false }, // 👈 Sirf live/active bookings dikhengi, paid/archived nahi
+      where: { isArchived: false }, 
       include: {
         vehicle: true,
         service: true,
@@ -134,10 +129,9 @@ export class BookingService {
     });
   }
 
-  // --- ADMIN: Get Archived (Completed & Paid) Bookings ---
   async findArchivedBookingsForAdmin() {
     return this.prisma.booking.findMany({
-      where: { isArchived: true }, // 👈 Sirf archived bookings
+      where: { isArchived: true }, 
       include: {
         vehicle: true,
         service: true,
@@ -162,8 +156,6 @@ export class BookingService {
       orderBy: { updatedAt: 'desc' },
     });
   }
-
-  // --- ADMIN: Permanent Delete Archived Booking ---
   async permanentDeleteArchivedBooking(bookingId: string) {
     const booking = await this.prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) throw new NotFoundException('Booking not found.');
@@ -173,7 +165,6 @@ export class BookingService {
     });
   }
 
-  // --- ADMIN / WORKSHOP: Add Spare Part to Booking & Deduct Inventory Stock ---
   async addSparePartToBooking(bookingId: string, dto: { inventoryPartId: string; quantity: number }) {
     const part = await this.prisma.inventoryPart.findUnique({
       where: { id: dto.inventoryPartId },
@@ -184,13 +175,11 @@ export class BookingService {
       throw new BadRequestException(`Insufficient stock! Available: ${part.stockQty}, Requested: ${dto.quantity}`);
     }
 
-    // 1. Deduct stock from inventory
     await this.prisma.inventoryPart.update({
       where: { id: dto.inventoryPartId },
       data: { stockQty: part.stockQty - dto.quantity },
     });
 
-    // 2. Create BookingSparePart record
     const sparePartEntry = await this.prisma.bookingSparePart.create({
       data: {
         bookingId,
@@ -200,7 +189,6 @@ export class BookingService {
       },
     });
 
-    // 3. Update Booking's finalAmount automatically (Service Cost + Parts Cost)
     const booking = await this.prisma.booking.findUnique({
       where: { id: bookingId },
       include: { service: true, spareParts: true },
@@ -209,7 +197,6 @@ export class BookingService {
     const serviceCost = booking?.service?.price ? Number(booking.service.price) : Number(booking?.estimatedAmount || 0);
     const totalPartsCost = booking?.spareParts.reduce((sum, sp) => sum + (Number(sp.price) * sp.quantity), 0) || 0;
     const newFinalAmount = serviceCost + totalPartsCost;
-
     await this.prisma.booking.update({
       where: { id: bookingId },
       data: { finalAmount: newFinalAmount },
@@ -217,8 +204,6 @@ export class BookingService {
 
     return sparePartEntry;
   }
-
-  // --- ADMIN: Update Status + Trigger WhatsApp/SMS Notification Simulation ---
   async updateBookingStatusByAdmin(bookingId: string, status: any) {
     const updatedBooking = await this.prisma.booking.update({
       where: { id: bookingId },
@@ -231,7 +216,6 @@ export class BookingService {
       },
     });
 
-    // 🚀 Notification Alert Simulation (WhatsApp / SMS Trigger)
     console.log(`\n========================================`);
     console.log(`[WHATSAPP/SMS ALERT TRIGGERED]`);
     console.log(`To Customer: ${updatedBooking.customer?.name} (${updatedBooking.customer?.phone})`);

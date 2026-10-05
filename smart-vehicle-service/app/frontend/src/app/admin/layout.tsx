@@ -10,7 +10,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    // Check if token exists in localStorage
     const token = localStorage.getItem("autocare_token");
     if (!token) {
       router.push("/login");
@@ -24,7 +23,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     router.push("/login");
   };
 
-  // Agar token verify nahi hua toh blank screen ya loader dikhayein redirect hone tak
   if (!authorized) {
     return (
       <div className="min-h-screen bg-[#0b0b0e] text-white flex items-center justify-center font-mono text-xs uppercase tracking-widest">
@@ -61,7 +59,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {/* Adaptive Main Page Content */}
         <main className={`flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto ${isLightMode ? "bg-white text-[#111111]" : "bg-[#141418] text-[#f3f3f6]"}`}>
           {children}
         </main>

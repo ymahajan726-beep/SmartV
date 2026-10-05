@@ -20,7 +20,6 @@ import { Role } from '@prisma/client';
 export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
-  // --- CUSTOMER ROUTES ---
   @Get('customer/bookings')
   getCustomerBookings(@Req() req: any) {
     const userId = req.user.userId || req.user.id;
@@ -45,7 +44,6 @@ export class BookingController {
     return this.bookingService.cancelBooking(userId, id);
   }
 
-  // --- ADMIN ROUTES ---
   @Get('admin/bookings')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.WORKSHOP)
@@ -53,7 +51,6 @@ export class BookingController {
     return this.bookingService.findAllBookingsForAdmin();
   }
 
-  // 👈 Archived Bookings Fetch Endpoint Added
   @Get('admin/bookings/archived')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.WORKSHOP)
@@ -78,7 +75,6 @@ export class BookingController {
     return this.bookingService.addSparePartToBooking(bookingId, dto);
   }
 
-  // 👈 Permanent Delete Archived Booking Endpoint Added
   @Delete('admin/bookings/:id/archive')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.WORKSHOP)

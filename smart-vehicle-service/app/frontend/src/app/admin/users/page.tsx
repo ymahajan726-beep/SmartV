@@ -19,8 +19,6 @@ export default function AdminUsersPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("STAFF");
-
-  // Edit User States
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -133,7 +131,6 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* Header with Tabs */}
       <header className={`pb-6 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
           <h1 className={`text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>
@@ -141,7 +138,6 @@ export default function AdminUsersPage() {
           </h1>
         </div>
 
-        {/* Tab Switcher */}
         <div className="flex items-center gap-3">
           <div className={`p-1 rounded-xl border flex gap-1 font-mono text-xs ${isLightMode ? "bg-gray-100 border-gray-200" : "bg-[#0b0b0e] border-white/10"}`}>
             <button
@@ -177,7 +173,6 @@ export default function AdminUsersPage() {
 
       {errorMsg && <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-xs font-mono border border-red-500/20">⚠️ {errorMsg}</div>}
 
-      {/* STAFF / ADMIN TABLE */}
       {activeTab === "staff" && (
         <div className={`rounded-[32px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
@@ -225,7 +220,6 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* CUSTOMER CRM DIRECTORY TABLE */}
       {activeTab === "customers" && (
         <div className={`rounded-[32px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
@@ -247,28 +241,22 @@ export default function AdminUsersPage() {
                 customers.map((c) => (
                   <tr key={c.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
                     
-                    {/* Customer Info */}
                     <td className="p-4">
                       <div className={`font-bold text-sm ${isLightMode ? "text-gray-900" : "text-white"}`}>{c.name || "Valued Customer"}</div>
                       <div className="text-[10px] text-neutral-400">ID: #{c.id.slice(-6)}</div>
                     </td>
-
-                    {/* Mobile No */}
                     <td className="p-4 font-bold text-[#cbf000]">
                       {c.phone || "No Phone"}
                     </td>
 
-                    {/* Email */}
                     <td className="p-4 lowercase text-neutral-300">
                       {c.email || "No Email"}
                     </td>
 
-                    {/* Address */}
                     <td className="p-4 text-neutral-300 truncate max-w-[150px]">
                       {c.address || "No Address"}
                     </td>
 
-                    {/* Actions - Edit option removed */}
                     <td className="p-4 text-right">
                       <button onClick={() => handleDelete(c)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
                     </td>
@@ -280,7 +268,6 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* Register Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-lg p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
@@ -305,7 +292,6 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* Edit Modal (Only used for Staff / Admin now) */}
       {showEditModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-lg p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>

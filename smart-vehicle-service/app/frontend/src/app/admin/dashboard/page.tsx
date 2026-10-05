@@ -50,9 +50,9 @@ export default function AdminDashboardPage() {
         </button>
       </header>
 
-      {/* Stats Cards Grid */}
+      
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 font-mono">
-        {/* Total Vehicles Card */}
+  
         <div className={`p-6 rounded-[28px] border shadow-md ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-1">Total Fleet Vehicles</span>
           <div className="text-3xl font-bold text-[#cbf000]">
@@ -60,7 +60,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Total Customers Card */}
         <div className={`p-6 rounded-[28px] border shadow-md ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-1">Total Customers</span>
           <div className="text-3xl font-bold text-cyan-400">
@@ -68,7 +67,6 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Total Bookings Card */}
         <div className={`p-6 rounded-[28px] border shadow-md ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <span className="text-[10px] text-neutral-400 uppercase tracking-widest block mb-1">Service Bookings</span>
           <div className="text-3xl font-bold text-amber-400">
@@ -77,7 +75,6 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* RECENT PAID INVOICES FEED */}
       <div className={`rounded-[32px] border overflow-hidden shadow-xl p-6 ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/10">
           <div>

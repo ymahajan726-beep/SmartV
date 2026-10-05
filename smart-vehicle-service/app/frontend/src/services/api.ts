@@ -10,18 +10,27 @@ export async function apiRequest(endpoint: string, method: string = "GET", body?
       endpoint.startsWith("/invoices") || 
       endpoint.includes("/admin/");
 
-    token = localStorage.getItem(isAdminRoute ? "autocare_token" : "customer_token") || 
-            localStorage.getItem("autocare_token") || 
-            localStorage.getItem("token") || 
-            localStorage.getItem("access_token") || 
-            localStorage.getItem("authToken") || 
-            localStorage.getItem("jwt") || "";
+    if (isAdminRoute) {
+      token = 
+        localStorage.getItem("autocare_token") || 
+        localStorage.getItem("token") || 
+        localStorage.getItem("access_token") || 
+        localStorage.getItem("authToken") || 
+        localStorage.getItem("jwt") || "";
+    } else {
+      token = 
+        localStorage.getItem("customer_token") || 
+        localStorage.getItem("autocare_token") || 
+        localStorage.getItem("token") || 
+        localStorage.getItem("access_token") || 
+        localStorage.getItem("authToken") || 
+        localStorage.getItem("jwt") || "";
+    }
   }
 
-  // Base URL aur endpoint ko clean karo aur aakhri slash (/) hata do
-  const cleanBase = API_BASE_URL.replace(/\/+$/, "");
-  const formattedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  const cleanEndpoint = formattedEndpoint.replace(/\/+$/, ""); // 👈 Aakhri slash ko hata dega taaki 308 na aaye
+
+  const cleanBase = API_BASE_URL.replace(/\/+$/, ""); 
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
   const finalUrl = cleanBase.endsWith("/api") 
     ? `${cleanBase}${cleanEndpoint}` 

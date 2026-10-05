@@ -24,14 +24,12 @@ export class RemindersService {
       },
     });
   }
-
-  async markAsCompleted(id: string, customerId: string) {
+ async markAsCompleted(id: string, customerId: string) {
     const reminder = await this.prisma.reminder.findUnique({ where: { id } });
     if (!reminder || reminder.customerId !== customerId) {
       throw new NotFoundException('Reminder not found or unauthorized');
     }
-
-    return this.prisma.reminder.update({
+return this.prisma.reminder.update({
       where: { id },
       data: { status: 'COMPLETED' },
     });
@@ -56,7 +54,6 @@ export class RemindersService {
     });
   }
 
-  // 👇 Yeh function add karna zaroori hai
   async getAllCustomers() {
     return this.prisma.user.findMany({
       where: { role: 'CUSTOMER' },

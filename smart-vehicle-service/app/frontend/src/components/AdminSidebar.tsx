@@ -9,7 +9,6 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile & Tablet Top Bar for Responsive Screens */}
       <div className={`lg:hidden flex items-center justify-between px-4 sm:px-6 py-4 border-b ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#121216] border-white/10 text-white"} fixed top-0 left-0 right-0 z-50`}>
         <span className="text-lg font-black tracking-tighter uppercase">
           Auto<span className="text-[#cbf000] bg-black text-white px-2 py-0.5 rounded-md">Care</span>
@@ -21,16 +20,12 @@ export default function AdminSidebar() {
           {sidebarOpen ? "✕ Close" : "☰ Menu"}
         </button>
       </div>
-
-      {/* Backdrop Overlay for smaller viewports */}
       {sidebarOpen && (
         <div 
           onClick={() => setSidebarOpen(false)} 
           className="fixed inset-0 bg-black/70 backdrop-blur-xs z-40 lg:hidden" 
         />
       )}
-
-      {/* Adaptive Sidebar Navigation */}
       <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-72 shrink-0 border-r p-6 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} ${isLightMode ? "border-gray-200 bg-white text-gray-900" : "border-white/10 bg-[#121216] text-[#f3f3f6]"}`}>
         <div>
           <div className="hidden lg:flex items-center justify-between mb-8">
@@ -48,7 +43,6 @@ export default function AdminSidebar() {
             <Link href="/admin/service-centers" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>🛠️ Centers</Link>
             <Link href="/admin/spare-parts" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>📦 Spare Parts</Link>
             
-            {/* ✅ Fixed Archives Link with matching uniform styling and auto-close on mobile */}
             <Link 
               href="/admin/archive" 
               onClick={() => setSidebarOpen(false)} 

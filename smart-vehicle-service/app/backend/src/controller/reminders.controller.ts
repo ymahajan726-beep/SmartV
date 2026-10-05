@@ -46,7 +46,6 @@ export class RemindersController {
     });
   }
 
-  // Admin ke liye saare customers ki list fetch karne ka endpoint
   @Get('admin/customers-list')
   getCustomersList() {
     return this.remindersService.getAllCustomers();

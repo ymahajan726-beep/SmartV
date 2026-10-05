@@ -10,26 +10,17 @@ export default function AdminBookingsPage() {
   const [inventoryParts, setInventoryParts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Search & Filter States
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-
-  // Modal State for Spare Parts Assignment
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
   const [selectedPartId, setSelectedPartId] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [submitting, setSubmitting] = useState(false);
-
-  // Invoice Modal State
   const [viewingInvoice, setViewingInvoice] = useState<any>(null);
   const [invoiceLoading, setInvoiceLoading] = useState(false);
   const [updatingPayment, setUpdatingPayment] = useState(false);
-
-  // Manual Charges & Discount States
   const [manualLabor, setManualLabor] = useState("0");
   const [discountVal, setDiscountVal] = useState("0");
-
-  // Toast
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
 
@@ -91,7 +82,6 @@ export default function AdminBookingsPage() {
     }
   };
 
-  // Fetch and View Bill Modal (Only allowed if status is COMPLETED or READY_FOR_DELIVERY)
   const handleViewBill = async (b: any) => {
     if (b.status !== 'COMPLETED' && b.status !== 'READY_FOR_DELIVERY') {
       triggerToast("Invoice can only be generated when service status is Ready for Delivery or Completed.", "error");
@@ -124,8 +114,6 @@ export default function AdminBookingsPage() {
       triggerToast("Failed to update extra charges.", "error");
     }
   };
-
-  // Cash Payment Handler (Instant Paid & Auto Close)
   const handleCashPayment = async () => {
     if (!viewingInvoice) return;
     try {
@@ -143,8 +131,6 @@ export default function AdminBookingsPage() {
       setUpdatingPayment(false);
     }
   };
-
-  // Online Razorpay Payment Handler (Verified via Gateway & Auto Close)
   const handleOnlinePayment = async () => {
     if (!viewingInvoice) return;
     payWithRazorpay({
@@ -170,8 +156,6 @@ export default function AdminBookingsPage() {
       }
     });
   };
-
-  // Filter Bookings based on Search and Status Filter
   const filteredBookings = bookings.filter((b) => {
     const matchesSearch = 
       b.bookingNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -204,7 +188,6 @@ export default function AdminBookingsPage() {
         </button>
       </header>
 
-      {/* SEARCH AND STATUS FILTER CONTROLS */}
       <div className="flex flex-col xl:flex-row justify-between items-stretch xl:items-center gap-4">
         <input
           type="text"
@@ -322,8 +305,6 @@ export default function AdminBookingsPage() {
           </table>
         </div>
       </div>
-
-      {/* Spare Part Assignment Modal */}
       {selectedBookingId && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
@@ -384,8 +365,6 @@ export default function AdminBookingsPage() {
           </div>
         </div>
       )}
-
-      {/* Tax Invoice & Billing Modal */}
       {viewingInvoice && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white text-slate-900 w-full max-w-2xl p-8 rounded-[32px] shadow-2xl relative space-y-6 font-mono text-xs my-8">
@@ -427,8 +406,6 @@ export default function AdminBookingsPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Items & Manual Charges Section */}
               <div className="border rounded-xl p-4 space-y-3">
                 <div className="flex justify-between font-bold border-b pb-2 text-slate-500 uppercase text-[10px]">
                   <span>Item Description</span>
@@ -444,8 +421,6 @@ export default function AdminBookingsPage() {
                     <span>₹{Number(sp.price * sp.quantity).toFixed(2)}</span>
                   </div>
                 ))}
-
-                {/* Manual Labor / Extra Charges Input Row */}
                 {viewingInvoice.status !== 'PAID' && (
                   <div className="pt-3 border-t grid grid-cols-2 gap-3 items-center">
                     <div>

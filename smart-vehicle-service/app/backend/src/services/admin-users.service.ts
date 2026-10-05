@@ -9,7 +9,6 @@ import { randomUUID } from 'crypto';
 export class AdminUsersService {
   constructor(private prisma: PrismaService) {}
 
-  // Register / Create Staff Member with safe Prisma Role Mapping
   async createStaff(dto: any) {
     const { name, email, phone, password, role } = dto;
 
@@ -57,7 +56,6 @@ export class AdminUsersService {
     };
   }
 
-  // Customer Directory for Admin Dashboard
   async findAllCustomers() {
     return this.prisma.user.findMany({
       where: { role: Role.CUSTOMER },
@@ -75,7 +73,6 @@ export class AdminUsersService {
     });
   }
 
-  // Staff / Workshop Directory for Admin Dashboard
   async findAllStaff() {
     return this.prisma.user.findMany({
       where: { role: { in: [Role.ADMIN, Role.WORKSHOP] } },
@@ -107,7 +104,6 @@ export class AdminUsersService {
   async updateUser(id: string, dto: any) {
     const existingUser = await this.findUserById(id);
 
-    // Agar frontend se role nahi aaya hai, toh purana role hi retain rakhein
     let assignedRole = existingUser.role; 
 
     if (dto.role) {
@@ -128,7 +124,7 @@ export class AdminUsersService {
         email: dto.email,
         phone: dto.phone,
         address: dto.address,
-        role: assignedRole, // Safe role mapping taaki customer idhar-udhar na jaye
+        role: assignedRole, 
       },
     });
 

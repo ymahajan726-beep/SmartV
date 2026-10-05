@@ -5,12 +5,11 @@ const ThemeContext = createContext<{
   isLightMode: boolean;
   toggleTheme: () => void;
 }>({
-  isLightMode: true, // Default to true
+  isLightMode: true,
   toggleTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Lazy initialization: Check localStorage, default to 'true' (Light mode) if not set
   const [isLightMode, setIsLightMode] = useState(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("autocare_theme");
@@ -18,7 +17,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         return savedTheme === "light";
       }
     }
-    return true; // Default default state is Light Mode
+    return true; 
   });
 
   const toggleTheme = () => {

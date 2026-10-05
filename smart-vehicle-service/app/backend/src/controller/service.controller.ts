@@ -8,27 +8,23 @@ import { Role } from '@prisma/client';
 @Controller('services')
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
-
-  @Get()
+@Get()
   findAll(@Query('serviceCenterId') serviceCenterId?: string) {
     return this.serviceService.findAll(serviceCenterId);
   }
-
-  @Post()
+ @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   create(@Body() dto: { name: string; description?: string; price: number; duration?: string; serviceCenterId: string }) {
     return this.serviceService.create(dto);
   }
-
-  @Patch(':id')
+ @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   update(@Param('id') id: string, @Body() dto: { name: string; description?: string; price: number; duration?: string; serviceCenterId: string }) {
     return this.serviceService.update(id, dto);
   }
-
-  @Delete(':id')
+ @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   remove(@Param('id') id: string) {

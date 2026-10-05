@@ -7,11 +7,7 @@ export default function AdminArchivePage() {
   const { isLightMode } = useTheme();
   const [archivedBookings, setArchivedBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Selected Invoice Modal for viewing archived bill
   const [viewingInvoice, setViewingInvoice] = useState<any>(null);
-
-  // Toast Notification States
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
 
@@ -62,7 +58,6 @@ export default function AdminArchivePage() {
   return (
     <div className={`space-y-8 font-sans p-8 ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
       
-      {/* Toast Notification Popup */}
       {toastMessage && (
         <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-xs font-mono border flex items-center gap-3 ${toastType === "success" ? "bg-emerald-500 text-slate-950 font-bold border-emerald-400" : "bg-red-500 text-white font-bold border-red-400"}`}>
           <span>{toastType === "success" ? "⚡" : "⚠"}</span>
@@ -133,8 +128,6 @@ export default function AdminArchivePage() {
           </table>
         </div>
       </div>
-
-      {/* Viewed Saved Bill Modal */}
       {viewingInvoice && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white text-slate-900 w-full max-w-2xl p-8 rounded-[32px] shadow-2xl relative space-y-6 font-mono text-xs my-8">

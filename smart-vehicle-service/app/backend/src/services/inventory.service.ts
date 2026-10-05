@@ -21,9 +21,7 @@ export class InventoryService {
       },
     });
   }
-
   async update(id: string, dto: { partName?: string; sku?: string; stockQty?: number; unitPrice?: number }) {
-    // 👈 Check if record exists before updating to prevent Prisma P2025 crash
     const existingPart = await this.prisma.inventoryPart.findUnique({
       where: { id },
     });

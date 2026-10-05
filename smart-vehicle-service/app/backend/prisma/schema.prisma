@@ -117,7 +117,7 @@ model Booking {
   finalAmount     Decimal?       @db.Decimal(10, 2)
   status          BookingStatus  @default(BOOKED)
   paymentStatus   PaymentStatus  @default(UNPAID)
-  isArchived      Boolean        @default(false) // 👈 Yeh field archive ke liye add ki gayi hai
+  isArchived      Boolean        @default(false) 
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 

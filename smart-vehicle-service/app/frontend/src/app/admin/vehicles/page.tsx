@@ -50,8 +50,6 @@ export default function AdminVehiclesPage() {
           ⚠️ {errorMsg}
         </div>
       )}
-
-      {/* Responsive Vehicles Table Container */}
       <div className={`rounded-[32px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-xs uppercase tracking-wider font-mono min-w-[700px]">
@@ -73,28 +71,21 @@ export default function AdminVehiclesPage() {
                 vehicles.map((v) => (
                   <tr key={v.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
                     
-                    {/* Vehicle Name / Model */}
                     <td className="p-4 font-bold text-sm">
                       {v.model || v.modelName || "Unknown Model"}
                       <div className="text-[10px] text-neutral-400 font-normal">Fuel: {v.fuelType || "Petrol"}</div>
                     </td>
-
-                    {/* Vehicle Number */}
                     <td className="p-4 font-bold text-[#cbf000]">
                       {v.registrationNumber || v.vehicleNumber || "N/A"}
                     </td>
 
-                    {/* Owner Name - Fixed to use 'v.customer' matching Prisma schema */}
                     <td className="p-4 font-bold">
                       {v.customer?.name || "Valued Customer"}
                     </td>
-
-                    {/* Owner Mobile No - Fixed to use 'v.customer' matching Prisma schema */}
                     <td className="p-4 text-neutral-300">
                       {v.customer?.phone || "No Phone"}
                     </td>
 
-                    {/* Status Badge */}
                     <td className="p-4 text-right">
                       <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 border border-green-500/20">
                         🟢 ACTIVE

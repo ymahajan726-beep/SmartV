@@ -8,7 +8,6 @@ export default function AdminRemindersPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form states for creating reminder as admin
   const [showModal, setShowModal] = useState(false);
   const [customerId, setCustomerId] = useState("");
   const [vehicleId, setVehicleId] = useState("");
@@ -78,7 +77,6 @@ export default function AdminRemindersPage() {
         </button>
       </div>
 
-      {/* Reminders Table */}
       <div className="border border-white/10 rounded-2xl overflow-hidden bg-[#0d0d14]">
         <table className="w-full text-left text-xs font-mono">
           <thead className="bg-[#12121c] border-b border-white/10 uppercase text-slate-400">
@@ -116,7 +114,6 @@ export default function AdminRemindersPage() {
         </table>
       </div>
 
-      {/* Modal to Set Reminder as Admin */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-[#12121c] border border-white/25 rounded-3xl p-8 max-w-lg w-full font-mono text-xs text-white relative shadow-2xl">

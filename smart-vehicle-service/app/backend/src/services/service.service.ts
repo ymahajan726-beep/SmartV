@@ -4,8 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class ServiceService {
   constructor(private readonly prisma: PrismaService) {}
-
-  // Agar centerId di gayi ho toh sirf us center ki services return karein, warna saari
   async findAll(serviceCenterId?: string) {
     return this.prisma.service.findMany({
       where: serviceCenterId ? { serviceCenterId } : {},

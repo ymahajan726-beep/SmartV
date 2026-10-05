@@ -4,11 +4,10 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Saari APIs ke aage '/api' prefix set kiya gaya hai
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: true, // 👈 Isse kisi bhi Vercel/Live domain se request allow ho jayegi
+    origin: true, 
     credentials: true,
   });
 

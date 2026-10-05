@@ -8,7 +8,6 @@ export class AdminVehiclesService {
   async findAllVehiclesWithOwners() {
     return this.prisma.vehicle.findMany({
       include: {
-        // Agar aapke Prisma schema mein relation ka naam 'customer' ya 'owner' hai, toh yahan change karein
         customer: { 
           select: {
             name: true,

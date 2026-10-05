@@ -7,8 +7,6 @@ export default function AdminReviewsPage() {
   const { isLightMode } = useTheme();
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Toast
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<"success" | "error">("success");
 
@@ -74,8 +72,6 @@ export default function AdminReviewsPage() {
           🔄 Refresh Feed
         </button>
       </header>
-
-      {/* Reviews Table / Grid Section */}
       <div className={`p-8 rounded-[32px] border shadow-xl ${isLightMode ? "bg-white border-slate-200" : "bg-[#141418] border-white/10"}`}>
         <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F0FF] mb-6">All Platform Feedback</h3>
         

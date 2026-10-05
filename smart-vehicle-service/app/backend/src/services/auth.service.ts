@@ -34,7 +34,7 @@ export class AuthService {
         passwordHash: hashedPassword,
         phone: dto.phone,
         address: dto.address,
-        role: Role.CUSTOMER, // Strictly registered as customer
+        role: Role.CUSTOMER, 
       },
       select: {
         id: true,
@@ -51,7 +51,6 @@ export class AuthService {
     };
   }
 
-  // 2. Universal Login (Handles Admin, Workshop & Customer securely)
   async login(dto: AuthLoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -66,7 +65,6 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // JWT Payload with strict session isolation
     const payload = { userId: user.id, email: user.email, role: user.role };
     const accessToken = this.jwtService.sign(payload);
 
@@ -82,7 +80,6 @@ export class AuthService {
     };
   }
 
-  // 3. Forgot Password Handler
   async forgotPassword(dto: ForgotPasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -91,17 +88,14 @@ export class AuthService {
     if (!user) {
       return { message: 'If the email exists, a password reset token has been generated.' };
     }
-
-    // Secure temporary token generate karna
     const resetToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
 
     return {
       message: 'Password reset token generated successfully',
-      resetToken, // Testing ke liye response mein bhej rahe hain
+      resetToken, 
     };
   }
 
-  // 4. Reset Password Handler
   async resetPassword(dto: ResetPasswordDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -113,7 +107,6 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
 
-    // Database mein passwordHash update karenge
     await this.prisma.user.update({
       where: { email: dto.email },
       data: { passwordHash: hashedPassword },

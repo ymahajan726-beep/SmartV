@@ -5,7 +5,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from './auth.module';
 
 @Module({
-  imports: [PrismaModule,AuthModule], // <-- Imports array mein AuthModule daalna zaroori hai
+  imports: [PrismaModule,AuthModule], 
   controllers: [ReviewController],
   providers: [ReviewService],
   exports: [ReviewService],

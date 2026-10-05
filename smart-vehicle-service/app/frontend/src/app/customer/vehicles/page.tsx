@@ -323,7 +323,6 @@ export default function CustomerVehiclesPage() {
         </div>
       )}
 
-      {/* Unified Header */}
       <div className={`w-full px-8 py-4 border-b flex justify-between items-center ${isLightMode ? "bg-white border-slate-200 text-slate-500" : "bg-[#060608] border-white/[0.06] text-slate-400"}`}>
         <div className="flex items-center gap-2.5">
           <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
@@ -357,7 +356,7 @@ export default function CustomerVehiclesPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-slate-300/60">
           <div>
             <span className={`text-xs font-mono uppercase tracking-widest font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>
-              [ ISOLATED CUSTOMER VAULT ]
+           
             </span>
             <h1 className={`text-3xl md:text-4xl font-light tracking-tight mt-1 ${isLightMode ? "text-slate-900" : "text-white"}`}>
               My Registered Vehicles

@@ -17,11 +17,11 @@ import { Role } from '@prisma/client';
 
 @Controller('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(Role.ADMIN) // Strictly isolated for admin
+@Roles(Role.ADMIN) 
 export class AdminUsersController {
   constructor(private readonly adminUsersService: AdminUsersService) {}
 
-  // Dashboard Stats Endpoint for Admin Dashboard counts
+  
   @Get('stats')
   getAdminStats() {
     return this.adminUsersService.getDashboardStats();
