@@ -216,7 +216,7 @@ function CustomerBookingsContent() {
 
       <div className="flex justify-between items-center border-b pb-6">
         <div>
-          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest">[ SERVICE VAULT ]</span>
+          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest"> SERVICE VAULT </span>
           <h1 className="text-3xl font-light tracking-tight mt-1">My Service Bookings</h1>
         </div>
         <button

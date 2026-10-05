@@ -124,25 +124,26 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className={`space-y-8 font-sans ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
+    <div className={`space-y-6 sm:space-y-8 font-sans max-w-full overflow-x-hidden ${isLightMode ? "text-gray-900" : "text-[#f3f3f6]"}`}>
       {toastMsg && (
         <div className="fixed top-6 right-6 z-50 px-6 py-3 rounded-2xl bg-[#cbf000] text-black font-mono text-xs font-bold uppercase shadow-2xl animate-bounce">
           ✨ {toastMsg}
         </div>
       )}
 
+      {/* Responsive Header / Actions Bar */}
       <header className={`pb-6 border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-4 ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
-          <h1 className={`text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>
+          <h1 className={`text-2xl sm:text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>
             {activeTab === "staff" ? "Staff & Admin Directory" : "Customer CRM Directory"}
           </h1>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           <div className={`p-1 rounded-xl border flex gap-1 font-mono text-xs ${isLightMode ? "bg-gray-100 border-gray-200" : "bg-[#0b0b0e] border-white/10"}`}>
             <button
               onClick={() => setActiveTab("staff")}
-              className={`px-4 py-2 rounded-lg font-bold transition-all cursor-pointer ${
+              className={`px-3 sm:px-4 py-2 rounded-lg font-bold transition-all cursor-pointer ${
                 activeTab === "staff"
                   ? isLightMode ? "bg-white text-gray-900 shadow-sm" : "bg-[#cbf000] text-black"
                   : "text-neutral-400 hover:text-white"
@@ -152,7 +153,7 @@ export default function AdminUsersPage() {
             </button>
             <button
               onClick={() => setActiveTab("customers")}
-              className={`px-4 py-2 rounded-lg font-bold transition-all cursor-pointer ${
+              className={`px-3 sm:px-4 py-2 rounded-lg font-bold transition-all cursor-pointer ${
                 activeTab === "customers"
                   ? isLightMode ? "bg-white text-gray-900 shadow-sm" : "bg-[#cbf000] text-black"
                   : "text-neutral-400 hover:text-white"
@@ -174,103 +175,103 @@ export default function AdminUsersPage() {
       {errorMsg && <div className="p-4 rounded-xl bg-red-500/10 text-red-400 text-xs font-mono border border-red-500/20">⚠️ {errorMsg}</div>}
 
       {activeTab === "staff" && (
-        <div className={`rounded-[32px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
-          <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
-            <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
-              <tr>
-                <th className="p-4">ID</th>
-                <th className="p-4">Name</th>
-                <th className="p-4">Email / Phone</th>
-                <th className="p-4">Role</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
-              {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading staff directory...</td></tr>
-              ) : users.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No staff users found.</td></tr>
-              ) : (
-                users.map((u) => {
-                  const roleUpper = String(u.role || "").toUpperCase();
-                  const isAdminProtected = roleUpper === 'SUPER_ADMIN' || roleUpper === 'ADMIN' || u.email === 'admin@autocare.com';
-                  return (
-                    <tr key={u.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
-                      <td className="p-4 text-neutral-400">#{u.id.slice(-6)}</td>
-                      <td className={`p-4 font-bold ${isLightMode ? "text-gray-900" : "text-white"}`}>{u.name || "N/A"}</td>
-                      <td className="p-4 lowercase text-neutral-400">
-                        <div>{u.email}</div>
-                        <span className="text-[10px] text-[#cbf000]">{u.phone || "No Phone"}</span>
-                      </td>
-                      <td className="p-4 text-[#cbf000]">{u.role}</td>
-                      <td className="p-4 text-right space-x-3">
-                        <button onClick={() => handleOpenEdit(u)} className="text-blue-400 hover:text-blue-300 cursor-pointer">Edit</button>
-                        {isAdminProtected ? (
-                          <span className="text-neutral-500 italic font-mono text-[10px]">Protected 🛡️</span>
-                        ) : (
-                          <button onClick={() => handleDelete(u)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+        <div className={`rounded-[32px] border overflow-hidden shadow-xl p-2 sm:p-0 ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-left text-xs uppercase tracking-wider font-mono min-w-[700px]">
+              <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
+                <tr>
+                  <th className="p-4">ID</th>
+                  <th className="p-4">Name</th>
+                  <th className="p-4">Email / Phone</th>
+                  <th className="p-4">Role</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
+                {loading ? (
+                  <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading staff directory...</td></tr>
+                ) : users.length === 0 ? (
+                  <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No staff users found.</td></tr>
+                ) : (
+                  users.map((u) => {
+                    const roleUpper = String(u.role || "").toUpperCase();
+                    const isAdminProtected = roleUpper === 'SUPER_ADMIN' || roleUpper === 'ADMIN' || u.email === 'admin@autocare.com';
+                    return (
+                      <tr key={u.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
+                        <td className="p-4 text-neutral-400">#{u.id.slice(-6)}</td>
+                        <td className={`p-4 font-bold ${isLightMode ? "text-gray-900" : "text-white"}`}>{u.name || "N/A"}</td>
+                        <td className="p-4 lowercase text-neutral-400">
+                          <div>{u.email}</div>
+                          <span className="text-[10px] text-[#cbf000]">{u.phone || "No Phone"}</span>
+                        </td>
+                        <td className="p-4 text-[#cbf000]">{u.role}</td>
+                        <td className="p-4 text-right space-x-3">
+                          <button onClick={() => handleOpenEdit(u)} className="text-blue-400 hover:text-blue-300 cursor-pointer">Edit</button>
+                          {isAdminProtected ? (
+                            <span className="text-neutral-500 italic font-mono text-[10px]">Protected 🛡️</span>
+                          ) : (
+                            <button onClick={() => handleDelete(u)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {activeTab === "customers" && (
-        <div className={`rounded-[32px] border overflow-hidden shadow-xl ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
-          <table className="w-full text-left text-xs uppercase tracking-wider font-mono">
-            <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
-              <tr>
-                <th className="p-4">Customer Info</th>
-                <th className="p-4">Mobile No</th>
-                <th className="p-4">Email</th>
-                <th className="p-4">Address</th>
-                <th className="p-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
-              {loading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading customer telemetry...</td></tr>
-              ) : customers.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No registered customers found.</td></tr>
-              ) : (
-                customers.map((c) => (
-                  <tr key={c.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
-                    
-                    <td className="p-4">
-                      <div className={`font-bold text-sm ${isLightMode ? "text-gray-900" : "text-white"}`}>{c.name || "Valued Customer"}</div>
-                      <div className="text-[10px] text-neutral-400">ID: #{c.id.slice(-6)}</div>
-                    </td>
-                    <td className="p-4 font-bold text-[#cbf000]">
-                      {c.phone || "No Phone"}
-                    </td>
-
-                    <td className="p-4 lowercase text-neutral-300">
-                      {c.email || "No Email"}
-                    </td>
-
-                    <td className="p-4 text-neutral-300 truncate max-w-[150px]">
-                      {c.address || "No Address"}
-                    </td>
-
-                    <td className="p-4 text-right">
-                      <button onClick={() => handleDelete(c)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <div className={`rounded-[32px] border overflow-hidden shadow-xl p-2 sm:p-0 ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-left text-xs uppercase tracking-wider font-mono min-w-[700px]">
+              <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
+                <tr>
+                  <th className="p-4">Customer Info</th>
+                  <th className="p-4">Mobile No</th>
+                  <th className="p-4">Email</th>
+                  <th className="p-4">Address</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
+                {loading ? (
+                  <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading customer telemetry...</td></tr>
+                ) : customers.length === 0 ? (
+                  <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No registered customers found.</td></tr>
+                ) : (
+                  customers.map((c) => (
+                    <tr key={c.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
+                      <td className="p-4">
+                        <div className={`font-bold text-sm ${isLightMode ? "text-gray-900" : "text-white"}`}>{c.name || "Valued Customer"}</div>
+                        <div className="text-[10px] text-neutral-400">ID: #{c.id.slice(-6)}</div>
+                      </td>
+                      <td className="p-4 font-bold text-[#cbf000]">
+                        {c.phone || "No Phone"}
+                      </td>
+                      <td className="p-4 lowercase text-neutral-300">
+                        {c.email || "No Email"}
+                      </td>
+                      <td className="p-4 text-neutral-300 truncate max-w-[150px]">
+                        {c.address || "No Address"}
+                      </td>
+                      <td className="p-4 text-right">
+                        <button onClick={() => handleDelete(c)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className={`w-full max-w-lg p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
+          <div className={`w-full max-w-lg p-6 sm:p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
             <h3 className="text-sm font-mono uppercase tracking-widest text-[#cbf000] mb-6">Register New Staff</h3>
             <form onSubmit={handleCreateStaff} className="space-y-4">
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name (e.g. John Mechanic)" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
@@ -294,7 +295,7 @@ export default function AdminUsersPage() {
 
       {showEditModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className={`w-full max-w-lg p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
+          <div className={`w-full max-w-lg p-6 sm:p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
             <h3 className="text-sm font-mono uppercase tracking-widest text-[#cbf000] mb-6">Edit User Details</h3>
             <form onSubmit={handleUpdateUser} className="space-y-4">
               <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Full Name" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />

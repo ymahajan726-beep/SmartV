@@ -101,7 +101,7 @@ export default function AdminCentersPage() {
 
       <header className={`pb-6 border-b flex justify-between items-center ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
-          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest">[ WORKSHOP MANAGEMENT ]</span>
+          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest"> WORKSHOP MANAGEMENT </span>
           <h1 className="text-3xl font-light tracking-tight mt-1">Service Centers</h1>
         </div>
       </header>

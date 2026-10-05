@@ -32,7 +32,7 @@ export default function AdminVehiclesPage() {
       {/* Header */}
       <header className={`pb-6 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
-          <span className="text-xs font-mono text-[#cbf000] uppercase tracking-widest">[ FLEET CONTROL CENTER ]</span>
+          <span className="text-xs font-mono text-[#cbf000] uppercase tracking-widest">FLEET CONTROL CENTER </span>
           <h1 className={`text-2xl sm:text-3xl font-light tracking-tight mt-1 ${isLightMode ? "text-gray-900" : "text-white"}`}>
             Registered Customer Vehicles
           </h1>

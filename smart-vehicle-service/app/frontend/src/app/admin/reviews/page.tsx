@@ -65,7 +65,7 @@ export default function AdminReviewsPage() {
 
       <header className={`pb-6 border-b flex justify-between items-center ${isLightMode ? "border-slate-200" : "border-white/10"}`}>
         <div>
-          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest">[ ADMIN CONTROL CENTER ]</span>
+          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest"> ADMIN CONTROL CENTER </span>
           <h1 className="text-3xl font-light tracking-tight mt-1">Customer Reviews & Moderation</h1>
         </div>
         <button onClick={fetchAdminReviews} className="px-4 py-2.5 rounded-xl border text-xs uppercase font-mono cursor-pointer border-white/20 hover:border-[#00F0FF]">

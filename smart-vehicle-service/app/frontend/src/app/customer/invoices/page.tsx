@@ -38,7 +38,7 @@ export default function CustomerInvoicesPage() {
     <div className={`space-y-6 font-sans p-6 ${isLightMode ? "text-gray-900" : "text-white"} max-w-5xl mx-auto`}>
       <header className={`pb-4 border-b flex justify-between items-center ${isLightMode ? "border-gray-200" : "border-white/10"}`}>
         <div>
-          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest">[ MY BILLING HISTORY ]</span>
+          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest"> MY BILLING HISTORY </span>
           <h1 className="text-2xl font-light tracking-tight mt-1">Service Invoices & Payments</h1>
         </div>
         <button onClick={fetchCustomerInvoices} className="px-4 py-2 rounded-xl border text-xs uppercase font-mono border-white/20 hover:border-[#00F0FF] cursor-pointer">

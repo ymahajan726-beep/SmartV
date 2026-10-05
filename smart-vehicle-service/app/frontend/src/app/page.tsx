@@ -10,9 +10,9 @@ const API_BASE_URL =
 export default function LandingPage() {
   const [mounted, setMounted] = useState(false);
   const { isLightMode, toggleTheme } = useTheme();
- const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [activeReview, setActiveReview] = useState<number | null>(0);
- const [identifier, setIdentifier] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [shake, setShake] = useState(false);
@@ -20,6 +20,7 @@ export default function LandingPage() {
   const [notification, setNotification] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [publicReviews, setPublicReviews] = useState<any[]>([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // 👈 Added for mobile menu drawer
 
   const heroImages = [
     "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&auto=format&fit=crop&q=80",
@@ -192,7 +193,7 @@ export default function LandingPage() {
   return (
     <div className={`min-h-screen font-sans transition-colors duration-300 overflow-x-hidden ${isLightMode ? "bg-[#f8f9fa] text-slate-900" : "bg-[#060608] text-[#f8fafc]"}`}>
       
-      <nav className={`w-full px-8 md:px-16 py-6 flex justify-between items-center border-b sticky top-0 backdrop-blur-2xl z-50 ${isLightMode ? "border-slate-200 bg-white/90 text-slate-900" : "border-white/[0.06] bg-[#0d0d12]/90 text-white"}`}>
+      <nav className={`w-full px-6 sm:px-8 md:px-16 py-6 flex justify-between items-center border-b sticky top-0 backdrop-blur-2xl z-50 ${isLightMode ? "border-slate-200 bg-white/90 text-slate-900" : "border-white/[0.06] bg-[#0d0d12]/90 text-white"}`}>
         <div className="flex items-center gap-3">
           <span className="text-xl font-black tracking-tighter uppercase">
             Auto<span className="text-slate-950 bg-[#00F0FF] px-2 py-0.5 rounded-lg">Care</span>
@@ -206,7 +207,7 @@ export default function LandingPage() {
           <a href="#contact" className="hover:text-[#00F0FF] transition-colors">Contact Us</a>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           <div className="hidden sm:flex items-center gap-2">
             <Link href="/admin/dashboard" className={`px-4 py-2 rounded-xl border text-xs font-mono uppercase tracking-wider transition-all flex items-center gap-2 font-bold ${isLightMode ? "border-slate-300 bg-slate-100 text-slate-900 hover:bg-slate-900 hover:text-white" : "border-white/10 bg-white/5 text-white hover:bg-[#00F0FF] hover:text-slate-950"}`}>
               <span>🔐</span> Staff
@@ -217,13 +218,34 @@ export default function LandingPage() {
             <span>{isLightMode ? "🌙" : "☀️"}</span>
             <span className="text-[10px] uppercase font-bold">{isLightMode ? "Dark" : "Light"}</span>
           </button>
+
+          {/* 👈 Mobile Menu Toggle Button */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`lg:hidden px-3.5 py-2 rounded-xl border text-xs font-mono font-bold uppercase cursor-pointer ${isLightMode ? "border-slate-300 bg-slate-100 text-slate-900" : "border-white/10 bg-white/5 text-white"}`}
+          >
+            {mobileMenuOpen ? "✕" : "☰"}
+          </button>
         </div>
       </nav>
+
+      {/* 👈 Mobile Dropdown Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className={`lg:hidden flex flex-col px-6 py-6 space-y-4 border-b font-mono text-xs uppercase tracking-widest font-bold z-40 shadow-xl ${isLightMode ? "bg-white border-slate-200 text-slate-900" : "bg-[#0d0d12] border-white/10 text-white"}`}>
+          <a href="#features" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-[#00F0FF]">Features</a>
+          <a href="#why-choose" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-[#00F0FF]">Why Choose Us</a>
+          <a href="#reviews" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-[#00F0FF]">Client Reviews</a>
+          <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-[#00F0FF]">Contact Us</a>
+          <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)} className="py-2.5 px-4 rounded-xl bg-[#00F0FF] text-slate-950 text-center font-bold">
+            🔐 Staff Portal
+          </Link>
+        </div>
+      )}
 
       <section className="container mx-auto px-8 md:px-16 pt-24 pb-20">
         <div className="max-w-5xl mb-16">
           <span className="text-[#00F0FF] text-xs font-mono uppercase tracking-widest block mb-4 font-bold">
-            [ COMMERCIAL AUTOMOTIVE ECOSYSTEM ]
+             COMMERCIAL AUTOMOTIVE ECOSYSTEM 
           </span>
 
           <h1 className="text-4xl sm:text-6xl md:text-8xl font-light tracking-tight leading-[1.02] mb-8">
@@ -427,6 +449,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
       {showCustomerModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <div className={`w-full max-w-xl rounded-[40px] p-8 md:p-12 relative shadow-2xl border overflow-hidden ${isLightMode ? "bg-white border-slate-300 text-slate-900" : "bg-[#0d0d14] border-[#00F0FF]/40 text-white"} ${shake ? "animate-bounce" : ""}`}>
