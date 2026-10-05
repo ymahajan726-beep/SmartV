@@ -178,7 +178,7 @@ export default function AdminUsersPage() {
         <div className={`rounded-[32px] border overflow-hidden shadow-xl p-2 sm:p-0 ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <div className="w-full overflow-x-auto">
             <table className="w-full text-left text-xs uppercase tracking-wider font-mono min-w-[700px]">
-              <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
+              <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-600 font-bold" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
                 <tr>
                   <th className="p-4">ID</th>
                   <th className="p-4">Name</th>
@@ -187,7 +187,7 @@ export default function AdminUsersPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
+              <tbody className={`divide-y ${isLightMode ? "divide-gray-200" : "divide-white/5"}`}>
                 {loading ? (
                   <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading staff directory...</td></tr>
                 ) : users.length === 0 ? (
@@ -197,20 +197,20 @@ export default function AdminUsersPage() {
                     const roleUpper = String(u.role || "").toUpperCase();
                     const isAdminProtected = roleUpper === 'SUPER_ADMIN' || roleUpper === 'ADMIN' || u.email === 'admin@autocare.com';
                     return (
-                      <tr key={u.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
-                        <td className="p-4 text-neutral-400">#{u.id.slice(-6)}</td>
+                      <tr key={u.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-900" : "hover:bg-white/5 text-white"}`}>
+                        <td className={`p-4 ${isLightMode ? "text-gray-500" : "text-neutral-400"}`}>#{u.id.slice(-6)}</td>
                         <td className={`p-4 font-bold ${isLightMode ? "text-gray-900" : "text-white"}`}>{u.name || "N/A"}</td>
-                        <td className="p-4 lowercase text-neutral-400">
+                        <td className={`p-4 lowercase ${isLightMode ? "text-gray-700 font-medium" : "text-neutral-400"}`}>
                           <div>{u.email}</div>
-                          <span className="text-[10px] text-[#cbf000]">{u.phone || "No Phone"}</span>
+                          <span className={`text-[10px] ${isLightMode ? "text-cyan-700 font-bold" : "text-[#cbf000]"}`}>{u.phone || "No Phone"}</span>
                         </td>
-                        <td className="p-4 text-[#cbf000]">{u.role}</td>
+                        <td className={`p-4 font-bold ${isLightMode ? "text-cyan-700" : "text-[#cbf000]"}`}>{u.role}</td>
                         <td className="p-4 text-right space-x-3">
-                          <button onClick={() => handleOpenEdit(u)} className="text-blue-400 hover:text-blue-300 cursor-pointer">Edit</button>
+                          <button onClick={() => handleOpenEdit(u)} className="text-blue-500 hover:text-blue-600 font-bold cursor-pointer">Edit</button>
                           {isAdminProtected ? (
                             <span className="text-neutral-500 italic font-mono text-[10px]">Protected 🛡️</span>
                           ) : (
-                            <button onClick={() => handleDelete(u)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
+                            <button onClick={() => handleDelete(u)} className="text-red-500 hover:text-red-600 font-bold cursor-pointer">Delete</button>
                           )}
                         </td>
                       </tr>
@@ -227,7 +227,7 @@ export default function AdminUsersPage() {
         <div className={`rounded-[32px] border overflow-hidden shadow-xl p-2 sm:p-0 ${isLightMode ? "bg-white border-gray-200" : "bg-[#141418] border-white/10"}`}>
           <div className="w-full overflow-x-auto">
             <table className="w-full text-left text-xs uppercase tracking-wider font-mono min-w-[700px]">
-              <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-500" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
+              <thead className={`border-b ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-600 font-bold" : "bg-[#0b0b0e] border-white/10 text-neutral-400"}`}>
                 <tr>
                   <th className="p-4">Customer Info</th>
                   <th className="p-4">Mobile No</th>
@@ -236,29 +236,29 @@ export default function AdminUsersPage() {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className={`divide-y ${isLightMode ? "divide-gray-100" : "divide-white/5"}`}>
+              <tbody className={`divide-y ${isLightMode ? "divide-gray-200" : "divide-white/5"}`}>
                 {loading ? (
                   <tr><td colSpan={5} className="p-8 text-center text-neutral-400">Loading customer telemetry...</td></tr>
                 ) : customers.length === 0 ? (
                   <tr><td colSpan={5} className="p-8 text-center text-neutral-400">No registered customers found.</td></tr>
                 ) : (
                   customers.map((c) => (
-                    <tr key={c.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-800" : "hover:bg-white/5 text-white"}`}>
+                    <tr key={c.id} className={`transition-colors ${isLightMode ? "hover:bg-gray-50 text-gray-900" : "hover:bg-white/5 text-white"}`}>
                       <td className="p-4">
                         <div className={`font-bold text-sm ${isLightMode ? "text-gray-900" : "text-white"}`}>{c.name || "Valued Customer"}</div>
-                        <div className="text-[10px] text-neutral-400">ID: #{c.id.slice(-6)}</div>
+                        <div className={`text-[10px] ${isLightMode ? "text-gray-500" : "text-neutral-400"}`}>ID: #{c.id.slice(-6)}</div>
                       </td>
-                      <td className="p-4 font-bold text-[#cbf000]">
+                      <td className={`p-4 font-bold ${isLightMode ? "text-cyan-700" : "text-[#cbf000]"}`}>
                         {c.phone || "No Phone"}
                       </td>
-                      <td className="p-4 lowercase text-neutral-300">
+                      <td className={`p-4 lowercase ${isLightMode ? "text-gray-800 font-medium" : "text-neutral-300"}`}>
                         {c.email || "No Email"}
                       </td>
-                      <td className="p-4 text-neutral-300 truncate max-w-[150px]">
+                      <td className={`p-4 truncate max-w-[150px] ${isLightMode ? "text-gray-700" : "text-neutral-300"}`}>
                         {c.address || "No Address"}
                       </td>
                       <td className="p-4 text-right">
-                        <button onClick={() => handleDelete(c)} className="text-red-400 hover:text-red-300 cursor-pointer">Delete</button>
+                        <button onClick={() => handleDelete(c)} className="text-red-500 hover:text-red-600 font-bold cursor-pointer">Delete</button>
                       </td>
                     </tr>
                   ))
@@ -272,13 +272,13 @@ export default function AdminUsersPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-lg p-6 sm:p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
-            <h3 className="text-sm font-mono uppercase tracking-widest text-[#cbf000] mb-6">Register New Staff</h3>
+            <h3 className={`text-sm font-mono uppercase tracking-widest mb-6 font-bold ${isLightMode ? "text-cyan-700" : "text-[#cbf000]"}`}>Register New Staff</h3>
             <form onSubmit={handleCreateStaff} className="space-y-4">
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name (e.g. John Mechanic)" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Mobile Number (e.g. 9876543210)" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Temporary Password" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <select value={role} onChange={(e) => setRole(e.target.value)} className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Full Name (e.g. John Mechanic)" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Mobile Number (e.g. 9876543210)" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Temporary Password" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <select value={role} onChange={(e) => setRole(e.target.value)} className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}>
                 <option value="STAFF">Staff / Mechanic</option>
                 <option value="MANAGER">Manager</option>
                 <option value="ADMIN">Admin</option>
@@ -286,7 +286,7 @@ export default function AdminUsersPage() {
               
               <div className="flex gap-4 pt-4">
                 <button type="submit" className={`flex-1 py-3.5 rounded-2xl font-bold uppercase text-xs cursor-pointer ${isLightMode ? "bg-gray-900 text-white hover:bg-gray-800" : "bg-[#cbf000] text-black hover:opacity-90"}`}>Register Staff</button>
-                <button type="button" onClick={() => setShowModal(false)} className={`px-6 py-3.5 rounded-2xl border text-xs uppercase font-mono cursor-pointer ${isLightMode ? "border-gray-200 hover:bg-gray-50" : "border-white/20 hover:bg-white/5"}`}>Cancel</button>
+                <button type="button" onClick={() => setShowModal(false)} className={`px-6 py-3.5 rounded-2xl border text-xs uppercase font-mono cursor-pointer font-bold ${isLightMode ? "border-gray-300 hover:bg-gray-100 text-gray-700" : "border-white/20 hover:bg-white/5"}`}>Cancel</button>
               </div>
             </form>
           </div>
@@ -296,12 +296,12 @@ export default function AdminUsersPage() {
       {showEditModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <div className={`w-full max-w-lg p-6 sm:p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-gray-200 text-gray-900" : "bg-[#141418] border-white/10 text-white"}`}>
-            <h3 className="text-sm font-mono uppercase tracking-widest text-[#cbf000] mb-6">Edit User Details</h3>
+            <h3 className={`text-sm font-mono uppercase tracking-widest mb-6 font-bold ${isLightMode ? "text-cyan-700" : "text-[#cbf000]"}`}>Edit User Details</h3>
             <form onSubmit={handleUpdateUser} className="space-y-4">
-              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Full Name" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email Address" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <input type="text" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Mobile Number" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
-              <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none ${isLightMode ? "bg-gray-50 border-gray-200 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}>
+              <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Full Name" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} placeholder="Email Address" required className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <input type="text" value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="Mobile Number" className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`} />
+              <select value={editRole} onChange={(e) => setEditRole(e.target.value)} className={`w-full px-4 py-3 rounded-2xl border text-sm outline-none font-bold ${isLightMode ? "bg-gray-50 border-gray-300 text-gray-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}>
                 <option value="STAFF">Staff / Mechanic</option>
                 <option value="MANAGER">Manager</option>
                 <option value="ADMIN">Admin</option>
@@ -310,7 +310,7 @@ export default function AdminUsersPage() {
               
               <div className="flex gap-4 pt-4">
                 <button type="submit" className={`flex-1 py-3.5 rounded-2xl font-bold uppercase text-xs cursor-pointer ${isLightMode ? "bg-gray-900 text-white hover:bg-gray-800" : "bg-[#cbf000] text-black hover:opacity-90"}`}>Save Changes</button>
-                <button type="button" onClick={() => setShowEditModal(false)} className={`px-6 py-3.5 rounded-2xl border text-xs uppercase font-mono cursor-pointer ${isLightMode ? "border-gray-200 hover:bg-gray-50" : "border-white/20 hover:bg-white/5"}`}>Cancel</button>
+                <button type="button" onClick={() => setShowEditModal(false)} className={`px-6 py-3.5 rounded-2xl border text-xs uppercase font-mono cursor-pointer font-bold ${isLightMode ? "border-gray-300 hover:bg-gray-100 text-gray-700" : "border-white/20 hover:bg-white/5"}`}>Cancel</button>
               </div>
             </form>
           </div>

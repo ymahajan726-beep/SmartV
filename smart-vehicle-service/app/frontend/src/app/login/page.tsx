@@ -100,7 +100,7 @@ export default function AdminLoginPage() {
             Auto<span className="text-[#cbf000] bg-black text-white px-2 py-0.5 rounded-md">Care</span>
           </span>
           <p className="text-xs font-mono text-neutral-400 mt-2 uppercase tracking-widest">
-            {isForgotPassword ? "[ Password Recovery Portal ]" : "[ Admin Portal Authentication ]"}
+            {isForgotPassword ? "[ Password Recovery Portal ]" : " Admin Portal Authentication "}
           </p>
         </div>
 
