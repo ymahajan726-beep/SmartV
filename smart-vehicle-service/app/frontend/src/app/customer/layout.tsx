@@ -47,23 +47,48 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest font-bold">Customer Cockpit</span>
         </div>
 
+        {/* 👈 Added onClick={() => setSidebarOpen(false)} on each Link to auto-close sidebar on mobile */}
         <nav className="flex-1 px-6 py-4 space-y-1.5 text-xs uppercase tracking-widest font-mono overflow-y-auto">
-          <Link href="/customer/dashboard" className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${isActive('/customer/dashboard') ? (isLightMode ? "bg-slate-900 text-white shadow-md" : "bg-[#00F0FF] text-slate-950 shadow-lg") : "hover:opacity-80"}`}>
+          <Link 
+            href="/customer/dashboard" 
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-bold transition-all ${isActive('/customer/dashboard') ? (isLightMode ? "bg-slate-900 text-white shadow-md" : "bg-[#00F0FF] text-slate-950 shadow-lg") : "hover:opacity-80"}`}
+          >
             <span>⚡</span> Dashboard
           </Link>
-          <Link href="/customer/vehicles" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/vehicles') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
+          <Link 
+            href="/customer/vehicles" 
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/vehicles') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}
+          >
             <span>🚗</span> My Vehicles
           </Link>
-          <Link href="/customer/bookings" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/bookings') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
+          <Link 
+            href="/customer/bookings" 
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/bookings') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}
+          >
             <span>📅</span> My Bookings
           </Link>
-          <Link href="/customer/invoices" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/invoices') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
+          <Link 
+            href="/customer/invoices" 
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/invoices') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}
+          >
             <span>💳</span> Invoices
           </Link>
-          <Link href="/customer/reminders" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/reminders') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
+          <Link 
+            href="/customer/reminders" 
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/reminders') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}
+          >
             <span>⏰</span> Reminders
           </Link>
-          <Link href="/customer/reviews" className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/reviews') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}>
+          <Link 
+            href="/customer/reviews" 
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-colors ${isActive('/customer/reviews') ? (isLightMode ? "bg-slate-900 text-white" : "bg-[#00F0FF] text-slate-950") : "hover:opacity-80"}`}
+          >
             <span>⭐</span> Reviews
           </Link>
         </nav>
@@ -75,17 +100,17 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col md:pl-72 w-full">
+      <div className="flex-1 flex flex-col md:pl-72 w-full min-w-0">
         <div className="md:hidden p-4 flex items-center border-b border-white/[0.06]">
           <button 
-            onClick={() => setSidebarOpen(true)} 
+            onClick={() => setSidebarOpen(true)} // 👈 Fixed: changed from false to true so menu opens correctly
             className="text-lg font-mono p-2 rounded-xl border border-white/10 cursor-pointer"
           >
             ☰ Menu
           </button>
         </div>
 
-        <div className="w-full flex-1">
+        <div className="w-full flex-1 overflow-x-hidden">
           {children}
         </div>
       </div>

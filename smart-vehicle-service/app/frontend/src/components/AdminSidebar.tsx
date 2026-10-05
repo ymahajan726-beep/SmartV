@@ -47,12 +47,16 @@ export default function AdminSidebar() {
             <Link href="/admin/services" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>⚙️ Services</Link>
             <Link href="/admin/service-centers" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>🛠️ Centers</Link>
             <Link href="/admin/spare-parts" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>📦 Spare Parts</Link>
+            
+            {/* ✅ Fixed Archives Link with matching uniform styling and auto-close on mobile */}
             <Link 
-                    href="/admin/archive" 
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-all text-xs font-mono uppercase tracking-wider text-slate-300 hover:text-[#00F0FF]"
-                  >
-                    <span>📦</span>  Archives
-              </Link>
+              href="/admin/archive" 
+              onClick={() => setSidebarOpen(false)} 
+              className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}
+            >
+              <span>📦</span> Archives
+            </Link>
+
             <Link href="/admin/invoices" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>💰 Invoices</Link>
             <Link href="/admin/reminders" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>⏰ Reminders</Link>
             <Link href="/admin/reviews" onClick={() => setSidebarOpen(false)} className={`px-4 py-2.5 rounded-2xl flex items-center gap-3 transition-all ${isLightMode ? "hover:bg-gray-100 text-gray-700" : "hover:bg-white/5 text-neutral-300"}`}>⭐ Reviews</Link>
