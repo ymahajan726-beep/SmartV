@@ -12,22 +12,26 @@ export async function apiRequest(endpoint: string, method: string = "GET", body?
 
     if (isAdminRoute) {
       token = 
+        sessionStorage.getItem("autocare_token") || 
+        sessionStorage.getItem("token") || 
+        sessionStorage.getItem("access_token") || 
+        sessionStorage.getItem("authToken") || 
+        sessionStorage.getItem("jwt") || 
         localStorage.getItem("autocare_token") || 
-        localStorage.getItem("token") || 
-        localStorage.getItem("access_token") || 
-        localStorage.getItem("authToken") || 
-        localStorage.getItem("jwt") || "";
+        localStorage.getItem("token") || "";
     } else {
       token = 
+        sessionStorage.getItem("customer_token") || 
+        sessionStorage.getItem("autocare_token") || 
+        sessionStorage.getItem("token") || 
+        sessionStorage.getItem("access_token") || 
+        sessionStorage.getItem("authToken") || 
+        sessionStorage.getItem("jwt") || 
         localStorage.getItem("customer_token") || 
         localStorage.getItem("autocare_token") || 
-        localStorage.getItem("token") || 
-        localStorage.getItem("access_token") || 
-        localStorage.getItem("authToken") || 
-        localStorage.getItem("jwt") || "";
+        localStorage.getItem("token") || "";
     }
   }
-
 
   const cleanBase = API_BASE_URL.replace(/\/+$/, ""); 
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
