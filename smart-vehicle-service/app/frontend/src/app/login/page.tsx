@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
         response?.data?.token;
 
       if (token) {
-        // 👈 Changed from localStorage to sessionStorage so session clears when leaving/closing browser
+        
         sessionStorage.setItem("autocare_token", token);
         router.push("/admin/dashboard");
       } else {

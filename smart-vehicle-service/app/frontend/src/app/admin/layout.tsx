@@ -10,7 +10,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const [authorized, setAuthorized] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("autocare_token");
+    
+    const token = sessionStorage.getItem("autocare_token");
     if (!token) {
       router.push("/login");
     } else {
@@ -19,7 +20,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem("autocare_token");
+  
+    sessionStorage.removeItem("autocare_token");
     router.push("/login");
   };
 
