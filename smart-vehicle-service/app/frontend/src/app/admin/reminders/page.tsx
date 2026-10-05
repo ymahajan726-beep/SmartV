@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { apiRequest } from "@/src/services/api";
+import { useTheme } from "@/src/context/ThemeContext";
 
 export default function AdminRemindersPage() {
+  const { isLightMode } = useTheme();
   const [reminders, setReminders] = useState<any[]>([]);
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,28 +63,28 @@ export default function AdminRemindersPage() {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full overflow-x-hidden font-sans">
+    <div className={`p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full overflow-x-hidden font-sans ${isLightMode ? "text-slate-900" : "text-white"}`}>
       {/* Responsive Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-light mb-1">Customer Service Reminders Overview</h1>
-          <p className="text-xs font-mono text-slate-400 uppercase tracking-widest">
+          <p className={`text-xs font-mono uppercase tracking-widest ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>
             Monitor and assign upcoming vehicle maintenance across workshop clients
           </p>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="w-full sm:w-auto bg-[#00F0FF] text-slate-950 px-6 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg text-center"
+          className={`w-full sm:w-auto px-6 py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wider cursor-pointer shadow-lg text-center ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-[#00F0FF] text-slate-950"}`}
         >
           + Set Reminder for Client
         </button>
       </div>
 
       {/* Responsive Table Wrapper */}
-      <div className="border border-white/10 rounded-2xl overflow-hidden bg-[#0d0d14]">
+      <div className={`border rounded-2xl overflow-hidden shadow-md ${isLightMode ? "bg-white border-slate-200" : "border-white/10 bg-[#0d0d14]"}`}>
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left text-xs font-mono min-w-[750px]">
-            <thead className="bg-[#12121c] border-b border-white/10 uppercase text-slate-400">
+            <thead className={`border-b uppercase font-bold ${isLightMode ? "bg-slate-100 border-slate-200 text-slate-700" : "bg-[#12121c] border-white/10 text-slate-400"}`}>
               <tr>
                 <th className="p-4">Customer</th>
                 <th className="p-4">Phone</th>
@@ -99,14 +101,14 @@ export default function AdminRemindersPage() {
                 <tr><td colSpan={6} className="p-6 text-center text-slate-500">No client reminders found.</td></tr>
               ) : (
                 reminders.map((rem) => (
-                  <tr key={rem.id} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="p-4 font-medium text-white">{rem.customer?.name || "N/A"}</td>
-                    <td className="p-4 text-slate-300">{rem.customer?.phone || "N/A"}</td>
-                    <td className="p-4 text-[#00F0FF]">{rem.title}</td>
+                  <tr key={rem.id} className={`border-b transition-colors ${isLightMode ? "border-slate-100 hover:bg-slate-50" : "border-white/5 hover:bg-white/5"}`}>
+                    <td className={`p-4 font-medium ${isLightMode ? "text-slate-900" : "text-white"}`}>{rem.customer?.name || "N/A"}</td>
+                    <td className={`p-4 ${isLightMode ? "text-slate-600" : "text-slate-300"}`}>{rem.customer?.phone || "N/A"}</td>
+                    <td className={`p-4 font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>{rem.title}</td>
                     <td className="p-4 uppercase">{rem.type}</td>
                     <td className="p-4">{new Date(rem.dueDate).toLocaleDateString()}</td>
                     <td className="p-4">
-                      <span className={`px-2 py-1 rounded text-[10px] ${rem.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                      <span className={`px-2 py-1 rounded text-[10px] font-bold ${rem.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-600' : 'bg-amber-500/20 text-amber-600'}`}>
                         {rem.status}
                       </span>
                     </td>
@@ -120,23 +122,23 @@ export default function AdminRemindersPage() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-[#12121c] border border-white/25 rounded-3xl p-6 sm:p-8 max-w-lg w-full font-mono text-xs text-white relative shadow-2xl">
+          <div className={`border rounded-3xl p-6 sm:p-8 max-w-lg w-full font-mono text-xs relative shadow-2xl ${isLightMode ? "bg-white border-slate-300 text-slate-900" : "bg-[#12121c] border-white/25 text-white"}`}>
             <button 
               onClick={() => setShowModal(false)}
-              className="absolute top-6 right-6 text-slate-400 hover:text-white cursor-pointer"
+              className={`absolute top-6 right-6 cursor-pointer font-bold ${isLightMode ? "text-slate-500 hover:text-slate-900" : "text-slate-400 hover:text-white"}`}
             >
               [X]
             </button>
 
-            <h2 className="text-xl font-light mb-6 text-[#00F0FF]">Create Client Service Reminder</h2>
+            <h2 className={`text-xl font-light mb-6 ${isLightMode ? "text-cyan-700 font-bold" : "text-[#00F0FF]"}`}>Create Client Service Reminder</h2>
 
             <form onSubmit={handleCreateAdminReminder} className="space-y-4">
               <div>
-                <label className="block text-slate-400 mb-1">Select Customer</label>
+                <label className={`block mb-1 ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Select Customer</label>
                 <select 
                   value={customerId} 
                   onChange={(e) => setCustomerId(e.target.value)}
-                  className="w-full bg-black/80 border border-white/20 rounded-xl px-4 py-3 text-white"
+                  className={`w-full border rounded-xl px-4 py-3 outline-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-black/80 border-white/20 text-white"}`}
                   required
                 >
                   <option value="">-- Choose Customer --</option>
@@ -147,23 +149,23 @@ export default function AdminRemindersPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Reminder Title</label>
+                <label className={`block mb-1 ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Reminder Title</label>
                 <input 
                   type="text" 
                   placeholder="e.g. 10,000 KM Major Service" 
                   value={title} 
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-black/80 border border-white/20 rounded-xl px-4 py-3 text-white"
+                  className={`w-full border rounded-xl px-4 py-3 outline-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-black/80 border-white/20 text-white"}`}
                   required 
                 />
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Type</label>
+                <label className={`block mb-1 ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Type</label>
                 <select 
                   value={type} 
                   onChange={(e) => setType(e.target.value)}
-                  className="w-full bg-black/80 border border-white/20 rounded-xl px-4 py-3 text-white"
+                  className={`w-full border rounded-xl px-4 py-3 outline-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-black/80 border-white/20 text-white"}`}
                 >
                   <option value="SERVICE">Service</option>
                   <option value="PUC">PUC Check</option>
@@ -172,12 +174,12 @@ export default function AdminRemindersPage() {
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">Due Date</label>
+                <label className={`block mb-1 ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Due Date</label>
                 <input 
                   type="date" 
                   value={dueDate} 
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full bg-black/80 border border-white/20 rounded-xl px-4 py-3 text-white"
+                  className={`w-full border rounded-xl px-4 py-3 outline-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-black/80 border-white/20 text-white"}`}
                   required 
                 />
               </div>
@@ -185,14 +187,14 @@ export default function AdminRemindersPage() {
               <div className="pt-4 flex flex-col sm:flex-row gap-3">
                 <button 
                   type="submit" 
-                  className="flex-1 bg-[#00F0FF] text-slate-950 font-bold py-3.5 rounded-xl uppercase tracking-wider cursor-pointer"
+                  className={`flex-1 font-bold py-3.5 rounded-xl uppercase tracking-wider cursor-pointer ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-[#00F0FF] text-slate-950"}`}
                 >
                   Save & Send Reminder
                 </button>
                 <button 
                   type="button" 
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3.5 rounded-xl border border-white/20 uppercase hover:bg-white/5 cursor-pointer text-center"
+                  className={`px-6 py-3.5 rounded-xl border uppercase cursor-pointer text-center font-bold ${isLightMode ? "border-slate-300 text-slate-700 hover:bg-slate-100" : "border-white/20 hover:bg-white/5"}`}
                 >
                   Cancel
                 </button>

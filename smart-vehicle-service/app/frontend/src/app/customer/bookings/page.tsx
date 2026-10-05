@@ -206,7 +206,7 @@ function CustomerBookingsContent() {
   }
 
   return (
-    <div className={`p-8 md:p-12 space-y-8 font-sans max-w-7xl mx-auto relative ${isLightMode ? "text-slate-900" : "text-white"}`}>
+    <div className={`p-4 sm:p-6 md:p-12 space-y-8 font-sans max-w-7xl mx-auto relative w-full overflow-x-hidden ${isLightMode ? "text-slate-900" : "text-white"}`}>
       {toastMessage && (
         <div className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-2xl shadow-2xl text-xs font-mono border flex items-center gap-3 ${toastType === "success" ? "bg-emerald-500 text-slate-950 font-bold border-emerald-400" : "bg-red-500 text-white font-bold border-red-400"}`}>
           <span>{toastType === "success" ? "⚡" : "⚠"}</span>
@@ -214,14 +214,15 @@ function CustomerBookingsContent() {
         </div>
       )}
 
-      <div className="flex justify-between items-center border-b pb-6">
+      {/* Responsive Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
         <div>
-          <span className="text-xs font-mono text-[#00F0FF] uppercase tracking-widest"> SERVICE VAULT </span>
-          <h1 className="text-3xl font-light tracking-tight mt-1">My Service Bookings</h1>
+          <span className={`text-xs font-mono uppercase tracking-widest ${isLightMode ? "text-cyan-700 font-bold" : "text-[#00F0FF]"}`}> SERVICE VAULT </span>
+          <h1 className="text-2xl sm:text-3xl font-light tracking-tight mt-1">My Service Bookings</h1>
         </div>
         <button
           onClick={openCreateModal}
-          className="px-6 py-3.5 rounded-2xl bg-[#00F0FF] text-slate-950 font-bold uppercase text-xs font-mono tracking-wider cursor-pointer shadow-lg hover:opacity-90"
+          className={`w-full sm:w-auto px-6 py-3.5 rounded-2xl font-bold uppercase text-xs font-mono tracking-wider cursor-pointer shadow-lg transition-all text-center ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-[#00F0FF] text-slate-950 hover:opacity-90"}`}
         >
           + Book New Service
         </button>
@@ -230,44 +231,44 @@ function CustomerBookingsContent() {
       {loading ? (
         <div className="py-20 text-center font-mono text-xs text-neutral-400">Loading bookings telemetry...</div>
       ) : bookings.length === 0 ? (
-        <div className="p-12 text-center rounded-[32px] border border-dashed border-neutral-600 font-mono text-xs text-neutral-400">
+        <div className={`p-12 text-center rounded-[32px] border border-dashed font-mono text-xs ${isLightMode ? "border-slate-300 text-slate-600 bg-white shadow-sm" : "border-neutral-600 text-neutral-400"}`}>
           No active service bookings found. Click "+ Book New Service" to schedule one.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-mono text-xs">
           {bookings.map((b) => (
-            <div key={b.id} className={`p-6 rounded-[28px] border shadow-md space-y-4 flex flex-col justify-between ${isLightMode ? "bg-white border-slate-200" : "bg-[#141418] border-white/10 text-white"}`}>
+            <div key={b.id} className={`p-6 rounded-[28px] border shadow-md space-y-4 flex flex-col justify-between ${isLightMode ? "bg-white border-slate-200 text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
               <div className="space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-[10px] text-[#00F0FF] font-bold uppercase">{b.bookingNumber}</span>
-                    <h3 className="text-base font-bold uppercase mt-0.5">{b.vehicle?.make} {b.vehicle?.model}</h3>
+                    <span className={`text-[10px] font-bold uppercase ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>{b.bookingNumber}</span>
+                    <h3 className={`text-base font-bold uppercase mt-0.5 ${isLightMode ? "text-slate-900" : "text-white"}`}>{b.vehicle?.make} {b.vehicle?.model}</h3>
                   </div>
                   <div>{renderStatusBadge(b.status)}</div>
                 </div>
 
-                <div className="pt-3 border-t border-white/10 space-y-1.5 text-neutral-300">
-                  <div>Vehicle No: <strong className="text-white">{b.vehicle?.registrationNumber}</strong></div>
-                  <div>Service Package: <strong className="text-cyan-400">{b.service?.name || "General Inspection"}</strong></div>
-                  <div>Scheduled Date: <strong className="text-white">{new Date(b.bookingDate).toLocaleDateString()} ({b.bookingTime || "10:00 AM"})</strong></div>
-                  <div>Service Center: <strong className="text-white">{b.serviceCenter?.name || "Main Garage"}</strong></div>
-                  {b.estimatedAmount && <div>Estimated Cost: <strong className="text-emerald-400">₹{b.estimatedAmount}</strong></div>}
-                  {b.notes && <div className="text-neutral-400 text-[10px] italic">Note: {b.notes}</div>}
+                <div className={`pt-3 border-t space-y-1.5 text-xs ${isLightMode ? "border-slate-200 text-slate-600" : "border-white/10 text-neutral-300"}`}>
+                  <div>Vehicle No: <strong className={isLightMode ? "text-slate-900" : "text-white"}>{b.vehicle?.registrationNumber}</strong></div>
+                  <div>Service Package: <strong className={isLightMode ? "text-cyan-700 font-bold" : "text-cyan-400"}>{b.service?.name || "General Inspection"}</strong></div>
+                  <div>Scheduled Date: <strong className={isLightMode ? "text-slate-900" : "text-white"}>{new Date(b.bookingDate).toLocaleDateString()} ({b.bookingTime || "10:00 AM"})</strong></div>
+                  <div>Service Center: <strong className={isLightMode ? "text-slate-900" : "text-white"}>{b.serviceCenter?.name || "Main Garage"}</strong></div>
+                  {b.estimatedAmount && <div>Estimated Cost: <strong className="text-emerald-500 font-bold">₹{b.estimatedAmount}</strong></div>}
+                  {b.notes && <div className={`text-[10px] italic ${isLightMode ? "text-slate-500" : "text-neutral-400"}`}>Note: {b.notes}</div>}
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-3 border-t border-white/10">
+              <div className={`grid grid-cols-2 gap-2 pt-3 border-t ${isLightMode ? "border-slate-200" : "border-white/10"}`}>
                 <button
                   onClick={() => openEditModal(b)}
                   disabled={submitting}
-                  className="py-2 rounded-xl border border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 font-bold uppercase text-[10px] cursor-pointer disabled:opacity-50"
+                  className={`py-2 rounded-xl border font-bold uppercase text-[10px] cursor-pointer disabled:opacity-50 ${isLightMode ? "border-cyan-300 text-cyan-700 hover:bg-cyan-50" : "border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10"}`}
                 >
                   ✏️ Edit
                 </button>
                 <button
                   onClick={() => handleDeleteBooking(b.id)}
                   disabled={submitting}
-                  className="py-2 rounded-xl border border-red-500/30 text-red-400 hover:bg-red-500/10 font-bold uppercase text-[10px] cursor-pointer disabled:opacity-50"
+                  className={`py-2 rounded-xl border font-bold uppercase text-[10px] cursor-pointer disabled:opacity-50 ${isLightMode ? "border-red-300 text-red-600 hover:bg-red-50" : "border-red-500/30 text-red-400 hover:bg-red-500/10"}`}
                 >
                   🗑️ Delete
                 </button>
@@ -279,19 +280,19 @@ function CustomerBookingsContent() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
-            <h3 className="text-sm font-mono uppercase tracking-widest text-[#00F0FF] mb-6">
+          <div className={`w-full max-w-md p-8 rounded-[32px] border shadow-2xl ${isLightMode ? "bg-white border-slate-300 text-slate-900" : "bg-[#141418] border-white/10 text-white"}`}>
+            <h3 className={`text-sm font-mono uppercase tracking-widest mb-6 font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>
               {editingBookingId ? "Edit Service Booking" : "Schedule Garage Service"}
             </h3>
             
             <form onSubmit={handleSaveBooking} className="space-y-4 font-mono text-xs">
               <div>
-                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Your Vehicle</label>
+                <label className={`block text-[10px] uppercase mb-1 font-bold ${isLightMode ? "text-slate-700" : "text-neutral-400"}`}>Select Your Vehicle</label>
                 <select
                   value={vehicleId}
                   onChange={(e) => setVehicleId(e.target.value)}
                   required
-                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none font-bold ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                 >
                   <option value="">-- Choose Registered Vehicle --</option>
                   {vehicles.map((v) => (
@@ -303,12 +304,12 @@ function CustomerBookingsContent() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Service Center</label>
+                <label className={`block text-[10px] uppercase mb-1 font-bold ${isLightMode ? "text-slate-700" : "text-neutral-400"}`}>Select Service Center</label>
                 <select
                   value={serviceCenterId}
                   onChange={(e) => handleCenterChange(e.target.value)}
                   required
-                  className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none font-bold ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                 >
                   <option value="">-- Choose Workshop / Center --</option>
                   {serviceCenters.map((center) => (
@@ -320,13 +321,13 @@ function CustomerBookingsContent() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Select Service Package</label>
+                <label className={`block text-[10px] uppercase mb-1 font-bold ${isLightMode ? "text-slate-700" : "text-neutral-400"}`}>Select Service Package</label>
                 <select
                   value={serviceId}
                   onChange={(e) => handleServiceChange(e.target.value)}
                   required
                   disabled={!serviceCenterId}
-                  className={`w-full px-4 py-3 rounded-2xl border outline-none disabled:opacity-50 ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none font-bold disabled:opacity-50 ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                 >
                   <option value="">-- Choose Service Package --</option>
                   {availableServices.map((svc) => (
@@ -338,7 +339,7 @@ function CustomerBookingsContent() {
               </div>
 
               {estimatedAmount !== null && (
-                <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex justify-between items-center text-cyan-400 font-bold">
+                <div className={`p-3 rounded-xl border flex justify-between items-center font-bold ${isLightMode ? "bg-cyan-50 border-cyan-300 text-cyan-800" : "bg-cyan-500/10 border-cyan-500/30 text-cyan-400"}`}>
                   <span>Estimated Service Cost:</span>
                   <span className="text-sm">₹{estimatedAmount}</span>
                 </div>
@@ -346,36 +347,36 @@ function CustomerBookingsContent() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-400 mb-1">Booking Date</label>
+                  <label className={`block text-[10px] uppercase mb-1 font-bold ${isLightMode ? "text-slate-700" : "text-neutral-400"}`}>Booking Date</label>
                   <input
                     type="date"
                     value={bookingDate}
                     onChange={(e) => setBookingDate(e.target.value)}
                     required
-                    className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                    className={`w-full px-4 py-3 rounded-2xl border outline-none font-bold ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase text-neutral-400 mb-1">Preferred Time</label>
+                  <label className={`block text-[10px] uppercase mb-1 font-bold ${isLightMode ? "text-slate-700" : "text-neutral-400"}`}>Preferred Time</label>
                   <input
                     type="text"
                     value={bookingTime}
                     onChange={(e) => setBookingTime(e.target.value)}
                     placeholder="e.g. 11:15 AM"
                     required
-                    className={`w-full px-4 py-3 rounded-2xl border outline-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                    className={`w-full px-4 py-3 rounded-2xl border outline-none font-bold ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase text-neutral-400 mb-1">Service Notes / Issues</label>
+                <label className={`block text-[10px] uppercase mb-1 font-bold ${isLightMode ? "text-slate-700" : "text-neutral-400"}`}>Service Notes / Issues</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Describe any specific problem..."
                   rows={2}
-                  className={`w-full px-4 py-3 rounded-2xl border outline-none resize-none ${isLightMode ? "bg-slate-50 border-slate-200" : "bg-[#0b0b0e] border-white/10 text-white"}`}
+                  className={`w-full px-4 py-3 rounded-2xl border outline-none resize-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900" : "bg-[#0b0b0e] border-white/10 text-white"}`}
                 />
               </div>
 
@@ -383,14 +384,14 @@ function CustomerBookingsContent() {
                 <button 
                   type="submit" 
                   disabled={submitting} 
-                  className="flex-1 py-3.5 rounded-2xl bg-[#00F0FF] text-slate-950 font-bold uppercase tracking-wider cursor-pointer disabled:opacity-50"
+                  className={`flex-1 py-3.5 rounded-2xl font-bold uppercase tracking-wider cursor-pointer disabled:opacity-50 ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-[#00F0FF] text-slate-950"}`}
                 >
                   {submitting ? "Processing..." : editingBookingId ? "Update Booking" : "Confirm Booking"}
                 </button>
                 <button 
                   type="button" 
                   onClick={() => setShowModal(false)} 
-                  className="px-6 py-3.5 rounded-2xl border border-white/20 text-neutral-300 uppercase cursor-pointer"
+                  className={`px-6 py-3.5 rounded-2xl border uppercase cursor-pointer font-bold ${isLightMode ? "border-slate-300 text-slate-700 hover:bg-slate-100" : "border-white/20 text-neutral-300"}`}
                 >
                   Cancel
                 </button>
