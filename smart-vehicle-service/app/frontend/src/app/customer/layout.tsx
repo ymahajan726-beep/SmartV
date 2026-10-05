@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTheme } from "@/src/context/ThemeContext";
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
-  const { isLightMode } = useTheme();
+  const { isLightMode, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
@@ -15,6 +15,12 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   }, []);
 
   const isActive = (path: string) => pathname === path;
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("autocare_token");
+    localStorage.removeItem("autocare_token");
+    window.location.href = "/";
+  };
 
   if (!mounted) {
     return (
@@ -93,25 +99,40 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
         </nav>
 
         <div className="p-6 border-t border-inherit">
-          <button onClick={() => { localStorage.removeItem("token"); localStorage.removeItem("user"); window.location.href = "/"; }} className="w-full text-center py-3 rounded-xl border border-red-500/30 text-red-500 text-xs font-mono uppercase tracking-widest hover:bg-red-500/10 transition-colors font-bold cursor-pointer">
+          <button onClick={handleLogout} className="w-full text-center py-3 rounded-xl border border-red-500/30 text-red-500 text-xs font-mono uppercase tracking-widest hover:bg-red-500/10 transition-colors font-bold cursor-pointer">
             Sign Out
           </button>
         </div>
       </aside>
 
       <div className="flex-1 flex flex-col md:pl-72 w-full min-w-0">
-        <div className="md:hidden p-4 flex items-center border-b border-white/[0.06]">
-          <button 
-            onClick={() => setSidebarOpen(true)} 
-            className="text-lg font-mono p-2 rounded-xl border border-white/10 cursor-pointer"
-          >
-            ☰ Menu
-          </button>
-        </div>
+        {/* Universal Top Header for all customer pages with Theme Toggle */}
+        <header className={`h-16 px-4 sm:px-8 border-b flex justify-between items-center gap-4 z-30 sticky top-0 backdrop-blur-md ${isLightMode ? "border-slate-200 bg-white/80 text-slate-900" : "border-white/10 bg-[#060608]/80 text-white"}`}>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setSidebarOpen(true)} 
+              className="md:hidden text-xs font-mono p-2 rounded-xl border border-current cursor-pointer"
+            >
+              ☰ Menu
+            </button>
+            <span className="text-[10px] sm:text-xs font-mono uppercase tracking-widest text-[#00F0FF] truncate">
+              Secure Garage Vault 
+            </span>
+          </div>
 
-        <div className="w-full flex-1 overflow-x-hidden">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={toggleTheme} 
+              className={`px-3 sm:px-4 py-2 rounded-xl border text-xs cursor-pointer transition-all flex items-center gap-1.5 font-mono ${isLightMode ? "border-slate-300 bg-slate-100 text-slate-900 hover:bg-slate-200" : "border-white/20 bg-white/5 text-white hover:bg-white/10"}`}
+            >
+              {isLightMode ? "🌙 Dark Mode" : "☀️ Light Mode"}
+            </button>
+          </div>
+        </header>
+
+        <main className={`w-full flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto ${isLightMode ? "bg-[#f8f9fa] text-slate-900" : "bg-[#060608] text-[#f8fafc]"}`}>
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

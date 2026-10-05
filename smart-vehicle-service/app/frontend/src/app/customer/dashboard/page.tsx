@@ -5,7 +5,7 @@ import { apiRequest } from "@/src/services/api";
 import { useTheme } from "@/src/context/ThemeContext";
 
 export default function CustomerDashboardPage() {
-  const { isLightMode, toggleTheme } = useTheme();
+  const { isLightMode } = useTheme();
   
   const [mounted, setMounted] = useState(false);
   const [customer, setCustomer] = useState({ name: "Fellow Motorist", id: "", isGuest: false });
@@ -213,40 +213,7 @@ export default function CustomerDashboardPage() {
         </div>
       )}
 
-      <div className={`w-full px-8 py-4 border-b flex justify-between items-center ${isLightMode ? "bg-white border-slate-200 text-slate-500" : "bg-[#060608] border-white/[0.06] text-slate-400"}`}>
-        <div className="flex items-center gap-2.5">
-           <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
-          <span className="text-[10px] font-mono uppercase tracking-widest font-bold">Secure Garage Vault</span>
-        </div>
-
-        <div className="flex items-center">
-          <button
-            onClick={toggleTheme}
-            className={`group relative px-4 py-2 rounded-2xl border text-xs font-mono tracking-wider flex items-center gap-3 transition-all duration-300 cursor-pointer shadow-md ${
-              isLightMode 
-                ? "border-slate-300 bg-gradient-to-r from-slate-100 to-white text-slate-800 hover:border-cyan-500 shadow-slate-200/60" 
-                : "border-white/10 bg-gradient-to-r from-[#12121c] to-[#1a1a26] text-slate-200 hover:border-[#00F0FF]/50 shadow-black/50"
-            }`}
-            title="Switch Cockpit Theme"
-          >
-            <span className="flex items-center gap-1.5 font-bold">
-              <span className={`transition-transform duration-500 ${isLightMode ? "rotate-0 scale-100" : "-rotate-90 scale-75 opacity-40"}`}>☀️</span>
-              <span className="text-[10px] text-slate-400 font-normal">/</span>
-              <span className={`transition-transform duration-500 ${!isLightMode ? "rotate-0 scale-100" : "rotate-90 scale-75 opacity-40"}`}>🌙</span>
-            </span>
-            <span className={`h-3 w-[1px] ${isLightMode ? "bg-slate-300" : "bg-white/20"}`}></span>
-            <span className={`text-[10px] font-bold uppercase ${isLightMode ? "text-slate-900" : "text-[#00F0FF]"}`}>
-              {isLightMode ? "Light Deck" : "Cyber Dark"}
-            </span>
-
-          </button>
-        </div>
-      </div>
-
-    
       <main className="p-8 md:p-12 space-y-10 max-w-7xl mx-auto w-full">
-
-  
         <div className={`relative overflow-hidden p-8 md:p-12 rounded-[36px] border shadow-xl ${isLightMode ? "bg-gradient-to-br from-white via-slate-50 to-cyan-50/40 border-slate-200/80" : "bg-gradient-to-r from-[#111118] via-[#161622] to-[#0d0d14] border-white/[0.08]"}`}>
           <div className="absolute right-0 top-0 w-1/2 h-full opacity-10 pointer-events-none bg-[radial-gradient(#00F0FF_1px,transparent_1px)] [background-size:16px_16px]"></div>
           
@@ -283,7 +250,6 @@ export default function CustomerDashboardPage() {
           </div>
         ) : (
           <>
-          
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 font-mono">
               <div className={`p-6 rounded-[28px] border shadow-md relative overflow-hidden ${isLightMode ? "bg-white border-slate-200" : "bg-[#12121a] border-white/[0.06]"}`}>
                 <span className="text-[10px] text-slate-500 uppercase tracking-widest block mb-1 font-bold">My Garage</span>
@@ -341,7 +307,6 @@ export default function CustomerDashboardPage() {
             </div>
           </>
         )}
-
       </main>
     </div>
   );

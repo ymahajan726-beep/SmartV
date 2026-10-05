@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { apiRequest } from "@/src/services/api";
+import { useTheme } from "@/src/context/ThemeContext";
 
 export default function CustomerRemindersPage() {
+  const { isLightMode } = useTheme();
   const [reminders, setReminders] = useState<any[]>([]);
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,29 +76,30 @@ export default function CustomerRemindersPage() {
   };
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
+    <div className={`p-8 max-w-6xl mx-auto ${isLightMode ? "text-slate-900" : "text-white"}`}>
       <h1 className="text-3xl font-light mb-2">Service & Maintenance Reminders</h1>
-      <p className="text-xs font-mono text-slate-400 mb-8 uppercase tracking-widest">
+      <p className={`text-xs font-mono mb-8 uppercase tracking-widest ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>
         Track upcoming services and custom vehicle alerts
       </p>
-      <form onSubmit={handleCreate} className="bg-[#12121c] border border-white/10 p-6 rounded-3xl mb-10 grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs">
+
+      <form onSubmit={handleCreate} className={`border p-6 rounded-3xl mb-10 grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs shadow-md ${isLightMode ? "bg-white border-slate-200" : "bg-[#12121c] border-white/10"}`}>
         <div>
-          <label className="block text-slate-400 mb-1">Reminder Title</label>
+          <label className={`block mb-1 ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Reminder Title</label>
           <input 
             type="text" 
             placeholder="e.g. Engine Oil Change" 
             value={title} 
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-black/60 border border-white/20 rounded-xl px-4 py-3 text-white"
+            className={`w-full border rounded-xl px-4 py-3 outline-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-black/60 border-white/20 text-white"}`}
             required 
           />
         </div>
         <div>
-          <label className="block text-slate-400 mb-1">Type</label>
+          <label className={`block mb-1 ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Type</label>
           <select 
             value={type} 
             onChange={(e) => setType(e.target.value)}
-            className="w-full bg-black/60 border border-white/20 rounded-xl px-4 py-3 text-white"
+            className={`w-full border rounded-xl px-4 py-3 outline-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-black/60 border-white/20 text-white"}`}
           >
             <option value="SERVICE">Service</option>
             <option value="PUC">PUC Check</option>
@@ -104,17 +107,17 @@ export default function CustomerRemindersPage() {
           </select>
         </div>
         <div>
-          <label className="block text-slate-400 mb-1">Due Date</label>
+          <label className={`block mb-1 ${isLightMode ? "text-slate-700" : "text-slate-400"}`}>Due Date</label>
           <input 
             type="date" 
             value={dueDate} 
             onChange={(e) => setDueDate(e.target.value)}
-            className="w-full bg-black/60 border border-white/20 rounded-xl px-4 py-3 text-white"
+            className={`w-full border rounded-xl px-4 py-3 outline-none ${isLightMode ? "bg-slate-50 border-slate-300 text-slate-900 focus:border-cyan-500" : "bg-black/60 border-white/20 text-white"}`}
             required 
           />
         </div>
         <div className="flex items-end">
-          <button type="submit" className="w-full bg-[#00F0FF] text-slate-950 font-bold py-3 rounded-xl uppercase tracking-wider cursor-pointer">
+          <button type="submit" className={`w-full font-bold py-3 rounded-xl uppercase tracking-wider cursor-pointer shadow-md ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-[#00F0FF] text-slate-950"}`}>
             + Add Reminder
           </button>
         </div>
@@ -127,28 +130,28 @@ export default function CustomerRemindersPage() {
           <p className="text-xs font-mono text-slate-500">No reminders found.</p>
         ) : (
           reminders.map((rem) => (
-            <div key={rem.id} className="p-6 rounded-2xl border border-white/10 bg-[#0d0d14] flex flex-col justify-between">
+            <div key={rem.id} className={`p-6 rounded-2xl border flex flex-col justify-between shadow-md ${isLightMode ? "bg-white border-slate-200 text-slate-900" : "border-white/10 bg-[#0d0d14] text-white"}`}>
               <div>
                 <div className="flex justify-between items-start mb-3">
-                  <span className="text-[10px] font-mono px-3 py-1 rounded-full bg-[#00F0FF]/10 text-[#00F0FF] border border-[#00F0FF]/30 font-bold uppercase">
+                  <span className={`text-[10px] font-mono px-3 py-1 rounded-full border font-bold uppercase ${isLightMode ? "bg-cyan-500/10 text-cyan-700 border-cyan-500/30" : "bg-[#00F0FF]/10 text-[#00F0FF] border-[#00F0FF]/30"}`}>
                     {rem.type}
                   </span>
-                  <span className={`text-[10px] font-mono px-2 py-1 rounded ${rem.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                  <span className={`text-[10px] font-mono px-2 py-1 rounded ${rem.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-600 font-bold' : 'bg-amber-500/20 text-amber-600 font-bold'}`}>
                     {rem.status}
                   </span>
                 </div>
-                <h3 className="text-lg font-medium mb-1">{rem.title}</h3>
-                <p className="text-xs font-mono text-slate-400 mb-4">
+                <h3 className={`text-lg font-medium mb-1 ${isLightMode ? "text-slate-900" : "text-white"}`}>{rem.title}</h3>
+                <p className={`text-xs font-mono mb-4 ${isLightMode ? "text-slate-600" : "text-slate-400"}`}>
                   Due Date: {new Date(rem.dueDate).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex gap-3 pt-4 border-t border-white/10 font-mono text-xs">
+              <div className={`flex gap-3 pt-4 border-t font-mono text-xs ${isLightMode ? "border-slate-200" : "border-white/10"}`}>
                 {rem.status !== 'COMPLETED' && (
-                  <button onClick={() => markComplete(rem.id)} className="text-emerald-400 hover:underline cursor-pointer">
+                  <button onClick={() => markComplete(rem.id)} className="text-emerald-500 hover:underline cursor-pointer font-bold">
                     Mark Completed
                   </button>
                 )}
-                <button onClick={() => deleteReminder(rem.id)} className="text-rose-400 hover:underline cursor-pointer ml-auto">
+                <button onClick={() => deleteReminder(rem.id)} className="text-rose-500 hover:underline cursor-pointer ml-auto font-bold">
                   Delete
                 </button>
               </div>

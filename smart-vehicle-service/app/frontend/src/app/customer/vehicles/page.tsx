@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "@/src/context/ThemeContext";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
+
 type Vehicle = {
   id: string;
   customerId?: string;
@@ -25,8 +26,8 @@ const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "https://autocare-backend-p1v3.onrender.com/api";
 
 export default function CustomerVehiclesPage() {
-  const { isLightMode, toggleTheme } = useTheme();
- const router = useRouter();
+  const { isLightMode } = useTheme();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -323,41 +324,9 @@ export default function CustomerVehiclesPage() {
         </div>
       )}
 
-      <div className={`w-full px-8 py-4 border-b flex justify-between items-center ${isLightMode ? "bg-white border-slate-200 text-slate-500" : "bg-[#060608] border-white/[0.06] text-slate-400"}`}>
-        <div className="flex items-center gap-2.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#00F0FF] animate-ping"></span>
-          <span className="text-[10px] font-mono uppercase tracking-widest font-bold">Isolated Customer Vault</span>
-        </div>
-
-        <div className="flex items-center">
-          <button
-            onClick={toggleTheme}
-            className={`group relative px-4 py-2 rounded-2xl border text-xs font-mono tracking-wider flex items-center gap-3 transition-all duration-300 cursor-pointer shadow-md ${
-              isLightMode 
-                ? "border-slate-300 bg-gradient-to-r from-slate-100 to-white text-slate-800 hover:border-cyan-500 shadow-slate-200/60" 
-                : "border-white/10 bg-gradient-to-r from-[#12121c] to-[#1a1a26] text-slate-200 hover:border-[#00F0FF]/50 shadow-black/50"
-            }`}
-            title="Switch Cockpit Theme"
-          >
-            <span className="flex items-center gap-1.5 font-bold">
-              <span className={`transition-transform duration-500 ${isLightMode ? "rotate-0 scale-100" : "-rotate-90 scale-75 opacity-40"}`}>☀️</span>
-              <span className="text-[10px] text-slate-400 font-normal">/</span>
-              <span className={`transition-transform duration-500 ${!isLightMode ? "rotate-0 scale-100" : "rotate-90 scale-75 opacity-40"}`}>🌙</span>
-            </span>
-            <span className={`h-3 w-[1px] ${isLightMode ? "bg-slate-300" : "bg-white/20"}`}></span>
-            <span className={`text-[10px] font-bold uppercase ${isLightMode ? "text-slate-900" : "text-[#00F0FF]"}`}>
-              {isLightMode ? "Light Deck" : "Cyber Dark"}
-            </span>
-          </button>
-        </div>
-      </div>
-
       <main className="p-8 md:p-12 space-y-10 max-w-7xl mx-auto w-full">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-slate-300/60">
           <div>
-            <span className={`text-xs font-mono uppercase tracking-widest font-bold ${isLightMode ? "text-cyan-700" : "text-[#00F0FF]"}`}>
-           
-            </span>
             <h1 className={`text-3xl md:text-4xl font-light tracking-tight mt-1 ${isLightMode ? "text-slate-900" : "text-white"}`}>
               My Registered Vehicles
             </h1>
@@ -473,7 +442,7 @@ export default function CustomerVehiclesPage() {
 
                 <div className="grid grid-cols-3 gap-3 pt-2">
                   <Link
-                  href={`/customer/bookings?vehicleId=${v.id}`}
+                    href={`/customer/bookings?vehicleId=${v.id}`}
                     className={`py-3 rounded-xl font-bold uppercase text-[10px] text-center transition-all shadow-sm ${isLightMode ? "bg-slate-900 text-white hover:bg-slate-800" : "bg-[#00F0FF] text-slate-950 hover:opacity-90"}`}
                   >
                     Book Service
