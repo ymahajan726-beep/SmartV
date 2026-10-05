@@ -5,7 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from '../services/auth.service.js';
 import { AuthController } from '../controller/auth.controller.js';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy.js';
-import { PrismaModule } from '../prisma/prisma.module.js';  
+import { PrismaModule } from '../prisma/prisma.module.js';
 import { CustomerAuthController } from '../controller/customer-auth.controller.js';
 import { CustomerAuthService } from '../services/customer-auth.service.js';
 
@@ -17,7 +17,7 @@ import { CustomerAuthService } from '../services/customer-auth.service.js';
     }),
 
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'super-secret-key-smart-vehicle',
+      secret: process.env.JWT_SECRET,
       signOptions: {
         expiresIn: '1d',
       },

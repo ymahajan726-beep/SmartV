@@ -8,7 +8,7 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false); // 👈 Toggle for Forgot Password view
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   
   const [resetEmail, setResetEmail] = useState("");
   const [resetToken, setResetToken] = useState("");
@@ -35,7 +35,8 @@ export default function AdminLoginPage() {
         response?.data?.token;
 
       if (token) {
-        localStorage.setItem("autocare_token", token);
+        // 👈 Changed from localStorage to sessionStorage so session clears when leaving/closing browser
+        sessionStorage.setItem("autocare_token", token);
         router.push("/admin/dashboard");
       } else {
         setErrorMsg("Login failed: Secure token not found in server response.");
@@ -57,7 +58,7 @@ export default function AdminLoginPage() {
       const res = await apiRequest("/auth/forgot-password", "POST", { email: resetEmail });
       setSuccessMsg(res.message || "Reset token generated successfully!");
       if (res.resetToken) {
-        setResetToken(res.resetToken); // Auto-fill token for smooth testing
+        setResetToken(res.resetToken);
       }
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to process request.");
@@ -116,7 +117,6 @@ export default function AdminLoginPage() {
         )}
 
         {!isForgotPassword ? (
-          // LOGIN FORM
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-mono uppercase text-neutral-400 mb-1">Email Address</label>
@@ -169,7 +169,6 @@ export default function AdminLoginPage() {
             </button>
           </form>
         ) : (
-        
           <div className="space-y-4">
             {!resetToken ? (
               <form onSubmit={handleForgotPassword} className="space-y-4">
